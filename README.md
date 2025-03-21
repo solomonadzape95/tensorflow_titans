@@ -7,3 +7,4 @@
 - **[Venny](https://github.com/Venny-Dev)**
 - **[Stephen](https://github.com/Praizee)**
 - **[Obed](https://github.com/obed-smart)**
+- **[Diamond](https://github.com/raveroses)**
