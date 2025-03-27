@@ -24,7 +24,7 @@ git clone https://github.com/solomonadzape95/tensorflow_titans.git
 ### 2. Navigate into the Project Directory
 
 ```sh
-cd tensorflow
+cd tensorflow_titans
 ```
 
 ### 3. Install Dependencies
