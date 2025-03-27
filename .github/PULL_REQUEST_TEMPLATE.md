@@ -22,3 +22,6 @@ Steps to test your changes:
 - [ ] My code follows the project’s coding style.  
 - [ ] I have tested the changes locally.  
 - [ ] No console errors/warnings remain.  
+
+## Technical Challenges (optional)
+<!-- Document any significant blockers and how you resolved them -->
