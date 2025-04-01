@@ -64,3 +64,6 @@ export default tseslint.config({
   },
 })
 ```
+
+## UI Design Concept
+Our interface design was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered interface generator. You can view our initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-ThNCm0NuT1c?b=31soRHVZFjO).
