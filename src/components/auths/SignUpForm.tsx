@@ -41,7 +41,7 @@ const SignUpForm = () => {
                                 Email
                             </label>
                             <input
-                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
+                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10 box-shadow"
                                 id="email"
                                 placeholder="johndoe.com"
                                 required
@@ -56,7 +56,7 @@ const SignUpForm = () => {
                                 Full Name
                             </label>
                             <input
-                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
+                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10 box-shadow"
                                 id="email"
                                 placeholder="John Doe"
                                 required
@@ -71,13 +71,13 @@ const SignUpForm = () => {
                                 Password
                             </label>
                             <input
-                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
+                                className="flex h-10 w-full rounded-md px-3 py-2 text-sm placeholder:text-[#6b7280] focus-visible:outline-none disabled:opacity-50 border border-white/20 bg-white backdrop-blur-md focus:border-black/10 box-shadow"
                                 id="password"
                                 required
                                 type="password"
                             />
                         </div>
-                        <button className="inline-flex items-center justify-center rounded-3xl text-sm font-medium bg-[#4F32FF] text-white h-10 px-4 py-3 w-full cursor-pointer">
+                        <button className="inline-flex items-center justify-center rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-3 w-full cursor-pointer">
                             <a href="/">
                                 Sign Up
                             </a>
@@ -85,11 +85,11 @@ const SignUpForm = () => {
                     </form>
 
                     <div className=" flex justify-center items-center text-xs uppercase">
-                        <hr className="h-[0.5px] bg-[#6b7280] w-full" />
+                        <hr className="h-[0.5px] text-[#D6D9E0] w-full" />
                         <span className="bg-[#f5f7f9] px-2 text-[#6b7280] w-full">
                             Or continue with
                         </span>
-                        <hr className="h-[0.5px] bg-[#6b7280] w-full" />
+                        <hr className="h-[0.5px] text-[#D6D9E0] w-full" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
