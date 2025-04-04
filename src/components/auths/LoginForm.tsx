@@ -115,7 +115,7 @@ const LoginForm = () => {
 
               <Button
                 type="submit"
-                className="rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white w-full"
+                className="rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white w-full cursor-pointer"
               >
                 Sign In
               </Button>
