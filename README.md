@@ -67,3 +67,15 @@ export default tseslint.config({
 
 ## UI Design Concept
 Our interface design was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered interface generator. You can view our initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-ThNCm0NuT1c?b=31soRHVZFjO).
+
+## Supabase Setup
+
+This project uses [Supabase](https://supabase.com) for backend services (database, auth, storage, etc).
+
+### Environment Variables
+
+Make sure you create a `.env.local` file in the root with the following:
+
+```bash
+SUPABASE_URL=your-supabase-url
+SUPABASE_ANON_KEY=your-anon-public-key
