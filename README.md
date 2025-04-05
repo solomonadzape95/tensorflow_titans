@@ -77,5 +77,5 @@ This project uses [Supabase](https://supabase.com) for backend services (databas
 Make sure you create a `.env.local` file in the root with the following:
 
 ```bash
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-anon-public-key
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
