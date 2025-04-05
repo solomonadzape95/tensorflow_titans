@@ -182,7 +182,7 @@ export const recordSettlement = async (settlementData: Settlement) => {
 
 // Get balances for a group
 export const getGroupBalances = async (groupId: string) => {
-  // The functon exists in supabase
+  // The function exists in supabase
   const { data, error } = await supabase.rpc("calculate_group_balances", {
     p_group_id: groupId,
   });
