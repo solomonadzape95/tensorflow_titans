@@ -36,7 +36,7 @@ export const getGroupSettlements = async (
     `
     )
     .eq("group_id", groupId)
-    .order("date", { ascending: false })
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   return { data, error };
