@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -13,6 +14,7 @@ function App() {
         <Route path="*" element={<Login />} />
       </Routes>
     </Router>
+
   );
 }
 
