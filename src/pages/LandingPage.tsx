@@ -1,9 +1,11 @@
 import { LuWallet } from "react-icons/lu";
 import { FaArrowRight } from "react-icons/fa6";
-import { IoMdContacts } from "react-icons/io";
+import { BsPeople } from "react-icons/bs";
+import { FiCreditCard } from "react-icons/fi";
+import { AiOutlinePieChart } from "react-icons/ai";
 export default function LandingPage() {
   return (
-    <div>
+    <div className="">
       <div className="heading flex justify-between px-10 py-4 bg-white border-b-1">
         <div className="company'slogo flex items-center cursor-pointer">
           <LuWallet className="text-[#4a44ee] text-[25px] animation animate-bounce transition-all duration-300 ease-in-out" />
@@ -55,11 +57,49 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="card">
-        <div className="">
-          Easily create groups for trips, roommates, or events and invite
-          friends to join.
+      <div className="card flex px-30 gap-5 pt-50">
+        <div className="border-1 shadow-xl flex flex-col justify-center py-3 text-center px-10 rounded-xl w-[500px] h-[220px]">
+          <div
+            className="mx-auto bg-gray-300 rounded-full p-3 shadow-2xl transition-all ease-in-out animate-pulse infinite "
+            style={{ boxShadow: "2px 2px 2px 2px lightBlue" }}
+          >
+            <BsPeople className="text-[30px] text-blue-500" />
+          </div>
+          <h2 className="text-[22px] font-bold mt-1">Create & Join Groups</h2>
+          <p className="text-[17px] font-normal text-gray-500 mt-2">
+            Easily create groups for trips, roommates, or events and invite
+            friends to join.
+          </p>
         </div>
+        <div className="border-1 shadow-xl flex flex-col justify-center py-3 text-center px-10 rounded-xl w-[500px] h-[220px]">
+          <div
+            className="mx-auto bg-gray-300 rounded-full p-3 shadow-2xl transition-all ease-in-out animate-pulse infinite "
+            style={{ boxShadow: "2px 2px 2px 2px lightBlue" }}
+          >
+            <FiCreditCard className="text-[30px] text-blue-500" />
+          </div>
+          <h2 className="text-[22px] font-bold mt-1">Create & Join Groups</h2>
+          <p className="text-[17px] font-normal text-gray-500 mt-2">
+            Easily create groups for trips, roommates, or events and invite
+            friends to join.
+          </p>
+        </div>
+        <div className="border-1 shadow-xl flex flex-col justify-center py-3 text-center px-10 rounded-xl w-[500px] h-[220px]">
+          <div
+            className="mx-auto bg-gray-300 rounded-full p-3 shadow-2xl transition-all ease-in-out animate-pulse infinite "
+            style={{ boxShadow: "2px 2px 2px 2px lightBlue" }}
+          >
+            <AiOutlinePieChart className="text-[30px] text-blue-500" />
+          </div>
+          <h2 className="text-[22px] font-bold mt-1">Create & Join Groups</h2>
+          <p className="text-[17px] font-normal text-gray-500 mt-2">
+            Easily create groups for trips, roommates, or events and invite
+            friends to join.
+          </p>
+        </div>
+      </div>
+      <div className="foot bg-gray-100 w-full h-10 px-40 py-10 font-normal text-gray-500 mt-20">
+        © 2025 SplitWise. All rights reserved.
       </div>
     </div>
   );
