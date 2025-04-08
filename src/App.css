@@ -3,7 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 .box-shadow {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05), inset 0 1px 0 hsla(0, 0%, 100%, 0.9);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 hsla(0, 0%, 100%, 0.9);
 }
 /* #root {
   max-width: 1280px;
@@ -161,5 +162,64 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .animate-in {
+    animation: animate-in 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-fadeOut {
+    animation: fadeOut 0.3s ease-in forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 15px 2px hsl(var(--accent) / 0.3);
+    }
+    50% {
+      box-shadow: 0 0 25px 5px hsl(var(--accent) / 0.5);
+    }
   }
 }
