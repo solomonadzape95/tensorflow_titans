@@ -1,14 +1,11 @@
-// import { AppSidebar } from "@/components/app-sidebar";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-// import data from "./data.json";
 
 function Overview() {
   return (
     <SidebarProvider>
-      {/* <AppSidebar variant="inset" /> */}
       <SidebarInset className="bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
         <SiteHeader />
         <div className="flex flex-1 flex-col">
