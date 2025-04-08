@@ -9,6 +9,7 @@
 - **[Obed](https://github.com/obed-smart)**
 - **[Diamond](https://github.com/raveroses)**
 - **[Bridget](https://github.com/Bridgetamana)**
+- **[Basilver](https://github.com/Bazilver)**
 
 # React + TypeScript + Vite
 
