@@ -1,16 +1,17 @@
+import "./App.css";
+import Overview from "./components/dashboard/Overview";
 
-import './App.css'
-
-import Login from "./pages/Login"
-import SignUp from './pages/SignUp'
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 
 function App() {
   return (
-  <div >
-    <Login />
-    <SignUp />
-  </div>
-  )
+    <div>
+      <Login />
+      <SignUp />
+      <Overview />
+    </div>
+  );
 }
 
-export default App
+export default App;
