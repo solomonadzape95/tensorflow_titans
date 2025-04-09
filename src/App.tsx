@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import "./App.css";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Dashboard from "./pages/dashboard/DashboardLayout";
 import Group from "./pages/dashboard/Group";
 
 function App() {
