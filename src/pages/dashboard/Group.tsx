@@ -2,6 +2,7 @@ import { Plus, Users, Link } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useState } from 'react'
+import ArchivedGroup from '@/components/dashboard/ArchivedGroup';
 
 interface GroupMember {
     initial: string;
@@ -103,54 +104,55 @@ const Group = () => {
                     </ToggleGroup>
 
                     <div className="space-y-4">
-                        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                            {filteredGroups.map((group) => (
-                                <Card key={group.id} className="rounded-xl border border-[#4247704d] bg-[#17192399]">
-                                    <CardHeader className="p-4 pb-0">
-                                        <CardTitle className="font-semibold tracking-tight text-lg text-muted">{group.title}</CardTitle>
-                                        <CardDescription className="text-muted-foreground">{group.description}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="p-4 pt-0 space-y-4">
-                                        <div className="flex items-center justify-between text-sm">
-                                            <div className="flex items-center gap-1">
-                                                <Users className="h-4 w-4 text-muted-foreground" />
-                                                <span className="text-muted">{group.memberCount} members</span>
-                                            </div>
-                                            <span className="text-muted">{group.expenseCount} expenses</span>
-                                        </div>
-                                        <div className={`text-sm font-medium ${group.balance.isOwed ? 'text-green-500' : 'text-red-400'}`}>
-                                            {group.balance.isOwed ? `You're owed $${group.balance.amount.toFixed(2)}` : `You owe $${group.balance.amount.toFixed(2)}`}
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex -space-x-3 text-muted">
-                                                {group.members.map((member, index) => (
-                                                    <span
-                                                        key={index}
-                                                        className="relative flex h-8 w-8 shrink-0 rounded-full border-2 border-accent-foreground"
-                                                    >
-                                                        <span className="flex h-full w-full items-center justify-center rounded-full bg-muted-foreground border border-accent-foreground text-xs">
-                                                            {member.initial}
-                                                        </span>
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button className="h-8 w-8 border-2 border-input text-muted rounded-full flex justify-center items-center">
-                                                    <Link className="h-4 w-4" />
-                                                </button>
-                                                <a
-                                                    href="/"
-                                                    className="bg-transparent border border-white/20 text-muted px-3 h-9 rounded-md flex justify-center items-center"
-                                                >
-                                                    View
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                        {activeTab === 'active' ? (
 
-                            {activeTab === 'active' ? (
+                            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {filteredGroups.map((group) => (
+                                    <Card key={group.id} className="rounded-xl border border-[#4247704d] bg-[#17192399]">
+                                        <CardHeader className="p-4 pb-0">
+                                            <CardTitle className="font-semibold tracking-tight text-lg text-muted">{group.title}</CardTitle>
+                                            <CardDescription className="text-muted-foreground">{group.description}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="p-4 pt-0 space-y-4">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <div className="flex items-center gap-1">
+                                                    <Users className="h-4 w-4 text-muted-foreground" />
+                                                    <span className="text-muted">{group.memberCount} members</span>
+                                                </div>
+                                                <span className="text-muted">{group.expenseCount} expenses</span>
+                                            </div>
+                                            <div className={`text-sm font-medium ${group.balance.isOwed ? 'text-green-500' : 'text-red-400'}`}>
+                                                {group.balance.isOwed ? `You're owed $${group.balance.amount.toFixed(2)}` : `You owe $${group.balance.amount.toFixed(2)}`}
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex -space-x-3 text-muted">
+                                                    {group.members.map((member, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="relative flex h-8 w-8 shrink-0 rounded-full border-2 border-accent-foreground"
+                                                        >
+                                                            <span className="flex h-full w-full items-center justify-center rounded-full bg-muted-foreground border border-accent-foreground text-xs">
+                                                                {member.initial}
+                                                            </span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button className="h-8 w-8 border-2 border-input text-muted rounded-full flex justify-center items-center">
+                                                        <Link className="h-4 w-4" />
+                                                    </button>
+                                                    <a
+                                                        href="/"
+                                                        className="bg-transparent border border-white/20 text-muted px-3 h-9 rounded-md flex justify-center items-center"
+                                                    >
+                                                        View
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+
                                 <Card className="rounded-xl border border-[#4247704d] bg-[#17192399] flex h-full flex-col items-center justify-center p-6">
                                     <CardContent className="flex flex-col items-center justify-center p-0">
                                         <div className="rounded-full bg-[#4F32FF]/10 p-4 mb-4">
@@ -169,12 +171,11 @@ const Group = () => {
                                         </a>
                                     </CardContent>
                                 </Card>
-                            ) : (
-                                <>
-                                <h1 className='text-muted'>No archive</h1>
-                                </>
-                            )}
-                        </div>
+
+                            </div>
+                        ) : (
+                            <ArchivedGroup />
+                        )}
                     </div>
                 </div>
             </div>
