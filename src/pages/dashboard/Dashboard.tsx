@@ -1,6 +1,7 @@
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { MobileNav } from "./MobileNav";
+import { Outlet } from "react-router";
 
 function Dashboard() {
   return (
@@ -16,6 +17,7 @@ function Dashboard() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
+          <Outlet />
           {/* Overview Section */}
 
           {/* Activity List */}
