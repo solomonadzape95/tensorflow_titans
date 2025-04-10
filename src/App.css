@@ -260,6 +260,6 @@
   }
 
   .glass-button {
-    @apply glass rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
+    @apply rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
   }
 }
