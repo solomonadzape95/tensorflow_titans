@@ -16,16 +16,7 @@ import { Link } from "react-router";
 import { useState } from "react";
 
 
-// interface MotionVariants {
-//   hidden: {
-//     opacity: number;
-//     y: number;
-//   };
-//   visible: {
-//     opacity: number;
-//     y: number;
-//   };
-// }
+
 
 function Navbar() {
   const [isOpenUser, setIsOpenUser] = useState<boolean>(false);

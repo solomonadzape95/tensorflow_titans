@@ -27,7 +27,7 @@ function Sidebar() {
   const pathname = location.pathname;
 
   return (
-    <aside className="w-64   bg-gray-800/20 backdrop-blur-lg hidden md:block border-r   text-white p-4 h-screen">
+    <aside className="w-64   bg-gray-800/20 backdrop-blur-lg hidden md:block border-r text-white p-4 min-h-screen">
       <h2 className="text-xl font-bold mb-6">
         <Button className="text-xl">
           <Wallet className="h-10 w-10 scale-125 text-primary-foreground animate-pulse-glow drop-shadow-lg " />

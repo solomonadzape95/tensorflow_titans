@@ -1,11 +1,12 @@
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { MobileNav } from "./MobileNav";
+import BalanceLoyout from "../balance/BalanceLoyout";
 
 function Dashboard() {
   return (
-    <div className=" bg-primary min-h-screen">
-      <header className="sticky px-5 md:p-10  top-0 border-b border-gray-500 z-50  backdrop-blur-lg flex h-16 w-full  items-center">
+    <div className="h-full">
+      <header className="sticky px-5 md:p-10 glass top-0 supports-[backdrop-filter]:bg-background/60 z-50  backdrop-blur  flex h-6 w-full  items-center">
         <MobileNav />
         <Navbar />
       </header>
@@ -18,7 +19,8 @@ function Dashboard() {
         <div className="flex-1 p-6">
           {/* Overview Section */}
 
-          {/* Activity List */}
+          {/*Balance section */}
+          <BalanceLoyout />
           {/* <ActivityList /> */}
         </div>
       </div>
