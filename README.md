@@ -1,6 +1,6 @@
 # Tensorflow_titans
 
-## Team Members
+## Team Members 
 
 - **[Olamide](https://github.com/danieljs-codes)**
 - **[Solomon](https://github.com/solomonadzape95)**
@@ -9,6 +9,7 @@
 - **[Obed](https://github.com/obed-smart)**
 - **[Diamond](https://github.com/raveroses)**
 - **[Bridget](https://github.com/Bridgetamana)**
+- **[Basilver](https://github.com/Bazilver)**
 
 # React + TypeScript + Vite
 
@@ -66,7 +67,7 @@ export default tseslint.config({
 ```
 
 ## UI Design Concept
-Our interface design was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered interface generator. You can view our initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-ThNCm0NuT1c?b=31soRHVZFjO).
+Our interface design was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered interface generator. You can view our initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-nS46Gidhapg) and view the live demo version [here](https://v0-modern-bill-split-design.vercel.app/).
 
 ## Supabase Setup
 
