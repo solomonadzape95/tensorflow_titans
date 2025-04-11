@@ -5,11 +5,13 @@ import "./App.css";
 import Dashboard from "./pages/dashboard/DashboardLayout";
 import Group from "./pages/dashboard/Group";
 
+
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+
       {/* Dashboard routes */}
       <Route path="/dashboard" element={<Dashboard />}>
         <Route path="/dashboard/group" element={<Group />} />
@@ -20,4 +22,3 @@ function App() {
 }
 
 export default App;
-
