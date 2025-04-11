@@ -1,11 +1,12 @@
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import { MobileNav } from "./MobileNav";
+import { Outlet } from "react-router";
 
-function Dashboard() {
+function DashboardLayout() {
   return (
-    <div className=" bg-primary min-h-screen">
-      <header className="sticky px-5 md:p-10  top-0 border-b border-gray-500 z-50  backdrop-blur-lg flex h-16 w-full  items-center">
+    <div className="bg-background dark:bg-background-dark min-h-screen text-foreground dark:text-foreground-dark">
+      <header className="sticky top-0 z-50 w-full border-b dark:border-b-border-dark backdrop-blur-lg flex h-16 md:h-20 items-center px-4 md:px-6">
         <MobileNav />
         <Navbar />
       </header>
@@ -16,8 +17,8 @@ function Dashboard() {
 
         {/* Main Content */}
         <div className="flex-1 p-6">
+          <Outlet />
           {/* Overview Section */}
-
           {/* Activity List */}
           {/* <ActivityList /> */}
         </div>
@@ -26,4 +27,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default DashboardLayout;
