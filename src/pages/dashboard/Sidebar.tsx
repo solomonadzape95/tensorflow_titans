@@ -15,7 +15,7 @@ import { Link, useLocation } from "react-router";
 
 const navLists = [
   { path: "/dashboard", name: "Overview", icon: Home },
-  { path: "/dashboard/groups", name: "My Groups", icon: Users },
+  { path: "/dashboard/group", name: "My Groups", icon: Users },
   { path: "/dashboard/expenses", name: "Expenses", icon: CreditCard },
   { path: "/dashboard/balances", name: "Balances", icon: BarChart },
   { path: "/dashboard/recurring", name: "Recurring", icon: RefreshCw },
