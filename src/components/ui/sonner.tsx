@@ -1,12 +1,12 @@
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, ToasterProps } from "sonner"
+import { useDarkMode } from "@/hooks/use-darkmode";
+import { Toaster as Sonner, ToasterProps } from "sonner";
 
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+const Toaster = (props: ToasterProps) => {
+  const [darkMode] = useDarkMode();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={darkMode ? "dark" : "light"}
       className="toaster group"
       style={
         {
@@ -17,7 +17,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };
+
