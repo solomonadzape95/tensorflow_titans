@@ -6,11 +6,15 @@
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 hsla(0, 0%, 100%, 0.9);
 }
-
+@theme {
+  --font-second: "Bricolage Grotesque", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  
+}
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.9723 0.0046 262.41);
+  --foreground: oklch(0.1663 0.0524 284.34);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);

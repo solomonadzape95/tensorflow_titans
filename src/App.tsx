@@ -6,10 +6,12 @@ import Dashboard from "./pages/dashboard/DashboardLayout";
 import Group from "./pages/dashboard/Group";
 import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
 
@@ -25,4 +27,3 @@ function App() {
 }
 
 export default App;
-
