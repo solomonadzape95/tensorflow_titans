@@ -12,7 +12,7 @@ const features = [
       "Easily create groups for trips, roommates, or events and invite friends to join.",
   },
   {
-    icon: <CreditCard className="h-8 w-8 text-[#d84cd4] " />,
+    icon: <CreditCard className="h-8 w-8 text-[#d84cd4]" />,
     title: "Track Expenses",
     description:
       "Keep track of shared expenses and see who owes what in real-time.",

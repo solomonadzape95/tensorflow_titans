@@ -18,6 +18,9 @@
 * {
   font-family: var(--font-second), sans-serif;
 }
+.no-scrollbar {
+  scrollbar-width: none;
+}
 :root {
   --radius: 0.625rem;
   --background: oklch(0.9723 0.0046 262.41);
