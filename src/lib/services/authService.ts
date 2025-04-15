@@ -1,6 +1,5 @@
 import { Session } from "@supabase/supabase-js";
 import supabase from "../supabase";
-import { User } from "@supabase/supabase-js";
 export const signUpWithEmail = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -49,16 +48,6 @@ export const getSession = async () => {
   return { session: data.session, error };
 };
 
-// Update user profile
-export const updateUserProfile = async (userData : User) => {
-  const { data, error } = await supabase
-    .from("users")
-    .upsert(userData)
-    .select()
-    .single();
-
-  return { data, error };
-};
 
 // Set up auth state change listener
 export const onAuthStateChange = (
