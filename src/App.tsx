@@ -19,9 +19,9 @@ function App() {
       {/* Dashboard routes */}
       <Route path="/dashboard" element={<Dashboard />}>
         <Route index element={<Overview />} />
-        <Route path="/dashboard/groups" element={<Group />} />
-        <Route path="/dashboard/expenses" element={<ExpensesOverview />} />
-        <Route path="/dashboard/expenses/new" element={<NewExpense />} />
+        <Route path="groups" element={<Group />} />
+        <Route path="expenses" element={<ExpensesOverview />} />
+        <Route path="expenses/new" element={<NewExpense />} />
       </Route>
       <Route path="*" element={<Login />} />
     </Routes>

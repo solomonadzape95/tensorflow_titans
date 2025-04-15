@@ -33,10 +33,10 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
-      <Card className="rounded-xl bg-white/40 mx-auto w-full max-w-md backdrop-blur-2xl shadow-lg">
-        <div className="flex flex-col p-6 space-y-1">
-          <div className="flex items-center justify-center gap-2">
+    <div className=" h-screen w-screen grid place-content-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
+      <Card className="rounded-xl bg-white/40 mx-auto w-full backdrop-blur-2xl shadow-lg px-10">
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center justify-center gap-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -62,7 +62,7 @@ const SignUpForm = () => {
           </p>
         </div>
 
-        <div className="p-6 pt-0 space-y-4">
+        <div className=" pt-0 space-y-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
@@ -185,11 +185,11 @@ const SignUpForm = () => {
           </Form>
 
           <div className="flex justify-center items-center text-xs uppercase">
-            <hr className="h-px text-[#D6D9E0] w-full" />
+            <hr className="h-px text-[#D6D9E0] w-2/3" />
             <span className="bg-[#f5f7f9] px-2 text-[#6b7280] w-full">
               Or continue with
             </span>
-            <hr className="h-px text-[#D6D9E0] w-full" />
+            <hr className="h-px text-[#D6D9E0] w-2/3" />
           </div>
 
           <div className="grid grid-cols-1">

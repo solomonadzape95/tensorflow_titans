@@ -79,6 +79,15 @@ export default function LandingPage() {
             <FaArrowRight className="ml-1 transition-all ease-in-out group-hover:translate-x-1" />
           </Button>
         </Link>
+        <Link to={"/dashboard"} className="mx-auto">
+          <Button
+            className="flex items-center bg-linear-to-r from-[#9b48df] to-[#d84cd4]
+           text-white font-semibold rounded-lg cursor-pointer transition-all duration-300 drop-shadow-md hover:drop-shadow-2xl py-6"
+          >
+            Check Dashboard
+            <FaArrowRight className="ml-1 transition-all ease-in-out group-hover:translate-x-1" />
+          </Button>
+        </Link>
       </div>
 
       <div className="card flex px-[10px] gap-0 lg:px-30 md:px-30 md:gap-5 lg:gap-5 lg:pt-50 md:pt-50 pt-20 md:flex-row lg:flex-row flex-col ">
