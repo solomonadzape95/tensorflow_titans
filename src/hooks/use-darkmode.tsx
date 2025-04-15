@@ -5,24 +5,24 @@ export function useDarkMode(initialValue: boolean = false) {
     if (typeof localStorage !== undefined) {
       const value = localStorage.getItem("appDarkMode");
       if (value !== null) {
-        return JSON.parse(value)
+        return JSON.parse(value);
       }
     }
-    return initialValue
-  })
+    return initialValue;
+  });
   useEffect(() => {
     if (typeof localStorage !== undefined) {
-      localStorage.setItem("appDarkMode", JSON.stringify(darkMode))
+      localStorage.setItem("appDarkMode", JSON.stringify(darkMode));
     }
     if (darkMode) {
-      document.documentElement.classList.add("dark")
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark")
+      document.documentElement.classList.remove("dark");
     }
-  }, [darkMode])
-  
+  }, [darkMode]);
+
   const toggleDarkMode = (value: boolean) => {
-    setDarkMode(value)
-  }
-  return [darkMode, toggleDarkMode]
+    setDarkMode(value);
+  };
+  return [darkMode, toggleDarkMode];
 }
