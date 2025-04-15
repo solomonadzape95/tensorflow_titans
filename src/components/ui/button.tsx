@@ -9,20 +9,22 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: " text-primary-foreground shadow-xs hover:bg-primary/90",
+        default:
+          "glass-button bg-primary text-primary-foreground hover:shadow-glow",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "glass-button bg-destructive text-destructive-foreground hover:shadow-glow",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "glass-button border-2 border-input bg-transparent hover:bg-accent/50 hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "glass-button bg-secondary text-secondary-foreground hover:shadow-glow",
+        ghost: "hover:bg-accent/50 hover:text-accent-foreground",
         gradient:
           "relative overflow-hidden bg-gradient-to-r from-primary to-[#ff4ecd] text-white before:absolute before:inset-0 before:bg-gradient-shine before:translate-x-[-100%] hover:before:animate-shimmer",
         link: "text-primary underline-offset-4 hover:underline",
         glass:
-          "glass-button text-white bg-transparent backdrop-blur-md border border-solid border-white/20 text-foreground hover:shadow-glow",
+          "glass-button bg-transparent backdrop-blur-md border border-solid border-white/20 text-foreground hover:shadow-glow",
+        neumorphic:
+          "neumorphic text-foreground hover:shadow-lg active:neumorphic-inset",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

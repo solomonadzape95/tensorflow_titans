@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { LogOut, Moon, Settings, Sun, User } from "lucide-react";
+import { LogOut, Moon, Settings, Sun, User, Wallet } from "lucide-react";
 import { Link } from "react-router";
 import { useState } from "react";
 import { useDarkMode } from "@/hooks/use-darkmode";
@@ -25,9 +25,14 @@ function Navbar() {
   };
 
   return (
-    <div className="flex items-center h-16 md:h-20 px-4 md:px-6 justify-between w-full bg-background dark:bg-background-dark border-b dark:border-b-border-dark text-foreground dark:text-foreground-dark">
+    <div className="flex items-center h-16 md:h-20 px-4 md:px-6 justify-between w-full ">
       <div className="w-full">
-        <h2 className="text-xl font-bold md:text-2xl">SplitWise</h2>
+        <h2 className="text-xl font-bold">
+          <Button className="text-xl" variant="ghost">
+            <Wallet className="h-10 w-10 scale-125 " />
+            <span className="text-xl font-bold font-second">SplitWise</span>
+          </Button>
+        </h2>
       </div>
       <div className="flex items-center gap-3 md:gap-5">
         <DropdownMenu open={isOpenTheme} onOpenChange={setIsOpenTheme}>

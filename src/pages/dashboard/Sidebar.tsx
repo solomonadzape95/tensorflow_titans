@@ -1,21 +1,21 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   BarChart,
   CreditCard,
   Home,
-  PlusCircle,
+  Plus,
   RefreshCw,
   Settings,
   Users,
-  Wallet,
 } from "lucide-react";
 
 import { Link, useLocation } from "react-router";
 
 const navLists = [
   { path: "/dashboard", name: "Overview", icon: Home },
-  { path: "/dashboard/group", name: "My Groups", icon: Users },
+  { path: "/dashboard/groups", name: "My Groups", icon: Users },
   { path: "/dashboard/expenses", name: "Expenses", icon: CreditCard },
   { path: "/dashboard/balances", name: "Balances", icon: BarChart },
   { path: "/dashboard/recurring", name: "Recurring", icon: RefreshCw },
@@ -27,22 +27,38 @@ function Sidebar() {
   const pathname = location.pathname;
 
   return (
-    <aside className="w-64 bg-sidebar dark:bg-sidebar-dark border-r dark:border-r-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark p-4 h-screen md:block hidden">
-      <h2 className="text-xl font-bold mb-6">
-        <Button className="text-xl" variant="ghost">
-          <Wallet className="h-10 w-10 scale-125 text-primary-foreground dark:text-primary-foreground-dark animate-pulse-glow drop-shadow-lg " />
-          <span className="text-xl font-bold font-display">SplitWise</span>
-        </Button>
-      </h2>
+    <aside
+      className="w-64 bg-sidebar dark:bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]
+ border-r dark:border-r-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark p-4 h-screen md:block hidden space-y-6"
+    >
+      <div className="flex items-center space-x-2 mt-4">
+        <Avatar>
+          <AvatarImage
+            src="https://avatar.iran.liara.run/public/4"
+            alt={"Test User"}
+          />
+          <AvatarFallback className="bg-gray-300 dark:bg-gray-500">
+            TE
+          </AvatarFallback>
+        </Avatar>
+        <div>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            Test User
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            test@example.com
+          </p>
+        </div>
+      </div>
       <nav className="flex flex-col space-y-2">
         <Button
-          className="w-full justify-start gap-2 group text-white cursor-pointer"
+          className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] w-full justify-start gap-2 group text-white cursor-pointer py-4 shadow-md hover:shadow-lg"
           size="sm"
           variant="gradient"
           asChild
         >
           <Link to="/dashboard/expenses/new">
-            <PlusCircle className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300 text-xl" />
+            <Plus className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300 text-xl" />
             New Expense
           </Link>
         </Button>
@@ -54,13 +70,14 @@ function Sidebar() {
               <Link
                 key={list.name}
                 to={list.path}
-              // onClick={() => setOpen(false)} // Assuming setOpen is defined elsewhere for mobile nav
+                // onClick={() => setOpen(false)} // Assuming setOpen is defined elsewhere for mobile nav
               >
                 <Button
                   variant={isActive ? "glass" : "ghost"}
                   className={cn(
                     "w-full justify-start text-sidebar-foreground dark:text-sidebar-foreground-dark cursor-pointer animate-pulse-glow text-sm gap-2 group transition-all duration-300",
-                    isActive && "bg-accent dark:bg-accent-dark text-accent-foreground dark:text-accent-foreground-dark"
+                    isActive &&
+                      "bg-accent dark:bg-accent-dark text-accent-foreground dark:text-accent-foreground-dark"
                   )}
                   style={{ animationDelay: `${index * 0.05}s` }}
                   size="lg"
@@ -68,7 +85,8 @@ function Sidebar() {
                   <Icon
                     className={cn(
                       "h-4 w-4 transition-transform duration-300 group-hover:scale-110",
-                      isActive && "text-accent-foreground dark:text-accent-foreground-dark"
+                      isActive &&
+                        "text-accent-foreground dark:text-accent-foreground-dark"
                     )}
                   />
                   {list.name}
