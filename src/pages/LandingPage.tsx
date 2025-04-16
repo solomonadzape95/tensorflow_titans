@@ -72,7 +72,7 @@ export default function LandingPage() {
 
         <Link to={"/signup"} className="mx-auto">
           <Button
-            className="flex items-center bg-linear-to-r from-[#9b48df] to-[#d84cd4]
+            className="group flex items-center bg-linear-to-r from-[#9b48df] to-[#d84cd4]
            text-white font-semibold rounded-lg cursor-pointer transition-all duration-300 drop-shadow-md hover:drop-shadow-2xl py-6"
           >
             Get Started
