@@ -8,6 +8,7 @@ import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
 import LandingPage from "./pages/LandingPage";
 import Overview from "./pages/dashboard/Overview";
+import ModalViewExpense from "./components/ModalViewExpense";
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-
+      <Route path="/modal" element={<ModalViewExpense />} />
       {/* Dashboard routes */}
       <Route path="/dashboard" element={<Dashboard />}>
         <Route index element={<Overview />} />
