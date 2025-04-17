@@ -1,4 +1,4 @@
-import { Link2, Plus, Users as LinkIcon } from "lucide-react";
+import { Link2, Plus, Users } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { useState } from "react";
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
-import { Link } from "react-router";
 import { Link } from "react-router";
 
 interface GroupMember {
