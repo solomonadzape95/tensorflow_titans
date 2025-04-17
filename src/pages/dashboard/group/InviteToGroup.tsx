@@ -5,6 +5,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogOverlay,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,8 @@ const InviteToGroup = () => {
                     Invite New
                 </Button>
             </DialogTrigger>
+
+            <DialogOverlay className="bg-black/40 backdrop-blur-sm" />
 
             <DialogContent className=" sm:max-w-md">
                 <DialogHeader>

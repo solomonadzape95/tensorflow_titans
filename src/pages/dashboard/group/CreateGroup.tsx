@@ -73,13 +73,9 @@ const CreateGroup = () => {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between">
                                 <label className="text-sm font-medium">Add Members</label>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" className="cursor-pointer">
-                                        <Plus className="w-4 h-4 mr-2" />
-                                        Invite New
-                                    </Button>
+                                <div className="flex gap-2 mt-2 md:mt-0">
                                     <InviteToGroup />
                                     <Button variant="outline" className="cursor-pointer">
                                         <Link className="w-4 h-4 mr-2" />
