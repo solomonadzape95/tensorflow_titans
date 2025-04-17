@@ -9,6 +9,7 @@ import NewExpense from "./pages/dashboard/expenses/New";
 import LandingPage from "./pages/LandingPage";
 import Overview from "./pages/dashboard/Overview";
 import CreateGroup from "./pages/dashboard/group/CreateGroup";
+import GroupDetails from "./components/dashboard/GroupDetails";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />}>
         <Route index element={<Overview />} />
         <Route path="groups" element={<Group />} />
+        <Route path="/dashboard/groups/:id" element={<GroupDetails />} />
         <Route path="/dashboard/group/create-group" element={<CreateGroup />} />
         <Route path="expenses" element={<ExpensesOverview />} />
         <Route path="expenses/new" element={<NewExpense />} />
