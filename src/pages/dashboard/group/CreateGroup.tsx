@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import InviteToGroup from "./InviteToGroup";
 
 const members = [
     { name: "Alex Johnson", email: "alex@example.com", initials: "AJ" },
@@ -79,6 +80,7 @@ const CreateGroup = () => {
                                         <Plus className="w-4 h-4 mr-2" />
                                         Invite New
                                     </Button>
+                                    <InviteToGroup />
                                     <Button variant="outline" className="cursor-pointer">
                                         <Link className="w-4 h-4 mr-2" />
                                         Copy Link
