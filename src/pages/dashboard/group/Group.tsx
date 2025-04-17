@@ -1,8 +1,9 @@
-import { Plus, Users, Link } from 'lucide-react'
+import { Plus, Users, Link as LinkIcon } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useState } from 'react'
 import ArchivedGroup from '@/components/dashboard/ArchivedGroup';
+import { Link } from 'react-router';
 
 interface GroupMember {
     initial: string;
@@ -73,13 +74,13 @@ const Group = () => {
                         </h1>
                         <p className="text-muted-foreground">Manage your expense groups</p>
                     </div>
-                    <a
-                        href="/"
+                    <Link
+                        to="/dashboard/group/create-group"
                         className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
                     >
                         <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
                         Create Group
-                    </a>
+                    </Link>
                 </div>
 
                 <div className="space-y-4">
@@ -139,7 +140,7 @@ const Group = () => {
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button className="h-8 w-8 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
-                                                        <Link className="h-4 w-4" />
+                                                        <LinkIcon className="h-4 w-4" />
                                                     </button>
                                                     <a
                                                         href="/"
@@ -162,13 +163,13 @@ const Group = () => {
                                         <p className="mb-4 text-center text-sm text-muted-foreground">
                                             Start splitting expenses with friends, roommates, or travel buddies
                                         </p>
-                                        <a
+                                        <Link
                                             className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
-                                            href="/"
+                                            to="/dashboard/group/create-group"
                                         >
                                             <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
                                             New Group
-                                        </a>
+                                        </Link>
                                     </CardContent>
                                 </Card>
 

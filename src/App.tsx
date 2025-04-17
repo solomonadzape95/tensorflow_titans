@@ -3,11 +3,12 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import "./App.css";
 import Dashboard from "./pages/dashboard/DashboardLayout";
-import Group from "./pages/dashboard/Group";
+import Group from "./pages/dashboard/group/Group";
 import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
 import LandingPage from "./pages/LandingPage";
 import Overview from "./pages/dashboard/Overview";
+import CreateGroup from "./pages/dashboard/group/CreateGroup";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />}>
         <Route index element={<Overview />} />
         <Route path="groups" element={<Group />} />
+        <Route path="/dashboard/group/create-group" element={<CreateGroup />} />
         <Route path="expenses" element={<ExpensesOverview />} />
         <Route path="expenses/new" element={<NewExpense />} />
       </Route>
