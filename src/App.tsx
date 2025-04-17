@@ -8,6 +8,7 @@ import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
 import LandingPage from "./pages/LandingPage";
 import Overview from "./pages/dashboard/Overview";
+import GroupDetails from "./components/dashboard/GroupDetails";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />}>
         <Route index element={<Overview />} />
         <Route path="/dashboard/groups" element={<Group />} />
+        <Route path="/dashboard/groups/:id" element={<GroupDetails />} />
         <Route path="/dashboard/expenses" element={<ExpensesOverview />} />
         <Route path="/dashboard/expenses/new" element={<NewExpense />} />
       </Route>
