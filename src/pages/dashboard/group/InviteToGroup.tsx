@@ -9,13 +9,27 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Copy, Plus } from "lucide-react";
+import { Copy, Plus, Check } from "lucide-react";
+import { useState } from "react";
 
 const InviteToGroup = () => {
+    const [copied, setCopied] = useState(false);
+    const inviteLink = "https://splitwise.com/join/abc123";
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(inviteLink);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 3000);
+        } catch (err) {
+            console.error("Failed to copy link: ", err);
+        }
+    };
+
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="outline">                
+                <Button variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
                     Invite New
                 </Button>
@@ -23,7 +37,7 @@ const InviteToGroup = () => {
 
             <DialogOverlay className="bg-black/40 backdrop-blur-sm" />
 
-            <DialogContent className=" sm:max-w-md">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Invite to Group</DialogTitle>
                     <DialogDescription>
@@ -42,7 +56,7 @@ const InviteToGroup = () => {
                             type="email"
                             className="flex-1 h-10"
                         />
-                        <Button type="submit" className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 ">Invite</Button>
+                        <Button type="submit" className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2">Invite</Button>
                     </form>
                 </div>
                 <div className="relative my-4">
@@ -59,11 +73,19 @@ const InviteToGroup = () => {
                     <Input
                         id="invite-link"
                         readOnly
-                        value="https://spliwise.com/join/abc123"
+                        value={inviteLink}
                         className="flex-1 h-10"
                     />
-                    <Button variant="outline" size="icon">
-                        <Copy className="w-4 h-4" />
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleCopy}
+                    >
+                        {copied ? (
+                            <Check className="w-4 h-4" />
+                        ) : (
+                            <Copy className="w-4 h-4" />
+                        )}
                         <span className="sr-only">Copy link</span>
                     </Button>
                 </div>
