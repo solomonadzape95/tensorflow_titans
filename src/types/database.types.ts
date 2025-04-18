@@ -169,6 +169,7 @@ export type Database = {
         Row: {
           created_at: string | null
           creator_id: string | null
+          description: string | null
           id: string
           name: string
           updated_at: string | null
@@ -176,6 +177,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           creator_id?: string | null
+          description?: string | null
           id?: string
           name: string
           updated_at?: string | null
@@ -183,6 +185,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           creator_id?: string | null
+          description?: string | null
           id?: string
           name?: string
           updated_at?: string | null
@@ -201,26 +204,26 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
-          full_name: string | null
+          email: string
+          full_name: string
           id: string
           updated_at: string | null
-          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
-          full_name?: string | null
+          email: string
+          full_name: string
           id: string
           updated_at?: string | null
-          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
-          full_name?: string | null
+          email?: string
+          full_name?: string
           id?: string
           updated_at?: string | null
-          username?: string | null
         }
         Relationships: []
       }
@@ -268,7 +271,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_suggested_invitees: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          username: string
+          full_name: string
+          avatar_url: string
+          email: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
