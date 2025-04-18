@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import "./App.css";
 import GroupDetails from "./components/dashboard/GroupDetails";
+import { protectPage } from "./lib/services/authService";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
@@ -21,7 +22,13 @@ const routes: RouteObject[] = [
 		path: "/dashboard",
 		Component: Dashboard,
 		children: [
-			{ index: true, Component: Overview },
+			{
+				index: true,
+				Component: Overview,
+				loader: async () => {
+					return await protectPage();
+				},
+			},
 			{ path: "groups", Component: Group },
 			{ path: "groups/:id", Component: GroupDetails },
 			{ path: "groups/create", Component: CreateGroup }, // Changed path for consistency
