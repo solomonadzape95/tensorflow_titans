@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/select";
 import {
   Bell,
-  CreditCard,
   Globe,
   Lock,
   Moon,
@@ -93,13 +92,6 @@ export default function Settings() {
             >
               <Bell className="mr-2 h-4 w-4" />
               Notifications
-            </TabsTrigger>
-            <TabsTrigger
-              value="payment"
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Payment
             </TabsTrigger>
           </TabsList>
 
@@ -422,59 +414,6 @@ export default function Settings() {
                   Save Preferences
                 </Button>
               </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="payment" className="space-y-6 animate-in">
-            <Card className="hover:shadow-glow transition-all duration-300">
-              <CardHeader>
-                <CardTitle>Payment Methods</CardTitle>
-                <CardDescription>Manage your payment methods</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="rounded-full bg-primary/10 p-2">
-                        <CreditCard className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Visa ending in 4242</p>
-                        <p className="text-sm text-muted-foreground">
-                          Expires 12/2025
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <Button className="w-full">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Add Payment Method
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-glow transition-all duration-300">
-              <CardHeader>
-                <CardTitle>Billing History</CardTitle>
-                <CardDescription>View your billing history</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-6">
-                  <p className="text-muted-foreground">
-                    No billing history available
-                  </p>
-                </div>
-              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
