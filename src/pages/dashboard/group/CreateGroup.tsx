@@ -8,7 +8,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import InviteToGroup from "./InviteToGroup";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { UserData } from "@/types";
 
 interface FormValues {
     name: string;
@@ -16,9 +15,12 @@ interface FormValues {
     groupType: "home" | "trip" | "couple" | "custom";
 }
 
-interface SelectableUser extends UserData {
+interface SelectableUser {
     selected?: boolean;
     initials?: string;
+    id: string;
+    username: string;
+    email: string;
 }
 
 const initialMembers: SelectableUser[] = [

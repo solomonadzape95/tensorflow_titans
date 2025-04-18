@@ -15,9 +15,7 @@ import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 import Balances from "./pages/dashboard/Balances";
-
-import GroupDetails from "./components/dashboard/GroupDetails";
-import Settings from "./pages/dashboard/Settings";
+// import Settings from "./pages/dashboard/Settings";
 
 
 const protectedLoader = async () => {
