@@ -1,35 +1,35 @@
-import { Routes, Route } from "react-router";
+import { createBrowserRouter } from "react-router";
+import type { RouteObject } from "react-router";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import "./App.css";
+import GroupDetails from "./components/dashboard/GroupDetails";
+import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/dashboard/DashboardLayout";
-import Group from "./pages/dashboard/group/Group";
+import Overview from "./pages/dashboard/Overview";
 import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
-import LandingPage from "./pages/LandingPage";
-import Overview from "./pages/dashboard/Overview";
 import CreateGroup from "./pages/dashboard/group/CreateGroup";
-import GroupDetails from "./components/dashboard/GroupDetails";
+import Group from "./pages/dashboard/group/Group";
+import NotFound from "./pages/not-found";
 
-function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<SignUp />} />
+const routes: RouteObject[] = [
+	{ path: "/", Component: LandingPage },
+	{ path: "/login", Component: Login },
+	{ path: "/signup", Component: SignUp },
+	{
+		path: "/dashboard",
+		Component: Dashboard,
+		children: [
+			{ index: true, Component: Overview },
+			{ path: "groups", Component: Group },
+			{ path: "groups/:id", Component: GroupDetails },
+			{ path: "groups/create", Component: CreateGroup }, // Changed path for consistency
+			{ path: "expenses", Component: ExpensesOverview },
+			{ path: "expenses/new", Component: NewExpense },
+		],
+	},
+	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
+];
 
-      {/* Dashboard routes */}
-      <Route path="/dashboard" element={<Dashboard />}>
-        <Route index element={<Overview />} />
-        <Route path="groups" element={<Group />} />
-        <Route path="/dashboard/groups/:id" element={<GroupDetails />} />
-        <Route path="/dashboard/group/create-group" element={<CreateGroup />} />
-        <Route path="expenses" element={<ExpensesOverview />} />
-        <Route path="expenses/new" element={<NewExpense />} />
-      </Route>
-      <Route path="*" element={<Login />} />
-    </Routes>
-  );
-}
-
-export default App;
+export const router = createBrowserRouter(routes);
