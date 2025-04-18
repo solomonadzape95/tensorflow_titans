@@ -8,12 +8,19 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { type SignUpFormData, signUpSchema } from "@/lib/schema";
+import supabase from "@/lib/supabase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { Card } from "../ui/card";
 
 const SignUpForm = () => {
+	const navigate = useNavigate();
 	const form = useForm({
+		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			email: "",
 			fullName: "",
@@ -22,18 +29,45 @@ const SignUpForm = () => {
 		},
 	});
 
-	interface FormData {
-		email: string;
-		fullName: string;
-		password: string;
-	}
+	const { mutateAsync: signUp, isPending } = useMutation({
+		mutationKey: ["signup"],
+		mutationFn: async (data: SignUpFormData) => {
+			const { error, data: user } = await supabase.auth.signUp({
+				// Destructure error to handle potential issues
+				email: data.email,
+				password: data.password,
+				options: {
+					data: {
+						full_name: data.fullName,
+					},
+				},
+			});
 
-	const onSubmit = (data: FormData) => {
-		console.log(data);
+			if (error) {
+				throw error;
+			}
+
+			return user;
+		},
+		onSuccess: () => {
+			navigate("/dashboard");
+		},
+	});
+
+	const onSubmit = (data: SignUpFormData) => {
+		toast.promise(signUp(data), {
+			loading: "Creating your account...",
+			success: () => {
+				return "Account created successfully! Redirecting to dashboard...";
+			},
+			error: (err: Error) => {
+				return `Sign up failed: ${err?.message || "Please try again."}`;
+			},
+		});
 	};
 
 	return (
-		<div className=" h-screen w-screen grid place-content-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
+		<div className="min-h-screen w-full grid place-content-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
 			<Card className="rounded-xl bg-white/40 mx-auto w-full backdrop-blur-2xl shadow-lg px-10">
 				<div className="flex flex-col space-y-1">
 					<div className="flex items-center justify-center gap-1">
@@ -178,6 +212,7 @@ const SignUpForm = () => {
 							<Button
 								type="submit"
 								className="rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white w-full cursor-pointer hover:shadow-md"
+								disabled={isPending}
 							>
 								Sign Up
 							</Button>
