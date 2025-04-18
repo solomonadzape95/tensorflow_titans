@@ -13,7 +13,7 @@ function DashboardLayout() {
           <MobileNav />
           <Navbar />
         </header>
-        <main className="mt-8 bg-transparent">
+        <main className="mt-8 bg-transparent flex-1 overflow-y-auto p-4 md:p-8">
           <Outlet />
         </main>
       </div>

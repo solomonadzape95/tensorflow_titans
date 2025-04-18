@@ -55,7 +55,7 @@ const CreateGroup = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6 py-10 flex-1 overflow-y-auto px-4 md:px-8">
+        <div className="max-w-2xl mx-auto space-y-6 py-10">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Create a New Group</h1>
                 <p className="text-muted-foreground">

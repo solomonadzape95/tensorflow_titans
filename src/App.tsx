@@ -10,6 +10,7 @@ import LandingPage from "./pages/LandingPage";
 import Overview from "./pages/dashboard/Overview";
 import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import GroupDetails from "./components/dashboard/GroupDetails";
+import Balances from "./pages/dashboard/Balances";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/dashboard/group/create-group" element={<CreateGroup />} />
         <Route path="expenses" element={<ExpensesOverview />} />
         <Route path="expenses/new" element={<NewExpense />} />
+        <Route path="balances" element={<Balances />} />
       </Route>
       <Route path="*" element={<Login />} />
     </Routes>
