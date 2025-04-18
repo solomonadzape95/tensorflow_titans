@@ -21,19 +21,59 @@ const routes: RouteObject[] = [
 	{
 		path: "/dashboard",
 		Component: Dashboard,
+		loader: async () => {
+			// Protect the main dashboard layout as well
+			return await protectPage();
+		},
 		children: [
 			{
 				index: true,
 				Component: Overview,
+				// Loader already present
 				loader: async () => {
 					return await protectPage();
 				},
 			},
-			{ path: "groups", Component: Group },
-			{ path: "groups/:id", Component: GroupDetails },
-			{ path: "groups/create", Component: CreateGroup }, // Changed path for consistency
-			{ path: "expenses", Component: ExpensesOverview },
-			{ path: "expenses/new", Component: NewExpense },
+			{
+				path: "groups",
+				Component: Group,
+				loader: async () => {
+					// Protect groups route
+					return await protectPage();
+				},
+			},
+			{
+				path: "groups/:id",
+				Component: GroupDetails,
+				loader: async () => {
+					// Protect group details route
+					return await protectPage();
+				},
+			},
+			{
+				path: "groups/create",
+				Component: CreateGroup,
+				loader: async () => {
+					// Protect create group route
+					return await protectPage();
+				},
+			},
+			{
+				path: "expenses",
+				Component: ExpensesOverview,
+				loader: async () => {
+					// Protect expenses overview route
+					return await protectPage();
+				},
+			},
+			{
+				path: "expenses/new",
+				Component: NewExpense,
+				loader: async () => {
+					// Protect new expense route
+					return await protectPage();
+				},
+			},
 		],
 	},
 	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
