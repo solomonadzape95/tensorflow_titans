@@ -34,7 +34,7 @@ const SignUpForm = () => {
 
   return (
     <div className=" h-screen w-screen grid place-content-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
-      <Card className="rounded-xl bg-white/40 mx-auto w-full backdrop-blur-2xl shadow-lg px-10">
+      <Card className="rounded-xl bg-white/40 dark:bg-[#11131E] mx-auto w-md backdrop-blur-2xl shadow-lg px-10">
         <div className="flex flex-col space-y-1">
           <div className="flex items-center justify-center gap-1">
             <svg
@@ -177,7 +177,7 @@ const SignUpForm = () => {
 
               <Button
                 type="submit"
-                className="rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white w-full cursor-pointer hover:shadow-md"
+                className="rounded-3xl text-sm font-medium bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white w-full cursor-pointer dark:hover:bg-gradient-to-r dark:hover:from-[#4F32FF]/80 dark:hover:to-[#ff4ecd]/80 hover:shadow-md transition-all duration-300 "
               >
                 Sign Up
               </Button>
@@ -186,7 +186,7 @@ const SignUpForm = () => {
 
           <div className="flex justify-center items-center text-xs uppercase">
             <hr className="h-px text-[#D6D9E0] w-2/3" />
-            <span className="bg-[#f5f7f9] px-2 text-[#6b7280] w-full">
+            <span className="bg-[#f5f7f9] dark:bg-transparent px-2 text-[#6b7280] w-full">
               Or continue with
             </span>
             <hr className="h-px text-[#D6D9E0] w-2/3" />
@@ -195,7 +195,7 @@ const SignUpForm = () => {
           <div className="grid grid-cols-1">
             <Button
               variant="outline"
-              className="bg-white/70 backdrop-blur-md border border-white/20 cursor-pointer hover:shadow-md hover:bg-white/70 "
+              className="bg-white/70 backdrop-blur-md border border-white/20 cursor-pointer hover:shadow-md hover:bg-white/70 dark:bg-[#1c1f2c] dark:hover:bg-[#1c1f2c]/50"
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
