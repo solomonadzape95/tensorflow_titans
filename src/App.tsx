@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import "./App.css";
 import GroupDetails from "./components/dashboard/GroupDetails";
+import { queryClient } from "./lib/queryClient";
 import { protectPage } from "./lib/services/authService";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/dashboard/DashboardLayout";
@@ -14,6 +15,14 @@ import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 
+const protectedLoader = async () => {
+	return await queryClient.fetchQuery({
+		queryKey: ["auth", "user"],
+		queryFn: protectPage,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
+};
+
 const routes: RouteObject[] = [
 	{ path: "/", Component: LandingPage },
 	{ path: "/login", Component: Login },
@@ -21,48 +30,37 @@ const routes: RouteObject[] = [
 	{
 		path: "/dashboard",
 		Component: Dashboard,
+		loader: protectedLoader,
 		children: [
 			{
 				index: true,
 				Component: Overview,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 			{
 				path: "groups",
 				Component: Group,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 			{
 				path: "groups/:id",
 				Component: GroupDetails,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 			{
 				path: "groups/create",
 				Component: CreateGroup,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 			{
 				path: "expenses",
 				Component: ExpensesOverview,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 			{
 				path: "expenses/new",
 				Component: NewExpense,
-				loader: async () => {
-					return await protectPage();
-				},
+				loader: protectedLoader,
 			},
 		],
 	},
