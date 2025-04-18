@@ -15,6 +15,10 @@ import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 
+import GroupDetails from "./components/dashboard/GroupDetails";
+import Settings from "./pages/dashboard/Settings";
+
+
 const protectedLoader = async () => {
 	return await queryClient.fetchQuery({
 		queryKey: ["auth", "user"],
@@ -68,3 +72,4 @@ const routes: RouteObject[] = [
 ];
 
 export const router = createBrowserRouter(routes);
+
