@@ -21,15 +21,10 @@ const routes: RouteObject[] = [
 	{
 		path: "/dashboard",
 		Component: Dashboard,
-		loader: async () => {
-			// Protect the main dashboard layout as well
-			return await protectPage();
-		},
 		children: [
 			{
 				index: true,
 				Component: Overview,
-				// Loader already present
 				loader: async () => {
 					return await protectPage();
 				},
@@ -38,7 +33,6 @@ const routes: RouteObject[] = [
 				path: "groups",
 				Component: Group,
 				loader: async () => {
-					// Protect groups route
 					return await protectPage();
 				},
 			},
@@ -46,7 +40,6 @@ const routes: RouteObject[] = [
 				path: "groups/:id",
 				Component: GroupDetails,
 				loader: async () => {
-					// Protect group details route
 					return await protectPage();
 				},
 			},
@@ -54,7 +47,6 @@ const routes: RouteObject[] = [
 				path: "groups/create",
 				Component: CreateGroup,
 				loader: async () => {
-					// Protect create group route
 					return await protectPage();
 				},
 			},
@@ -62,7 +54,6 @@ const routes: RouteObject[] = [
 				path: "expenses",
 				Component: ExpensesOverview,
 				loader: async () => {
-					// Protect expenses overview route
 					return await protectPage();
 				},
 			},
@@ -70,7 +61,6 @@ const routes: RouteObject[] = [
 				path: "expenses/new",
 				Component: NewExpense,
 				loader: async () => {
-					// Protect new expense route
 					return await protectPage();
 				},
 			},
