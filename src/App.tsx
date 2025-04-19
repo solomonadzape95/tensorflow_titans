@@ -75,6 +75,11 @@ const routes: RouteObject[] = [
         Component: Settings,
         loader: protectedLoader,
       },
+      {
+        path: "balances",
+        Component: Balances,
+        loader: protectedLoader,
+      },
     ],
   },
   { path: "*", Component: NotFound }, // Consider a dedicated 404 page later

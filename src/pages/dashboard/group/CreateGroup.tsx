@@ -2,7 +2,7 @@ import { Check, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import InviteToGroup from "./InviteToGroup";
@@ -97,11 +97,11 @@ const CreateGroup = () => {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
-          <CardHeader>
+          {/* <CardHeader>
             <h3 className="text-2xl font-semibold tracking-tight">
               Group Details
             </h3>
-          </CardHeader>
+          </CardHeader> */}
           <CardContent className="space-y-6">
             <Tabs defaultValue="home" className="w-full">
               <TabsList className="grid w-full grid-cols-4">
