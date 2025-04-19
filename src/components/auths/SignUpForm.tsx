@@ -16,6 +16,9 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Card } from "../ui/card";
+import { useState } from "react";
+import { FaEye } from "react-icons/fa6";
+import { Eye, EyeClosed } from "lucide-react";
 
 const SignUpForm = () => {
   const navigate = useNavigate();
@@ -28,6 +31,7 @@ const SignUpForm = () => {
       password_confirmation: "",
     },
   });
+  const [canSee, setCanSee] = useState(false);
 
   const { mutateAsync: signUp, isPending } = useMutation({
     mutationKey: ["signup"],
@@ -164,12 +168,27 @@ const SignUpForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="********"
-                        type="password"
-                        className="border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="********"
+                          type={canSee ? "text" : "password"}
+                          className=" border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
+                          {...field}
+                        />
+                        <span className="absolute right-3 top-3 cursor-pointer">
+                          {canSee ? (
+                            <EyeClosed
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          ) : (
+                            <Eye
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          )}
+                        </span>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -197,12 +216,27 @@ const SignUpForm = () => {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="********"
-                        type="password"
-                        className="border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="********"
+                          type={canSee ? "text" : "password"}
+                          className=" border border-white/20 focus:dark:bg-[#141727]/90 backdrop-blur-md focus:border-black/10"
+                          {...field}
+                        />
+                        <span className="absolute right-3 top-3 cursor-pointer">
+                          {canSee ? (
+                            <EyeClosed
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          ) : (
+                            <Eye
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          )}
+                        </span>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

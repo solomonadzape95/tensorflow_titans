@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,15 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Bell,
-  Globe,
   Lock,
   Moon,
   Palette,
@@ -35,6 +25,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useDarkMode } from "@/hooks/use-darkmode";
+import { FaFloppyDisk } from "react-icons/fa6";
 
 export default function Settings() {
   const [darkMode, toggleDarkMode] = useDarkMode();
@@ -64,31 +55,31 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="glass">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-fit w-fit p-2 text-md shadow-md">
             <TabsTrigger
               value="profile"
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+              className="data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] transition-all duration-300"
             >
               <User className="mr-2 h-4 w-4" />
               Profile
             </TabsTrigger>
             <TabsTrigger
               value="account"
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+              className="data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] transition-all duration-300"
             >
               <Lock className="mr-2 h-4 w-4" />
               Account
             </TabsTrigger>
             <TabsTrigger
               value="appearance"
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+              className="data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] transition-all duration-300"
             >
               <Palette className="mr-2 h-4 w-4" />
               Appearance
             </TabsTrigger>
             <TabsTrigger
               value="notifications"
-              className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+              className="data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] transition-all duration-300"
             >
               <Bell className="mr-2 h-4 w-4" />
               Notifications
@@ -96,7 +87,7 @@ export default function Settings() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6 animate-in">
-            <Card className="hover:shadow-glow transition-all duration-300">
+            <Card className="hover:shadow-glow transition-all duration-300 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
                 <CardDescription>
@@ -113,7 +104,7 @@ export default function Settings() {
                     <AvatarFallback className="text-2xl">JD</AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
-                    <Button className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white ">
                       <Upload className="mr-2 h-4 w-4" />
                       Change Avatar
                     </Button>
@@ -162,29 +153,11 @@ export default function Settings() {
                   variant="gradient"
                   onClick={handleSave}
                   disabled={isLoading}
+                  className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
-                      <svg
-                        className="animate-spin h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <FaFloppyDisk />
                       <span>Saving...</span>
                     </div>
                   ) : (
@@ -199,7 +172,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="account" className="space-y-6 animate-in">
-            <Card className="hover:shadow-glow transition-all duration-300">
+            <Card className="hover:shadow-glow transition-all duration-300 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
               <CardHeader>
                 <CardTitle>Password</CardTitle>
                 <CardDescription>Change your password</CardDescription>
@@ -219,64 +192,16 @@ export default function Settings() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="gradient">
+                <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white">
                   <Save className="mr-2 h-4 w-4" />
                   Update Password
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="hover:shadow-glow transition-all duration-300">
-              <CardHeader>
-                <CardTitle>Language & Region</CardTitle>
-                <CardDescription>
-                  Set your language and regional preferences
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="language">Language</Label>
-                  <Select defaultValue="en">
-                    <SelectTrigger id="language" className="glass">
-                      <Globe className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent className="glass">
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                      <SelectItem value="ja">Japanese</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select defaultValue="usd">
-                    <SelectTrigger id="currency" className="glass">
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent className="glass">
-                      <SelectItem value="usd">USD ($)</SelectItem>
-                      <SelectItem value="eur">EUR (€)</SelectItem>
-                      <SelectItem value="gbp">GBP (£)</SelectItem>
-                      <SelectItem value="jpy">JPY (¥)</SelectItem>
-                      <SelectItem value="cad">CAD ($)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button variant="gradient">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Preferences
                 </Button>
               </CardFooter>
             </Card>
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-6 animate-in">
-            <Card className="hover:shadow-glow transition-all duration-300">
+            <Card className="hover:shadow-glow transition-all duration-300 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
               <CardHeader>
                 <CardTitle>Theme</CardTitle>
                 <CardDescription>
@@ -325,91 +250,42 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6 animate-in">
-            <Card className="hover:shadow-glow transition-all duration-300">
+            <Card className="hover:shadow-glow transition-all duration-300 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl">
+                  Notification Preferences
+                </CardTitle>
+                <CardDescription className="text-md">
                   Control how you receive notifications
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Email Notifications</h3>
+                  <h3 className="text-lg font-medium">Notifications</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="email-expenses">New Expenses</Label>
+                        <Label htmlFor="email">Email Notifications</Label>
                         <p className="text-sm text-muted-foreground">
-                          Receive emails when new expenses are added
+                          Receive emails{" "}
                         </p>
                       </div>
-                      <Switch id="email-expenses" defaultChecked />
+                      <Switch id="email" defaultChecked />
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="email-payments">Payments</Label>
+                        <Label htmlFor="push">Push Notifications</Label>
                         <p className="text-sm text-muted-foreground">
-                          Receive emails when payments are made
+                          Receive push notifications from the app
                         </p>
                       </div>
-                      <Switch id="email-payments" defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="email-reminders">Reminders</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive payment reminders
-                        </p>
-                      </div>
-                      <Switch id="email-reminders" defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="email-marketing">Marketing</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive marketing emails and newsletters
-                        </p>
-                      </div>
-                      <Switch id="email-marketing" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Push Notifications</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="push-expenses">New Expenses</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive push notifications for new expenses
-                        </p>
-                      </div>
-                      <Switch id="push-expenses" defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="push-payments">Payments</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive push notifications for payments
-                        </p>
-                      </div>
-                      <Switch id="push-payments" defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label htmlFor="push-reminders">Reminders</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Receive payment reminder notifications
-                        </p>
-                      </div>
-                      <Switch id="push-reminders" defaultChecked />
+                      <Switch id="push" defaultChecked />
                     </div>
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end">
-                <Button variant="gradient">
+                <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white">
                   <Save className="mr-2 h-4 w-4" />
                   Save Preferences
                 </Button>
@@ -421,4 +297,3 @@ export default function Settings() {
     </main>
   );
 }
-

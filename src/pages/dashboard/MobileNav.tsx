@@ -28,6 +28,7 @@ export function MobileNav() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const pathname = location.pathname;
+  console.log(pathname, location);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

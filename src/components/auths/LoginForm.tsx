@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { type LoginFormData, loginSchema } from "@/lib/schema";
@@ -16,51 +16,53 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router"; // Added useNavigate import
 import { toast } from "sonner"; // Added toast import
 import { Card } from "../ui/card";
+import { useState } from "react";
+import { Eye, EyeClosed } from "lucide-react";
 
 const LoginForm = () => {
-	const navigate = useNavigate(); // Added useNavigate hook
-	const form = useForm<LoginFormData>({
-		resolver: zodResolver(loginSchema),
-		defaultValues: {
-			email: "",
-			password: "",
-		},
-	});
+  const navigate = useNavigate(); // Added useNavigate hook
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  const [canSee, setCanSee] = useState(false);
+  const { mutateAsync: login, isPending } = useMutation({
+    // Added useMutation hook for login
+    mutationKey: ["login"],
+    mutationFn: async (data: LoginFormData) => {
+      const { error, data: user } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
 
-	const { mutateAsync: login, isPending } = useMutation({
-		// Added useMutation hook for login
-		mutationKey: ["login"],
-		mutationFn: async (data: LoginFormData) => {
-			const { error, data: user } = await supabase.auth.signInWithPassword({
-				email: data.email,
-				password: data.password,
-			});
+      if (error) {
+        throw error;
+      }
 
-			if (error) {
-				throw error;
-			}
+      return user;
+    },
+    onSuccess: () => {
+      navigate("/dashboard"); // Navigate to dashboard on success
+    },
+  });
 
-			return user;
-		},
-		onSuccess: () => {
-			navigate("/dashboard"); // Navigate to dashboard on success
-		},
-	});
+  const onSubmit = (data: LoginFormData): void => {
+    // Updated onSubmit function
+    toast.promise(login(data), {
+      loading: "Signing in...",
+      success: () => {
+        return "Signed in successfully! Redirecting to dashboard...";
+      },
+      error: (err: Error) => {
+        return `Sign in failed: ${err?.message || "Please try again."}`;
+      },
+    });
+  };
 
-	const onSubmit = (data: LoginFormData): void => {
-		// Updated onSubmit function
-		toast.promise(login(data), {
-			loading: "Signing in...",
-			success: () => {
-				return "Signed in successfully! Redirecting to dashboard...";
-			},
-			error: (err: Error) => {
-				return `Sign in failed: ${err?.message || "Please try again."}`;
-			},
-		});
-	};
-
-	return (
+  return (
     <div className="flex h-screen w-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
       <Card className="rounded-xl bg-white/40 mx-auto dark:bg-[#11131E] w-11/12 md:w-full md:max-w-md shadow-lg backdrop-blur-2xl">
         <div className="flex flex-col p-6 space-y-1">
@@ -110,7 +112,7 @@ const LoginForm = () => {
                       <Input
                         placeholder="johndoe@example.com"
                         type="email"
-                        className="border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
+                        className="border border-white/20 bg-[#F9FAFB]/80 backdrop-blur-md focus:border-black/10 focus:dark:bg-[#141727]/90"
                         {...field}
                       />
                     </FormControl>
@@ -137,12 +139,27 @@ const LoginForm = () => {
                       </Link>
                     </div>
                     <FormControl>
-                      <Input
-                        placeholder="********"
-                        type="password"
-                        className="border border-white/20 bg-white backdrop-blur-md focus:border-black/10"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          placeholder="********"
+                          type={canSee ? "text" : "password"}
+                          className=" border border-white/20 focus:border-black/10 bg-[#F9FAFB]/80 backdrop-blur-md  focus:dark:bg-[#141727]/90"
+                          {...field}
+                        />
+                        <span className="absolute right-3 top-3 cursor-pointer">
+                          {canSee ? (
+                            <EyeClosed
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          ) : (
+                            <Eye
+                              className="size-4"
+                              onClick={() => setCanSee((prev) => !prev)}
+                            />
+                          )}
+                        </span>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
