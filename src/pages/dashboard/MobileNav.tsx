@@ -10,10 +10,10 @@ import {
   RefreshCw,
   Settings,
   Users,
-  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router"; // Ensure you're using react-router-dom
+import { LuWallet } from "react-icons/lu";
 
 const navLists = [
   { path: "/dashboard", name: "Overview", icon: Home },
@@ -31,29 +31,21 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
-        >
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Toggle menu</span>
-        </Button>
-      </SheetTrigger>
       <SheetContent
         side="left"
-        className="flex flex-col p-0 bg-sidebar dark:bg-sidebar-dark text-sidebar-foreground dark:text-sidebar-foreground-dark"
+        className="flex flex-col p-0 bg-sidebar dark:bg-[#030712] text-sidebar-foreground dark:text-sidebar-foreground-dark"
       >
         <div className="flex items-center justify-between border-b dark:border-b-border-dark p-4">
           <div className="flex items-center gap-2">
-            <Wallet className="h-6 w-6 text-primary-foreground dark:text-primary-foreground-dark animate-pulse-glow" />
-            <span className="text-xl font-bold font-display">SplitWise</span>
+            <LuWallet className="text-[#4a44ee] text-[25px] animation animate-bounce transition-all duration-700 ease-in-out" />
+            <h2 className="text-xl md:text-2xl font-bold hover:text-[#9b48df]/90 transition-all duration-300 ease-in-out">
+              SplitWise
+            </h2>
           </div>
         </div>
         <div className="flex-1 overflow-auto p-4">
           <Button
-            className="mb-4 w-full justify-start gap-2 group text-white cursor-pointer"
+            className="mb-4 w-full justify-start gap-2 group bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer p-3"
             variant="gradient"
             size="sm"
             asChild
@@ -66,7 +58,7 @@ export function MobileNav() {
           <div className="space-y-1">
             {navLists.map((list, index) => {
               const Icon = list.icon;
-              const isActive = pathname.startsWith(list.path);
+              const isActive = pathname == list.path;
               return (
                 <Link
                   key={list.name}
@@ -76,9 +68,9 @@ export function MobileNav() {
                   <Button
                     variant={isActive ? "glass" : "ghost"}
                     className={cn(
-                      "w-full justify-start text-sidebar-foreground dark:text-sidebar-foreground-dark animate-pulse-glow text-sm gap-2 group transition-all duration-300",
+                      "w-full justify-start text-sidebar-foreground dark:text-sidebar-foreground-dark animate-pulse-glow text-sm gap-2 group transition-all duration-300 ",
                       isActive &&
-                      "bg-accent dark:bg-accent-dark text-accent-foreground dark:text-accent-foreground-dark"
+                        "dark:bg-[#141727]/90 bg-[#141727]/10 text-accent-foreground dark:text-accent-foreground-dark"
                     )}
                     style={{ animationDelay: `${index * 0.05}s` }}
                     size="lg"
@@ -87,7 +79,7 @@ export function MobileNav() {
                       className={cn(
                         "h-4 w-4 transition-all duration-300 group-hover:scale-110",
                         isActive &&
-                        "text-accent-foreground dark:text-accent-foreground-dark"
+                          "text-accent-foreground dark:text-accent-foreground-dark"
                       )}
                     />
                     {list.name}
@@ -98,6 +90,16 @@ export function MobileNav() {
           </div>
         </div>
       </SheetContent>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
+        >
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle menu</span>
+        </Button>
+      </SheetTrigger>
     </Sheet>
   );
 }

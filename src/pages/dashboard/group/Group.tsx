@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import { Link } from "react-router";
+import { Button } from "@/components/ui/button";
 
 interface GroupMember {
   initial: string;
@@ -66,8 +67,8 @@ const Group = () => {
   const filteredGroups = activeTab === "active" ? groups : [];
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <div className="space-y-8 bg-transparent">
+      <div className=" bg-transparent flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-transparent bg-clip-text">
@@ -85,14 +86,14 @@ const Group = () => {
         </a>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 bg-transparent">
         <ToggleGroup
           type="single"
           defaultValue={activeTab}
           onValueChange={(value) =>
             setActiveTab(value as "active" | "archived")
           }
-          className="inline-flex h-8 items-center justify-center rounded-lg p-1.5 bg-sidebar dark:bg-sidebar-dark border-r dark:border-r-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark border border-muted-foreground box-content"
+          className="inline-flex h-12 items-center justify-center rounded-lg py-3 px-1 bg-sidebar dark:bg-sidebar-dark border-r dark:border-r-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark border border-muted-foreground box-content"
         >
           <ToggleGroupItem
             value="active"
@@ -110,14 +111,14 @@ const Group = () => {
 
         <div className="space-y-4">
           {activeTab === "active" ? (
-            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6 bg-transparent">
               {filteredGroups.map((group) => (
                 <Card
                   key={group.id}
-                  className="rounded-xl bg-sidebar dark:bg-sidebar-dark border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark"
+                  className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark"
                 >
                   <CardHeader className="p-4 pb-0">
-                    <CardTitle className="font-semibold tracking-tight text-lg text-sidebar-foreground dark:text-sidebar-foreground-dark">
+                    <CardTitle className="font-semibold tracking-tight text-xl text-sidebar-foreground dark:text-sidebar-foreground-dark">
                       {group.title}
                     </CardTitle>
                     <CardDescription className="text-muted-foreground">
@@ -125,7 +126,7 @@ const Group = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-4 pt-0 space-y-4">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-md">
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sidebar-foreground dark:text-sidebar-foreground-dark">
@@ -137,10 +138,9 @@ const Group = () => {
                       </span>
                     </div>
                     <div
-                      className={`text-sm font-medium ${group.balance.isOwed
-                          ? "text-green-500"
-                          : "text-red-400"
-                        }`}
+                      className={`text-sm font-medium ${
+                        group.balance.isOwed ? "text-green-500" : "text-red-400"
+                      }`}
                     >
                       {group.balance.isOwed
                         ? `You're owed $${group.balance.amount.toFixed(2)}`
@@ -160,21 +160,19 @@ const Group = () => {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <button className="h-8 w-8 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
+                        <button className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
                           <Link2 className="h-4 w-4" />
                         </button>
-                        <button className="bg-transparent border border-black/20 dark:border-white/20 text-sidebar-foreground dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center">
-                          <Link to={`/dashboard/groups/${group.id}`}>
-                            View
-                          </Link>
-                        </button>
+                        <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
+                          <Link to={`/dashboard/groups/${group.id}`}>View</Link>
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
 
-              <Card className="rounded-xl bg-sidebar dark:bg-sidebar-dark border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
+              <Card className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
                 <CardContent className="flex flex-col items-center justify-center p-0">
                   <div className="rounded-full bg-[#4F32FF]/10 p-4 mb-4">
                     <Users className="h-8 w-8 text-[#4F32FF]" />
@@ -183,8 +181,8 @@ const Group = () => {
                     Create a new group
                   </h3>
                   <p className="mb-4 text-center text-sm text-muted-foreground">
-                    Start splitting expenses with friends, roommates, or
-                    travel buddies
+                    Start splitting expenses with friends, roommates, or travel
+                    buddies
                   </p>
                   <a
                     className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"

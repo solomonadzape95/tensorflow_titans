@@ -52,7 +52,7 @@ export function SectionCards() {
           {[1, 2, 3, 4, 5].map((i) => (
             <Avatar
               key={i}
-              className="border-2 border-background animate-float"
+              className="border-2 border-gray-800 dark:border-background animate-float"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
               <AvatarImage
@@ -61,7 +61,7 @@ export function SectionCards() {
               <AvatarFallback>U{i}</AvatarFallback>
             </Avatar>
           ))}
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium animate-float">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gary-800 dark:border-background bg-muted text-xs font-medium animate-float">
             +7
           </div>
         </div>

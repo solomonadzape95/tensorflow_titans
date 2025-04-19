@@ -10,7 +10,7 @@ import {
 function Group() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Card className="overflow-hidden hover:shadow-glow transition-all duration-300 animate-in">
+      <Card className="overflow-hidden hover:shadow-glow transition-all duration-300 animate-in bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
         <CardHeader className="p-4">
           <CardTitle className="text-lg">Roomates</CardTitle>
           <CardDescription>3 members • 10 expenses</CardDescription>
