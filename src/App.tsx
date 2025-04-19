@@ -14,8 +14,9 @@ import NewExpense from "./pages/dashboard/expenses/New";
 import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
-// import Settings from "./pages/dashboard/Settings";
+import Settings from "./pages/dashboard/Settings";
 import RecurringExpences from "./components/dashboard/RecurringExpences";
+import Balances from "./pages/dashboard/Balances";
 
 const protectedLoader = async () => {
   return await queryClient.fetchQuery({
@@ -72,6 +73,11 @@ const routes: RouteObject[] = [
       {
         path: "recurring/:id",
         Component: GroupDetails,
+        loader: protectedLoader,
+      },
+      {
+        path: "settings",
+        Component: Settings,
         loader: protectedLoader,
       },
     ],
