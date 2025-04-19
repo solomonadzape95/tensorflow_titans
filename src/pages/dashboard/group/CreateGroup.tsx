@@ -8,7 +8,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import InviteToGroup from "./InviteToGroup";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { UserData } from "@/types";
 
 interface FormValues {
     name: string;
@@ -16,9 +15,12 @@ interface FormValues {
     groupType: "home" | "trip" | "couple" | "custom";
 }
 
-interface SelectableUser extends UserData {
+interface SelectableUser {
     selected?: boolean;
     initials?: string;
+    id: string;
+    username: string;
+    email: string;
 }
 
 const initialMembers: SelectableUser[] = [
@@ -55,7 +57,7 @@ const CreateGroup = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6 py-10 flex-1 overflow-y-auto px-4 md:px-8">
+        <div className="max-w-2xl mx-auto space-y-6 py-10">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Create a New Group</h1>
                 <p className="text-muted-foreground">

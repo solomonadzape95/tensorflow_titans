@@ -14,9 +14,8 @@ import NewExpense from "./pages/dashboard/expenses/New";
 import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
-
-import GroupDetails from "./components/dashboard/GroupDetails";
-import Settings from "./pages/dashboard/Settings";
+import Balances from "./pages/dashboard/Balances";
+// import Settings from "./pages/dashboard/Settings";
 
 
 const protectedLoader = async () => {
@@ -66,6 +65,11 @@ const routes: RouteObject[] = [
 				Component: NewExpense,
 				loader: protectedLoader,
 			},
+      {
+        path: "balances",
+        Component: Balances,
+        loader: protectedLoader,
+      },
 		],
 	},
 	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
