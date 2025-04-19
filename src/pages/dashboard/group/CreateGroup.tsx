@@ -2,20 +2,19 @@ import { Check, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import InviteToGroup from "./InviteToGroup";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-
 interface FormValues {
   name: string;
   description: string;
   groupType: "home" | "trip" | "couple" | "custom";
 }
 
-interface SelectableUser {
+interface SelectableUser{
   id: string;
   username: string;
   email: string;
@@ -57,36 +56,99 @@ const initialMembers: SelectableUser[] = [
 ];
 
 const CreateGroup = () => {
-    const [members, setMembers] = useState<SelectableUser[]>(initialMembers);
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm<FormValues>({
-        mode: "onChange",
-        defaultValues: {
-            name: "",
-            description: "",
-            groupType: "home",
-        },
-    });
+  const [members, setMembers] = useState<SelectableUser[]>(initialMembers);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<FormValues>({
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      description: "",
+      groupType: "home",
+    },
+  });
 
-    const toggleMemberSelection = (email: string) => {
-        setMembers(
-            members.map((member) =>
-                member.email === email
-                    ? { ...member, selected: !member.selected }
-                    : member
-            )
-        );
-    };
+  const toggleMemberSelection = (email: string) => {
+    setMembers(
+      members.map((member) =>
+        member.email === email
+          ? { ...member, selected: !member.selected }
+          : member
+      )
+    );
+  };
 
-    const onSubmit = (data: FormValues) => {
-        console.log("Form data:", data);
-    };
+  const onSubmit = (data: FormValues) => {
+    console.log("Form data:", data);
+  };
 
-    return (
-        <div className="max-w-2xl mx-auto space-y-6 py-10">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Create a New Group</h1>
-                <p className="text-muted-foreground">
-                    Create a group to start splitting expenses with friends.
+  return (
+    <div className="max-w-2xl mx-auto space-y-6 py-10 flex-1 overflow-y-auto px-4 md:px-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Create a New Group
+        </h1>
+        <p className="text-muted-foreground">
+          Create a group to start splitting expenses with friends.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card>
+          {/* <CardHeader>
+            <h3 className="text-2xl font-semibold tracking-tight">
+              Group Details
+            </h3>
+          </CardHeader> */}
+          <CardContent className="space-y-6">
+            <Tabs defaultValue="home" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger
+                  value="home"
+                  className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+                >
+                  Home
+                </TabsTrigger>
+                <TabsTrigger
+                  value="trip"
+                  className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+                >
+                  Trip
+                </TabsTrigger>
+                <TabsTrigger
+                  value="couple"
+                  className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+                >
+                  Couple
+                </TabsTrigger>
+                <TabsTrigger
+                  value="custom"
+                  className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+                >
+                  Custom
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="home">
+                <p className="text-sm text-muted-foreground">
+                  Rent, utilities, groceries, and other household expenses
+                </p>
+              </TabsContent>
+              <TabsContent value="trip">
+                <p className="text-sm text-muted-foreground">
+                  Travel expenses, accommodations, activities, and meals
+                </p>
+              </TabsContent>
+              <TabsContent value="couple">
+                <p className="text-sm text-muted-foreground">
+                  Shared expenses between partners
+                </p>
+              </TabsContent>
+              <TabsContent value="custom">
+                <p className="text-sm text-muted-foreground">
+                  Create a group from scratch.
                 </p>
               </TabsContent>
             </Tabs>
