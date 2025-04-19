@@ -19,7 +19,7 @@ import { Card } from "../ui/card";
 
 const SignUpForm = () => {
 	const navigate = useNavigate();
-	const form = useForm({
+	const form = useForm<SignUpFormData>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
 			email: "",

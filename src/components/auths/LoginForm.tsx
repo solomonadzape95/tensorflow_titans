@@ -19,7 +19,7 @@ import { Card } from "../ui/card";
 
 const LoginForm = () => {
 	const navigate = useNavigate(); // Added useNavigate hook
-	const form = useForm({
+	const form = useForm<LoginFormData>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
 			email: "",
