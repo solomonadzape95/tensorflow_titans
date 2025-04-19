@@ -15,8 +15,15 @@ import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 import Settings from "./pages/dashboard/Settings";
+import RecurringExpences from "./components/dashboard/RecurringExpences";
+import Balances from "./pages/dashboard/Balances";
 
 const protectedLoader = async () => {
+  return await queryClient.fetchQuery({
+    queryKey: ["auth", "user"],
+    queryFn: protectPage,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
   return await queryClient.fetchQuery({
     queryKey: ["auth", "user"],
     queryFn: protectPage,
@@ -61,6 +68,62 @@ const routes: RouteObject[] = [
       {
         path: "expenses/new",
         Component: NewExpense,
+        loader: protectedLoader,
+      },
+      {
+        path: "settings",
+        Component: Settings,
+        loader: protectedLoader,
+      },
+    ],
+  },
+  { path: "*", Component: NotFound }, // Consider a dedicated 404 page later
+  { path: "/", Component: LandingPage },
+  { path: "/login", Component: Login },
+  { path: "/signup", Component: SignUp },
+  {
+    path: "/dashboard",
+    Component: Dashboard,
+    loader: protectedLoader,
+    children: [
+      {
+        index: true,
+        Component: Overview,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups",
+        Component: Group,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups/:id",
+        Component: GroupDetails,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups/create",
+        Component: CreateGroup,
+        loader: protectedLoader,
+      },
+      {
+        path: "expenses",
+        Component: ExpensesOverview,
+        loader: protectedLoader,
+      },
+      {
+        path: "expenses/new",
+        Component: NewExpense,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring",
+        Component: RecurringExpences,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring/:id",
+        Component: GroupDetails,
         loader: protectedLoader,
       },
       {
