@@ -20,7 +20,10 @@ function Activity() {
   const Icon = activity.icon;
 
   return (
-    <Card key={activity.id} className="p-4">
+    <Card
+      key={activity.id}
+      className="p-4 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
+    >
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
           <Icon className="h-5 w-5 text-primary" />

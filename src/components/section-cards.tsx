@@ -11,10 +11,10 @@ import { Button } from "./ui/button";
 
 export function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card flex w-full gap-4 px-4 *:data-[slot=card]:bg-gradi *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card flex-grow  border-none px-6 bg-[var(--card)]">
+    <div className=" flex flex-col lg:flex-row w-full gap-4 px-4 *:data-[slot=card]:bg-gradi *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      <Card className="bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md rounded-xl shadow-xl @container/card flex-grow">
         <CardHeader className="">
-          <CardTitle className="text-[7px] font-semibold tabular-nums @[250px]/card:text-[12px]">
+          <CardTitle className="text-lg font-semibold tabular-nums @[250px]/card:text-xl">
             Total Balance
           </CardTitle>
           <CardDescription className="text-[25px] font-semibold text-[#4F32FF]">
@@ -31,14 +31,14 @@ export function SectionCards() {
             </div>
           </CardDescription>
         </CardHeader>
-        <Button className="bg-white text-[var(--muted-foreground)] shadow-md font-semibold text-xs mt-4 hover:bg-transparent">
+        <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white shadow-md font-semibold text-xs mt-4 hover:bg-transparent w-10/12 mx-auto">
           View Details
         </Button>
       </Card>
 
-      <Card className="@container/card flex-grow  border-none px-6 bg-[var(--card)]">
+      <Card className="bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md rounded-xl shadow-xl @container/card flex-grow">
         <CardHeader className="">
-          <CardTitle className="text-[7px] font-semibold tabular-nums @[250px]/card:text-[12px]">
+          <CardTitle className="text-lg font-semibold tabular-nums @[250px]/card:text-xl">
             Active groups
           </CardTitle>
           <CardDescription className="text-[25px] font-semibold text-[#4F32FF]">
@@ -48,7 +48,7 @@ export function SectionCards() {
             <div className=" font-medium">Across 12 friends</div>
           </CardDescription>
         </CardHeader>
-        <div className="mt-4 flex -space-x-2">
+        <div className="mt-4 flex -space-x-2 w-10/12 mr-auto ml-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <Avatar
               key={i}
@@ -67,21 +67,21 @@ export function SectionCards() {
         </div>
       </Card>
 
-      <Card className="@container/card flex-grow  border-none px-6 bg-[var(--card)]">
+      <Card className="bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md rounded-xl shadow-2xl @container/card flex-grow">
         <CardHeader className="">
-          <CardTitle className="text-[7px] font-semibold tabular-nums @[250px]/card:text-[12px]">
+          <CardTitle className="text-lg font-semibold tabular-nums @[250px]/card:text-xl">
             Monthly Spending
           </CardTitle>
           <CardDescription className="text-[25px] font-semibold text-[#4F32FF]">
             $1254
           </CardDescription>
-          <CardDescription className=" justify-center text-sm pt-0">
+          <CardDescription className="w-10/12 justify-center text-sm pt-0">
             <div className=" font-medium">
               <span className="text-[var(--chart-2)]">12% </span>from last month
             </div>
           </CardDescription>
         </CardHeader>
-        <div className="mt-4">
+        <div className="mt-4 w-10/12 ml-5 mr-auto">
           <div className="flex items-center justify-between">
             <p className="text-[12px] font-semibold text-muted-foreground">
               Budget: $2000
