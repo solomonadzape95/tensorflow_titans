@@ -22,8 +22,6 @@ import { findUserByEmail } from "@/lib/services/userService"; // Import Profile 
 import { capitalizeWords } from "@/lib/utils";
 import type { Tables } from "@/types/database.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -33,35 +31,21 @@ type InviteToGroupProps = {
 	userId: string;
 	onUserInvited: (
 		user: Omit<Tables<"profiles">, "created_at" | "updated_at">,
-	) => void; // Add callback prop
+	) => void;
 };
 
 const InviteToGroup = ({
 	isOpen,
 	onOpenChange,
 	userId,
-	onUserInvited, // Destructure new prop
+	onUserInvited,
 }: InviteToGroupProps) => {
-	const [copied, setCopied] = useState(false);
-	const inviteLink = "https://splitwise.com/join/abc123";
-
 	const form = useForm<InviteToGroupFormData>({
 		resolver: zodResolver(inviteToGroupSchema),
 		defaultValues: {
 			email: "",
 		},
 	});
-
-	const handleCopy = async () => {
-		try {
-			await navigator.clipboard.writeText(inviteLink);
-			toast.success("Link copied to clipboard!");
-			setCopied(true);
-			setTimeout(() => setCopied(false), 3000);
-		} catch (err) {
-			console.error("Failed to copy link: ", err);
-		}
-	};
 
 	const onSubmit = async (data: InviteToGroupFormData) => {
 		const user = await findUserByEmail(data.email, userId);
@@ -72,20 +56,12 @@ const InviteToGroup = ({
 		}
 
 		toast.success(
-			`Invitation sent to ${capitalizeWords(user.full_name)} (${user.email.toLowerCase()})!`,
+			`Successfully invited ${capitalizeWords(user.full_name)} to the group.`,
 		);
 
-		// Call the callback with the invited user's data
 		onUserInvited(user);
 
-		// Reset the form after successful submission
 		form.reset();
-
-		// No longer need to set value here, parent will handle it
-		// setValue("selectedMembers", [
-		//   ...(getValues("selectedMembers") || []),
-		//   user.id,
-		// ]);
 	};
 
 	return (
@@ -132,34 +108,7 @@ const InviteToGroup = ({
 					</form>
 				</Form>
 
-				<div className="relative my-4">
-					<div className="absolute inset-0 flex items-center">
-						<span className="w-full border-t" />
-					</div>
-					<div className="relative flex justify-center text-xs uppercase">
-						<span className="bg-background px-2 text-muted-foreground">
-							Or share link
-						</span>
-					</div>
-				</div>
-				<div className="flex items-center space-x-2">
-					<Input
-						id="invite-link"
-						readOnly
-						value={inviteLink}
-						className="flex-1 h-10"
-					/>
-					<Button variant="outline" size="icon" onClick={handleCopy}>
-						{copied ? (
-							<Check className="w-4 h-4" />
-						) : (
-							<Copy className="w-4 h-4" />
-						)}
-						<span className="sr-only">Copy link</span>
-					</Button>
-				</div>
-
-				<div className="flex justify-start pt-4">
+				<div className="flex justify-end pt-4">
 					<DialogTrigger asChild>
 						<Button variant="outline">Close</Button>
 					</DialogTrigger>

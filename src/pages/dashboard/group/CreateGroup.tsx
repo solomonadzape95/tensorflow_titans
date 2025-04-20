@@ -13,33 +13,60 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { type CreateGroupFormData, createGroupSchema } from "@/lib/schema";
 import type { protectPage } from "@/lib/services/authService";
-import { getMembersOfMyCreatedGroups } from "@/lib/services/userService";
+import {
+	createGroup,
+	getMembersOfMyCreatedGroups,
+} from "@/lib/services/userService";
 import { getInitials } from "@/lib/utils";
 import type { Tables } from "@/types/database.types"; // Import Tables type
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"; // Import useQueryClient
-import { Check, Link, Plus } from "lucide-react";
+import {
+	useMutation,
+	useQueryClient,
+	useSuspenseQuery,
+} from "@tanstack/react-query"; // Import useQueryClient
+import { Check, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
+import { toast } from "sonner";
 import InviteToGroup from "./InviteToGroup";
 
-type FormValues = CreateGroupFormData;
 type MemberProfile = Omit<Tables<"profiles">, "created_at" | "updated_at">;
 
 const CreateGroup = () => {
+	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = useState(false);
 	const loaderData = useLoaderData() as Awaited<ReturnType<typeof protectPage>>;
 	const queryClient = useQueryClient();
+	const { mutateAsync: createNewGroup, isPending: isCreatingGroup } =
+		useMutation({
+			mutationKey: ["createGroup"],
+			mutationFn: async (data: CreateGroupFormData) => {
+				return await createGroup(data, loaderData.user.id);
+			},
+			onSuccess: () => {
+				// TODO: Invalidate the query on "/groups page"
+				// Reset the selected fetchedMembers data since we manually added data to the cache so next time it will be fetched again
+				queryClient.removeQueries({
+					queryKey: ["members"],
+					exact: true,
+				});
+				navigate("/dashboard/groups", {
+					replace: true,
+				});
+			},
+		});
 
 	const { data: fetchedMembersData } = useSuspenseQuery<MemberProfile[]>({
 		queryKey: ["members"],
 		queryFn: async () => {
 			return await getMembersOfMyCreatedGroups(loaderData.user.id);
 		},
+		staleTime: Number.POSITIVE_INFINITY,
 	});
 
-	const form = useForm<FormValues>({
+	const form = useForm<CreateGroupFormData>({
 		resolver: zodResolver(createGroupSchema),
 		mode: "onChange",
 		defaultValues: {
@@ -69,10 +96,12 @@ const CreateGroup = () => {
 		form.setValue("selectedMembers", newSelected, { shouldValidate: true });
 	};
 
-	const onSubmit = (data: FormValues) => {
-		console.log("Form data:", data);
-		console.log("Selected Member IDs:", data.selectedMembers);
-		// TODO: Implement actual group creation logic using data.selectedMembers
+	const onSubmit = (data: CreateGroupFormData) => {
+		toast.promise(createNewGroup(data), {
+			loading: "Creating group...",
+			success: "Group created successfully!",
+			error: (error) => error.message,
+		});
 	};
 
 	// Callback function to handle newly invited user using queryClient
@@ -156,14 +185,6 @@ const CreateGroup = () => {
 											<Plus className="w-4 h-4 mr-2" />
 											Invite New
 										</Button>
-										<Button
-											variant="outline"
-											className="cursor-pointer"
-											type="button"
-										>
-											<Link className="w-4 h-4 mr-2" />
-											Copy Link
-										</Button>
 									</div>
 								</div>
 
@@ -237,7 +258,9 @@ const CreateGroup = () => {
 								type="submit"
 								className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 cursor-pointer"
 								disabled={
-									!form.formState.isValid || form.formState.isSubmitting
+									!form.formState.isValid ||
+									form.formState.isSubmitting ||
+									isCreatingGroup
 								}
 							>
 								{form.formState.isSubmitting ? "Creating..." : "Create Group"}

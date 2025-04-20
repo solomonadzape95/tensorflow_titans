@@ -1,3 +1,4 @@
+import type { CreateGroupFormData } from "../schema";
 import supabase from "../supabase";
 
 export async function getMembersOfMyCreatedGroups(currentUserId: string) {
@@ -45,4 +46,47 @@ export async function findUserByEmail(email: string, userId: string) {
 	}
 
 	return data;
+}
+
+export async function createGroup(
+	data: CreateGroupFormData,
+	creatorId: string,
+) {
+	console.log(creatorId);
+
+	// 1. Create the group
+	const { data: groupData, error: groupError } = await supabase
+		.from("groups")
+		.insert({
+			name: data.name,
+			description: data.description,
+			creator_id: creatorId,
+		})
+		.select("id")
+		.single();
+
+	if (groupError) {
+		throw groupError;
+	}
+
+	const groupId = groupData.id;
+
+	const membersToInsert = [
+		{ group_id: groupId, user_id: creatorId },
+		...data.selectedMembers.map((memberId) => ({
+			group_id: groupId,
+			user_id: memberId,
+		})),
+	];
+
+	const { error: membersError } = await supabase
+		.from("group_members")
+		.insert(membersToInsert);
+
+	if (membersError) {
+		await supabase.from("groups").delete().eq("id", groupId);
+		throw membersError;
+	}
+
+	return { groupId };
 }
