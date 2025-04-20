@@ -32,3 +32,23 @@ export const loginSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+
+// Schema for creating a group
+export const createGroupSchema = z.object({
+	name: z.string().min(1, { message: "Group name is required" }),
+	description: z.string().optional(),
+	selectedMembers: z
+		.array(z.string())
+		.min(1, { message: "At least one member is required" }),
+});
+
+export type CreateGroupFormData = z.infer<typeof createGroupSchema>;
+
+// Schema for inviting a user to a group by email
+export const inviteToGroupSchema = z.object({
+	email: z
+		.string({ required_error: "Email is required" })
+		.email("Please enter a valid email address"),
+});
+
+export type InviteToGroupFormData = z.infer<typeof inviteToGroupSchema>;
