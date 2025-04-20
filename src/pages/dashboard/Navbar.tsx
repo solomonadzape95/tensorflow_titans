@@ -14,11 +14,13 @@ import type { UserData } from "@/types";
 import { LogOut, Moon, Settings, Sun, User, Wallet } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
+import { OnLogOut } from "@/hooks/use-logout";
 
 function Navbar({ user }: { user: UserData }) {
 	const [isOpenUser, setIsOpenUser] = useState<boolean>(false);
 	const [isOpenTheme, setIsOpenTheme] = useState<boolean>(false);
 	const [, toggleDarkMode] = useDarkMode();
+	const { handleLogOut} = OnLogOut()
 
 	const slidevariants: Variants = {
 		hidden: { y: 20, opacity: 0 },
@@ -134,10 +136,12 @@ function Navbar({ user }: { user: UserData }) {
 								asChild
 								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
 							>
-								<Link to="/auth/login" className="flex items-center">
+								<button
+								onClick={()=> handleLogOut()}
+								 className="flex w-full items-center">
 									<LogOut className="mr-2 h-4 w-4" />
 									<span>Log out</span>
-								</Link>
+								</button>
 							</DropdownMenuItem>
 						</motion.div>
 					</DropdownMenuContent>
