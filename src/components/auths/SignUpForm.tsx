@@ -17,7 +17,6 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Card } from "../ui/card";
 import { useState } from "react";
-import { FaEye } from "react-icons/fa6";
 import { Eye, EyeClosed } from "lucide-react";
 
 const SignUpForm = () => {
