@@ -2,6 +2,7 @@ import type { Session } from "@supabase/supabase-js";
 import { redirect } from "react-router";
 import { toast } from "sonner";
 import supabase from "../supabase";
+
 export const signUpWithEmail = async (email: string, password: string) => {
 	const { data, error } = await supabase.auth.signUp({
 		email,
