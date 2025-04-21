@@ -97,3 +97,19 @@ export const protectPage = async () => {
 		profile: profileData,
 	};
 };
+
+export const redirectIfLoggedIn = async () => {
+	const { data, error } = await supabase.auth.getUser();
+
+	// If there's an error fetching the user, proceed as if not logged in.
+	if (error) return null;
+
+	if (data.user) {
+		toast.info("You are already logged in.", {
+			description: "Redirecting to dashboard...",
+		});
+		throw redirect("/dashboard");
+	}
+
+	return null;
+};
