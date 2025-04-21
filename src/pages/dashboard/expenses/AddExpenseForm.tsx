@@ -254,6 +254,7 @@ export function AddExpenseForm() {
                           {...field}
                           placeholder="Give this expense a name"
                           required
+                          className="hover:drop-shadow-lg hover:brightness-95 transition-all duration-300"
                         />
                       </FormControl>
                     </FormItem>
@@ -725,7 +726,7 @@ export function AddExpenseForm() {
                   isCreatingExpense ||
                   !form.formState.isValid
                 }
-                className="min-w-[120px]"
+                className="min-w-[120px] "
               >
                 {form.formState.isSubmitting || isCreatingExpense ? (
                   <div className="flex items-center gap-2">
