@@ -70,8 +70,8 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen grid place-content-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
-      <Card className="rounded-xl bg-white/40 dark:bg-[#11131E] mx-auto w-full md:w-md backdrop-blur-2xl shadow-lg md:px-10 px-6">
+    <div className="min-h-screen w-screen flex items-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
+      <Card className="rounded-xl bg-white/40 dark:bg-[#11131E] mx-auto w-11/12 md:w-md backdrop-blur-2xl shadow-lg md:px-10 px-6">
         <div className="flex flex-col space-y-1">
           <div className="flex items-center justify-center gap-1">
             <svg
