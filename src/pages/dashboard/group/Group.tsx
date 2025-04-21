@@ -1,71 +1,70 @@
-import { Link2, Plus, Users } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { useState } from "react";
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Link2, Plus, Users } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 
 interface GroupMember {
-  initial: string;
+	initial: string;
 }
 
 interface GroupData {
-  id: string;
-  title: string;
-  description: string;
-  memberCount: number;
-  expenseCount: number;
-  balance: {
-    amount: number;
-    isOwed: boolean;
-  };
-  members: GroupMember[];
+	id: string;
+	title: string;
+	description: string;
+	memberCount: number;
+	expenseCount: number;
+	balance: {
+		amount: number;
+		isOwed: boolean;
+	};
+	members: GroupMember[];
 }
 
 const Group = () => {
-  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
+	const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
 
-  const groups: GroupData[] = [
-    {
-      id: "1",
-      title: "Roommates",
-      description: "Rent, utilities, and household expenses",
-      memberCount: 4,
-      expenseCount: 12,
-      balance: {
-        amount: 195.0,
-        isOwed: true,
-      },
-      members: [
-        { initial: "A" },
-        { initial: "B" },
-        { initial: "C" },
-        { initial: "1+" },
-      ],
-    },
-    {
-      id: "2",
-      title: "Trip to Vegas",
-      description: "Travel expenses for our vacation",
-      memberCount: 3,
-      expenseCount: 8,
-      balance: {
-        amount: 74.61,
-        isOwed: false,
-      },
-      members: [{ initial: "A" }, { initial: "B" }],
-    },
-  ];
+	const groups: GroupData[] = [
+		{
+			id: "1",
+			title: "Roommates",
+			description: "Rent, utilities, and household expenses",
+			memberCount: 4,
+			expenseCount: 12,
+			balance: {
+				amount: 195.0,
+				isOwed: true,
+			},
+			members: [
+				{ initial: "A" },
+				{ initial: "B" },
+				{ initial: "C" },
+				{ initial: "1+" },
+			],
+		},
+		{
+			id: "2",
+			title: "Trip to Vegas",
+			description: "Travel expenses for our vacation",
+			memberCount: 3,
+			expenseCount: 8,
+			balance: {
+				amount: 74.61,
+				isOwed: false,
+			},
+			members: [{ initial: "A" }, { initial: "B" }],
+		},
+	];
 
-  const filteredGroups = activeTab === "active" ? groups : [];
-
+	const filteredGroups = activeTab === "active" ? groups : [];
   return (
     <div className="space-y-8 bg-transparent">
       <div className=" bg-transparent flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -78,7 +77,7 @@ const Group = () => {
           <p className="text-muted-foreground">Manage your expense groups</p>
         </div>
         <a
-          href="/"
+          href="/dashboard/groups/create"
           className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
         >
           <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
@@ -186,7 +185,7 @@ const Group = () => {
                   </p>
                   <a
                     className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
-                    href="/"
+                    href="/dashboard/groups/create"
                   >
                     <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
                     New Group
