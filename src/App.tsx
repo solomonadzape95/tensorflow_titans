@@ -14,7 +14,6 @@ import Overview from "./pages/dashboard/Overview";
 import Settings from "./pages/dashboard/Settings";
 import ExpensesOverview from "./pages/dashboard/expenses/Expenses";
 import NewExpense from "./pages/dashboard/expenses/New";
-import CreateGroup from "./pages/dashboard/group/CreateGroup";
 import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 
@@ -48,11 +47,6 @@ const routes: RouteObject[] = [
       {
         path: "groups/:id",
         Component: GroupDetails,
-        loader: protectedLoader,
-      },
-      {
-        path: "groups/create",
-        Component: CreateGroup,
         loader: protectedLoader,
       },
       {
