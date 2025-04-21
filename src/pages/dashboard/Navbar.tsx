@@ -14,13 +14,13 @@ import type { UserData } from "@/types";
 import { LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { OnLogOut } from "@/hooks/use-logout";
+import { useLogOutHandler } from "@/hooks/use-logout";
 
 function Navbar({ user }: { user: UserData }) {
 	const [isOpenUser, setIsOpenUser] = useState<boolean>(false);
 	const [isOpenTheme, setIsOpenTheme] = useState<boolean>(false);
 	const [, toggleDarkMode] = useDarkMode();
-	const { handleLogOut} = OnLogOut()
+	const { handleLogOut} = useLogOutHandler()
 
 	const slidevariants: Variants = {
 		hidden: { y: 20, opacity: 0 },
@@ -151,6 +151,7 @@ function Navbar({ user }: { user: UserData }) {
 			</div>
 		</div>
 	);
+ 
 }
 
 export default Navbar;

@@ -19,7 +19,7 @@ const useLogout = () => {
 };
 
 // logout functionality
-export const OnLogOut = () => {
+export const useLogOutHandler = () => {
   const { mutateAsync: logout, isPending } = useLogout();
 
   const handleLogOut = () => {
