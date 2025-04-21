@@ -27,10 +27,10 @@ const features = [
 export default function LandingPage() {
   return (
     <div className="font-second">
-      <header className="sticky top-0 flex justify-between px-[10px] md:px-10 lg:px-10 py-4 bg-background/60 backdrop-blur-lg border-b-1 w-full">
+      <header className="sticky top-0 flex justify-between px-[10px] md:px-10 lg:px-10 py-4 bg-background/60 backdrop-blur-lg border-b-1 w-full z-10">
         <div className="company'slogo flex items-center cursor-pointer">
-          <LuWallet className="text-[#4a44ee] text-[25px] animation animate-bounce transition-all duration-700 ease-in-out" />
-          <h2 className="text-2xl font-bold hover:text-[#9b48df]/90 transition-all duration-300 ease-in-out">
+          <LuWallet className="text-[#4a44ee] text-[18px] md:text-[25px] animation animate-bounce transition-all duration-700 ease-in-out" />
+          <h2 className="text-xl md:text-2xl font-bold hover:text-[#9b48df]/90 transition-all duration-300 ease-in-out">
             SplitWise
           </h2>
         </div>
@@ -38,8 +38,8 @@ export default function LandingPage() {
           <Link to={"/login"}>
             <Button
               className="bg-white text-black drop-shadow-md hover:drop-shadow-2xl
-          py-3 px-4 rounded-lg font-semibold 
-           transition-all duration-500 ease-in-out cursor-pointer"
+          py-2 md:py-3 px-3 md:px-4 rounded-lg font-semibold 
+           transition-all duration-500 ease-in-out cursor-pointer text-xs md:text-base"
             >
               Log in
             </Button>
@@ -47,8 +47,8 @@ export default function LandingPage() {
           <Link to={"/signup"}>
             <Button
               className="bg-[#d84cd4] text-white drop-shadow-md hover:drop-shadow-2xl
-          py-3 px-4 rounded-lg font-semibold 
-           transition-all duration-500 ease-in-out cursor-pointer"
+          py-2 md:py-3 px-3 md:px-4rounded-lg font-semibold 
+           transition-all duration-500 ease-in-out cursor-pointer text-xs md:text-base"
             >
               Sign Up
             </Button>
@@ -56,7 +56,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <div className="content text-center pt-[140px] flex flex-col gap-5">
+      <div className="content text-center pt-[140px] flex flex-col gap-5 w-11/12 md:w-auto mx-auto">
         <span>
           <h1 className="text-[40px] font-bold md:text-[50px] lg:text-[57px] lg:font-semibold md:font-semibold">
             Split bills with friends,{" "}
@@ -79,10 +79,9 @@ export default function LandingPage() {
             <FaArrowRight className="ml-1 transition-all ease-in-out group-hover:translate-x-1" />
           </Button>
         </Link>
-        
       </div>
 
-      <div className="card flex px-[10px] gap-0 lg:px-30 md:px-30 md:gap-5 lg:gap-5 lg:pt-50 md:pt-50 pt-20 md:flex-row lg:flex-row flex-col ">
+      <div className="card flex px-[10px]  lg:px-30 md:px-30 md:gap-5 lg:gap-5 lg:pt-50 md:pt-50 pt-20 md:flex-row lg:flex-row flex-col w-11/12 mx-auto md:w-auto md:mx-0 gap-5">
         {features.map((feat, key) => (
           <Card
             key={key}
@@ -100,7 +99,7 @@ export default function LandingPage() {
           </Card>
         ))}
       </div>
-      <div className="foot bg-foreground w-full h-10 mt-10 flex justify-center text-center text-muted-foreground p-10">
+      <div className="foot bg-foreground dark:bg-gray-900 w-full h-10 mt-10 flex justify-center text-center dark:text-gray-100 text-muted-foreground p-10">
         © 2025 SplitWise. All rights reserved.
       </div>
     </div>

@@ -51,14 +51,17 @@ function RecurringExpences() {
     <div className="space-y-6 px-6 mb-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-transparent bg-clip-text">
             Recurring Expenses
           </h1>
           <p className="text-muted-foreground">
             Manage your recurring bills and expenses
           </p>
         </div>
-        <Button asChild>
+        <Button
+          asChild
+          className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white "
+        >
           <Link to="/dashboard/recurring/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Recurring
@@ -66,7 +69,7 @@ function RecurringExpences() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
         <CardHeader>
           <CardTitle>Upcoming Schedule</CardTitle>
           <CardDescription>Your next recurring expenses</CardDescription>
@@ -87,10 +90,11 @@ function RecurringExpences() {
           return (
             <Card
               key={expense.id}
-              className={expense.active ? "" : "opacity-60"}
+              className={`bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md
+                ${expense.active ? "" : "opacity-60"}`}
             >
               <CardContent className="p-4">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between ">
                   <div className="flex items-start gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                       <Icon className="h-5 w-5 text-primary" />

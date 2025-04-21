@@ -245,7 +245,11 @@ export default function ExpensesOverview() {
             Manage and track your expenses
           </p>
         </div>
-        <Button asChild variant="gradient" className="group">
+        <Button
+          asChild
+          variant="gradient"
+          className="group bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
+        >
           <Link to="/dashboard/expenses/new">
             <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
             Add Expense
@@ -257,19 +261,19 @@ export default function ExpensesOverview() {
         <TabsList className="glass">
           <TabsTrigger
             value="all"
-            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             All Expenses
           </TabsTrigger>
           <TabsTrigger
             value="you-paid"
-            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             You Paid
           </TabsTrigger>
           <TabsTrigger
             value="you-owe"
-            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+            className="dark:data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF]  hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             You Owe
           </TabsTrigger>
@@ -306,7 +310,7 @@ export default function ExpensesOverview() {
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[150px] glass">
+              <SelectTrigger className="w-fit glass">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4" />
                   <SelectValue placeholder="Category" />
@@ -327,7 +331,10 @@ export default function ExpensesOverview() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button size="icon" className="h-10 w-10">
+                <Button
+                  size="icon"
+                  className="h-10 w-10 bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
+                >
                   <ArrowUpDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -384,21 +391,21 @@ export default function ExpensesOverview() {
                 return (
                   <Card
                     key={expense.id}
-                    className="hover:shadow-glow transition-all duration-300 cursor-pointer"
+                    className="py-1 hover:shadow-glow transition-all duration-300 cursor-pointer bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
                     onClick={() => setSelectedExpense(expense)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="px-4 py-4">
                       <div className="flex items-start gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                           <Icon className="h-5 w-5 text-primary" />
                         </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-center justify-between">
+                        <div className="flex-1 space-y-1 gap-3">
+                          <div className="flex items-center justify-between text-sm gap-2">
                             <div>
-                              <p className="font-medium">
+                              <p className="font-medium text-xl">
                                 {expense.description}
                               </p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-2  text-muted-foreground">
                                 <span>Group: {expense.group}</span>
                                 <span>•</span>
                                 <span>Category: {expense.category}</span>
@@ -409,17 +416,19 @@ export default function ExpensesOverview() {
                             </p>
                           </div>
                           <div className="flex items-center justify-between text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage
-                                  src={expense.user.avatar}
-                                  alt={expense.user.name}
-                                />
-                                <AvatarFallback>
-                                  {expense.user.initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{expense.user.name}</span>
+                            <div className="flex items-start md:items-center gap-2 flex-col md:flex-row">
+                              <span className="flex items-center gap-3">
+                                <Avatar className="h-6 w-6 text-xs">
+                                  <AvatarImage
+                                    src={expense.user.avatar}
+                                    alt={expense.user.name}
+                                  />
+                                  <AvatarFallback>
+                                    {expense.user.initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{expense.user.name}</span>
+                              </span>
                               {expense.youOwe && (
                                 <span className="text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
                                   You owe
@@ -752,4 +761,3 @@ export default function ExpensesOverview() {
     </div>
   );
 }
-
