@@ -27,113 +27,67 @@ const protectedLoader = async () => {
 };
 
 const routes: RouteObject[] = [
-	{ path: "/", Component: LandingPage },
-	{ path: "/login", Component: Login },
-	{ path: "/signup", Component: SignUp },
-	{
-		path: "/dashboard",
-		Component: Dashboard,
-		loader: protectedLoader,
-		children: [
-			{
-				index: true,
-				Component: Overview,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups",
-				Component: Group,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups/:id",
-				Component: GroupDetails,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups/create",
-				Component: CreateGroup,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses",
-				Component: ExpensesOverview,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses/new",
-				Component: NewExpense,
-				loader: protectedLoader,
-			},
-			{
-				path: "settings",
-				Component: Settings,
-				loader: protectedLoader,
-			},
-			{
-				path: "balances",
-				Component: Balances,
-				loader: protectedLoader,
-			},
-		],
-	},
-	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
-	{ path: "/", Component: LandingPage },
-	{ path: "/login", Component: Login },
-	{ path: "/signup", Component: SignUp },
-	{
-		path: "/dashboard",
-		Component: Dashboard,
-		loader: protectedLoader,
-		children: [
-			{
-				index: true,
-				Component: Overview,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups",
-				Component: Group,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups/:id",
-				Component: GroupDetails,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups/create",
-				Component: CreateGroup,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses",
-				Component: ExpensesOverview,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses/new",
-				Component: NewExpense,
-				loader: protectedLoader,
-			},
-			{
-				path: "recurring",
-				Component: RecurringExpences,
-				loader: protectedLoader,
-			},
-			{
-				path: "recurring/:id",
-				Component: GroupDetails,
-				loader: protectedLoader,
-			},
-			{
-				path: "settings",
-				Component: Settings,
-				loader: protectedLoader,
-			},
-		],
-	},
-	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
+  { path: "/", Component: LandingPage },
+  { path: "/login", Component: Login },
+  { path: "/signup", Component: SignUp },
+  {
+    path: "/dashboard",
+    Component: Dashboard,
+    loader: protectedLoader,
+    children: [
+      {
+        index: true,
+        Component: Overview,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups",
+        Component: Group,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups/:id",
+        Component: GroupDetails,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups/create",
+        Component: CreateGroup,
+        loader: protectedLoader,
+      },
+      {
+        path: "expenses",
+        Component: ExpensesOverview,
+        loader: protectedLoader,
+      },
+      {
+        path: "expenses/new",
+        Component: NewExpense,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring",
+        Component: RecurringExpences,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring/:id",
+        Component: GroupDetails,
+        loader: protectedLoader,
+      },
+      {
+        path: "balances",
+        Component: Balances,
+        loader: protectedLoader,
+      },
+      {
+        path: "settings",
+        Component: Settings,
+        loader: protectedLoader,
+      },
+    ],
+  },
+  { path: "*", Component: NotFound }, // Consider a dedicated 404 page later
 ];
 
 export const router = createBrowserRouter(routes);
