@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDarkMode } from "@/hooks/use-darkmode";
 import type { UserData } from "@/types";
-import { LogOut, Moon, Settings, Sun, User, Wallet } from "lucide-react";
+import { LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { OnLogOut } from "@/hooks/use-logout";
@@ -28,56 +28,58 @@ function Navbar({ user }: { user: UserData }) {
 	};
 
 	return (
-		<div className="flex items-center h-16 md:h-20 px-4 md:px-6 justify-between w-full ">
-			<div className="w-full">
-				<h2 className="text-xl font-bold">
-					<Button className="text-xl" variant="ghost">
-						<Wallet className="h-10 w-10 scale-125 " />
-						<span className="text-xl font-bold font-second">SplitWise</span>
-					</Button>
-				</h2>
-			</div>
-			<div className="flex items-center gap-3 md:gap-5">
-				<DropdownMenu open={isOpenTheme} onOpenChange={setIsOpenTheme}>
-					<DropdownMenuTrigger asChild>
-						<Button
-							size="icon"
-							variant="ghost"
-							className="text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
-						>
-							<Sun className="h-5 w-5 opacity-100 dark:opacity-0 transition-all duration-200" />
-							<Moon className="absolute h-5 w-5 opacity-0 dark:opacity-100 transition-all duration-200" />
-							<span className="sr-only">Toggle theme</span>
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent
-						align="end"
-						className="w-32 rounded-md border dark:border-border-dark bg-popover dark:bg-popover-dark text-popover-foreground dark:text-popover-foreground-dark shadow-md"
-					>
-						<motion.div
-							variants={slidevariants}
-							initial="hidden"
-							animate={isOpenTheme ? "visible" : "hidden"}
-							transition={{
-								duration: 0.2,
-								ease: "easeOut",
-							}}
-						>
-							<DropdownMenuItem
-								onClick={() => toggleDarkMode(false)}
-								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
-							>
-								Light
-							</DropdownMenuItem>
-							<DropdownMenuItem
-								onClick={() => toggleDarkMode(true)}
-								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
-							>
-								Dark
-							</DropdownMenuItem>
-						</motion.div>
-					</DropdownMenuContent>
-				</DropdownMenu>
+    <div className="flex items-center h-16 md:h-20 px-4 md:px-6 justify-between w-full ">
+      <div className="w-full">
+        <h2 className="font-bold">
+          <Button className="" variant="ghost">
+           
+            <span className="text-2xl font-bold hover:text-[#9b48df]/90 transition-all duration-300 ease-in-out">
+              SplitWise
+            </span>
+          </Button>
+        </h2>
+      </div>
+      <div className="flex items-center gap-3 md:gap-5">
+        <DropdownMenu open={isOpenTheme} onOpenChange={setIsOpenTheme}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
+            >
+              <Sun className="h-5 w-5 opacity-100 dark:opacity-0 transition-all duration-200" />
+              <Moon className="absolute h-5 w-5 opacity-0 dark:opacity-100 transition-all duration-200" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-32 rounded-md border dark:border-border-dark bg-popover dark:bg-popover-dark text-popover-foreground dark:text-popover-foreground-dark shadow-md"
+          >
+            <motion.div
+              variants={slidevariants}
+              initial="hidden"
+              animate={isOpenTheme ? "visible" : "hidden"}
+              transition={{
+                duration: 0.2,
+                ease: "easeOut",
+              }}
+            >
+              <DropdownMenuItem
+                onClick={() => toggleDarkMode(false)}
+                className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
+              >
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => toggleDarkMode(true)}
+                className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
+              >
+                Dark
+              </DropdownMenuItem>
+            </motion.div>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
 				<DropdownMenu open={isOpenUser} onOpenChange={setIsOpenUser}>
 					<DropdownMenuTrigger asChild>

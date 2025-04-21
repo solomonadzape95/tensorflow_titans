@@ -7,9 +7,8 @@ function Groups() {
   return (
     <div>
       <Group />
-
-      <Card className="flex  flex-col items-center justify-center p-6 max-w-sm mt-3">
-        <div className="rounded-full bg-primary/10 p-4 mb-4 animate-pulse-glow">
+      <Card className="flex flex-col items-center justify-center p-6 max-w-sm mt-3 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
+        <div className="rounded-full p-4 mb-4 ">
           <Users className="h-8 w-8 text-primary" />
         </div>
         <h3 className="mb-2 text-lg font-medium font-display">

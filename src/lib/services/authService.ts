@@ -74,23 +74,17 @@ export const updatePassword = async (newPassword: string) => {
 };
 
 export const protectPage = async () => {
-	const { data, error } = await supabase.auth.getSession();
+	const { data, error } = await supabase.auth.getUser();
 
-	if (error || !data) {
-		toast.error("Error fetching session. Please try again later.");
-		throw redirect("/login");
-	}
-
-	if (!data.session) {
+	if (error) {
 		toast.error("You must be logged in to access this page.");
 		throw redirect("/login");
 	}
 
-	// Get profile
 	const { data: profileData, error: profileError } = await supabase
 		.from("profiles")
 		.select("*")
-		.eq("id", data.session.user.id)
+		.eq("id", data.user.id)
 		.single();
 
 	if (profileError) {
@@ -99,7 +93,7 @@ export const protectPage = async () => {
 	}
 
 	return {
-		user: data.session.user,
+		user: data.user,
 		profile: profileData,
 	};
 };
