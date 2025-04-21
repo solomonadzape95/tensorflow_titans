@@ -235,16 +235,6 @@ export function AddExpenseForm() {
 
   return (
     <div className="mx-auto space-y-6 flex-1 px-4 md:px-8 w-full h-full">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight ">
-          <span className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-transparent bg-clip-text">
-            Create New Expense
-          </span>
-        </h1>
-        <p className="text-muted-foreground">
-          Create an expense in any one of your groups.
-        </p>
-      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="animate-in">
           <Card className="hover:shadow-glow transition-all duration-300">

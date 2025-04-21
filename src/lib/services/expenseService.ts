@@ -99,3 +99,40 @@ export async function getExpenseWithParticipants(expenseId: string) {
     participants: participants,
   };
 }
+export async function getUserExpenses(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("expense_participants")
+      .select(`
+        *,
+        expense:expense_id(*)
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching user expenses:", error);
+    throw error;
+  }
+}
+
+export async function getGroupExpenses(groupId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("expenses")
+      .select(`
+        *,
+        participants:expense_participants(*, user:user_id(*))
+      `)
+      .eq("group_id", groupId)
+      .order("expense_date", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching group expenses:", error);
+    throw error;
+  }
+}
