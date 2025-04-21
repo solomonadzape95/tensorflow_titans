@@ -1,3 +1,4 @@
+import { queryClient } from "@/lib/queryClient";
 import supabase from "@/lib/supabase";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -25,7 +26,8 @@ export const useLogOutHandler = () => {
   const handleLogOut = () => {
     toast.promise(logout(), {
       loading: "Loging out...",
-      success: () => {
+      success: async () => {
+        await queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
         return "Logged out successfully!";
       },
       error: (err: Error) => {
