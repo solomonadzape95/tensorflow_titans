@@ -47,7 +47,6 @@ export function MobileNav() {
         <div className="flex-1 overflow-auto p-4">
           <Button
             className="mb-4 w-full justify-start gap-2 group bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer p-3"
-            variant="gradient"
             size="sm"
             asChild
           >
@@ -67,7 +66,6 @@ export function MobileNav() {
                   onClick={() => setOpen(false)}
                 >
                   <Button
-                    variant={isActive ? "glass" : "ghost"}
                     className={cn(
                       "w-full justify-start text-sidebar-foreground dark:text-sidebar-foreground-dark animate-pulse-glow text-sm gap-2 group transition-all duration-300 ",
                       isActive &&

@@ -52,3 +52,13 @@ export const inviteToGroupSchema = z.object({
 });
 
 export type InviteToGroupFormData = z.infer<typeof inviteToGroupSchema>;
+export type CreateExpenseFormData = z.infer<typeof createExpenseSchema>;
+export const createExpenseSchema = z.object({
+  name: z.string().min(1, { message: "Expense name is required" }),
+  description: z.string().optional(),
+  payer_id: z.string().min(1, { message: "Payer ID is required" }),
+  amount: z.string().min(1, { message: "Amount is required" }),
+  expense_date: z.date({required_error: "Expense date is required"}),
+  group_id: z.string().min(1, { message: "Group is required" }),
+  split_type: z.string().min(1, { message: "Split Type is required" }),
+});

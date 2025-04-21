@@ -8,18 +8,16 @@ import {
 } from "@/components/ui/card";
 import { Link2, Plus, Users } from "lucide-react";
 import { useState } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import CreateGroup from "./CreateGroup";
-import { useQuery } from "@tanstack/react-query";
-import { getGroupsForUser } from "@/lib/services/userService";
-import { protectPage } from "@/lib/services/authService";
+
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
-import { GroupData } from "@/types";
+import useGetGroups from "@/lib/services/groups/getGroupsForUser";
 
 const Group = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const loaderData = useLoaderData() as Awaited<ReturnType<typeof protectPage>>;
+
   // const groups: GroupData[] = [
   //   {
   //     id: "1",
@@ -51,16 +49,8 @@ const Group = () => {
   //     members: [{ initial: "A" }, { initial: "B" }],
   //   },
   // ];
-
-  const { data: filteredGroups } = useQuery<GroupData[]>({
-    queryKey: ["groups"],
-    queryFn: async () => {
-      const groups = await getGroupsForUser(loaderData.user.id);
-      return groups;
-    },
-    staleTime: Number.POSITIVE_INFINITY,
-  });
-  console.log(filteredGroups);
+  const { groups: filteredGroups, isLoading: isLoadingGroups } = useGetGroups();
+  console.log(isLoadingGroups);
   return (
     <div className="space-y-8 bg-transparent relative">
       {isOpen ? (

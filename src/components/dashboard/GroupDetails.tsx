@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import NotFound from "@/pages/not-found";
 import { useQuery } from "@tanstack/react-query";
-import { getGroupById } from "@/lib/services/groupService";
+import { getGroupById } from "@/lib/services/groups/groupService";
 import { Group } from "@/types";
 import {
   Breadcrumb,
@@ -105,7 +105,6 @@ function GroupDetails() {
               <div className="flex items-center gap-2">
                 <Button
                   asChild
-                  variant="gradient"
                   className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
                 >
                   <Link to="/dashboard/expenses/new">
@@ -282,7 +281,7 @@ function GroupDetails() {
                       <CardTitle>Group Members</CardTitle>
                       <CardDescription>People in this group</CardDescription>
                     </div>
-                    <Button variant="glass" size="sm" className="group">
+                    <Button size="sm" className="group">
                       <Plus className="mr-2 h-4 w-4" />
                       Invite
                     </Button>

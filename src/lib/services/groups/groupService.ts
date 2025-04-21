@@ -1,5 +1,5 @@
 import { Group } from "@/types";
-import supabase from "../supabase";
+import supabase from "../../supabase";
 export async function getGroupById(groupId: string) {
   const { data, error: groupError } = await supabase
     .from("groups")
@@ -53,4 +53,28 @@ export async function getGroupById(groupId: string) {
     settled: false,
   };
   return group;
+}
+export async function getGroupMembersByGroupId(groupId: string) {
+  const { data, error: countError } = await supabase
+    .from("group_members")
+    .select(
+      `
+        user_id,
+        profiles ( full_name, email, avatar_url ),
+        groups!inner ( creator_id )
+      `
+    )
+    .eq("group_id", groupId);
+  if (countError) {
+    throw countError;
+  }
+  const group_members = data.map((item) => {
+    return {
+      id: item.user_id,
+      name: item.profiles.full_name,
+      email: item.profiles.email,
+      avatar_url: item.profiles.avatar_url,
+    };
+  });
+  return group_members;
 }
