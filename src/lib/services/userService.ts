@@ -90,3 +90,27 @@ export async function createGroup(
 
 	return { groupId };
 }
+
+export async function fetchBalances(userId: string) {
+	const { data, error } = await supabase.rpc("get_user_balances", {
+		current_user_id: userId,
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	return data;
+}
+
+export async function fetchGroupBalances(userId: string) {
+	const { data, error } = await supabase.rpc("get_user_group_balances", {
+		p_current_user_id: userId,
+	});
+
+	if (error) {
+		throw error;
+	}
+
+	return data;
+}
