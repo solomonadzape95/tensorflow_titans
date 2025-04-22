@@ -28,7 +28,13 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarIcon, DollarSign, Loader } from "lucide-react";
+import {
+  CalendarDaysIcon,
+  CalendarIcon,
+  DollarSign,
+  Loader,
+  RepeatIcon,
+} from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -38,7 +44,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { CreateExpenseFormData, createExpenseSchema } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import useGetGroupMembers from "@/lib/services/groups/getGroupMembers";
@@ -46,6 +52,7 @@ import useGetGroups from "@/lib/services/groups/getGroupsForUser";
 import { GroupData } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
+import { Switch } from "@/components/ui/switch";
 type GroupMember = {
   id: string;
   name: string;
@@ -61,9 +68,14 @@ type SplitData = {
 };
 
 export function AddExpenseForm() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const fromGroups = pathname.includes("/groups/");
   const [splitMethod, setSplitMethod] = useState("equal");
   const [splitData, setSplitData] = useState<SplitData>({});
+  const [isRecurring, setIsRecurring] = useState(false);
   const queryClient = useQueryClient();
   const form = useForm<CreateExpenseFormData>({
     resolver: zodResolver(createExpenseSchema),
@@ -72,6 +84,7 @@ export function AddExpenseForm() {
       name: "",
       description: "",
       split_type: "equal",
+      group_id: id || "",
     },
   });
 
@@ -92,6 +105,10 @@ export function AddExpenseForm() {
               percentage?: number;
             };
           };
+          is_recurring: boolean;
+          recurring_frequency?: string;
+          recurring_end_date?: Date;
+          recurring_count?: number;
         }
       ) => {
         return await createExpense(data);
@@ -109,9 +126,11 @@ export function AddExpenseForm() {
           });
         }
 
-        navigate("/dashboard/expenses", {
-          replace: true,
-        });
+        return !fromGroups
+          ? navigate("/dashboard/expenses", {
+              replace: true,
+            })
+          : navigate(pathname.split("expenses")[0], { replace: true });
       },
     });
   // Update split data when members or expense amount changes
@@ -228,6 +247,13 @@ export function AddExpenseForm() {
       ...data,
       split_type: splitMethod === "percentage" ? "custom" : splitMethod,
       splits: splitData,
+      is_recurring: isRecurring,
+      // Only include recurring fields if it's a recurring expense
+      ...(isRecurring && {
+        recurring_frequency: data.recurring_frequency,
+        recurring_end_date: data.recurring_end_date,
+        recurring_count: data.recurring_count,
+      }),
     };
     createNewExpense(formData);
     console.log("Submitting expense data:", formData);
@@ -347,13 +373,182 @@ export function AddExpenseForm() {
                   </FormItem>
                 )}
               />
+              {/* Recurring Expense Toggle */}
+              <div className="flex items-center justify-between space-x-2 rounded-lg glass p-4">
+                <div className="flex flex-col space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <RepeatIcon className="h-4 w-4 text-primary" />
+                    <Label htmlFor="recurring-toggle" className="font-medium">
+                      Recurring Expense
+                    </Label>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    Set this as a recurring expense that happens regularly
+                  </span>
+                </div>
+                <Switch
+                  id="recurring-toggle"
+                  checked={isRecurring}
+                  onCheckedChange={setIsRecurring}
+                />
+              </div>
+
+              {/* Recurring Options (only displayed if recurring is toggled on) */}
+              {isRecurring && (
+                <div className="space-y-4 animate-in">
+                  <FormField
+                    control={form.control}
+                    name="recurring_frequency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Frequency</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select frequency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="quarterly">Quarterly</SelectItem>
+                            <SelectItem value="yearly">Yearly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          How often does this expense repeat?
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-4">
+                    <Label>End Recurrence</Label>
+                    <Tabs defaultValue="count" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 glass">
+                        <TabsTrigger
+                          value="count"
+                          className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                        >
+                          After occurrences
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="date"
+                          className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                        >
+                          On date
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="count" className="mt-4 animate-in">
+                        <FormField
+                          control={form.control}
+                          name="recurring_count"
+                          render={({ field }) => (
+                            <FormItem className="space-y-1">
+                              <FormControl>
+                                <div className="flex items-center space-x-2">
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    min={1}
+                                    max={100}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        parseInt(e.target.value) || 1
+                                      )
+                                    }
+                                    disabled={
+                                      form.watch("recurring_frequency") === ""
+                                        ? true
+                                        : false
+                                    }
+                                    className="w-20 text-center"
+                                  />
+                                  <FormDescription>time(s)</FormDescription>
+                                </div>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </TabsContent>
+
+                      <TabsContent value="date" className="mt-4 animate-in">
+                        <FormField
+                          control={form.control}
+                          name="recurring_end_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant={"outline"}
+                                      className={cn(
+                                        "w-full pl-3 text-left font-normal",
+                                        !field.value && "text-muted-foreground"
+                                      )}
+                                    >
+                                      {field.value ? (
+                                        <span>
+                                          {
+                                            field.value
+                                              .toISOString()
+                                              .split("T")[0]
+                                          }
+                                        </span>
+                                      ) : (
+                                        <span>Select end date</span>
+                                      )}
+                                      <CalendarDaysIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                >
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    disabled={(date) =>
+                                      date < new Date() ||
+                                      form.watch("recurring_frequency")
+                                        ? true
+                                        : false
+                                    }
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormDescription>
+                                The expense will repeat until this date
+                              </FormDescription>
+                            </FormItem>
+                          )}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              )}
               <FormField
                 control={form.control}
                 name="group_id"
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Group</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!!id}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Group" />
@@ -683,7 +878,7 @@ export function AddExpenseForm() {
                                 value={[splitData[member.id]?.percentage || 0]}
                                 max={100}
                                 step={1}
-                                onValueChange={(value) =>
+                                onValueChange={(value: number[]) =>
                                   handlePercentageChange(member.id, value)
                                 }
                                 className="[&>.slider-track]:h-2 [&>.slider-track]:bg-secondary [&>.slider-range]:bg-gradient-to-r [&>.slider-range]:from-primary [&>.slider-range]:to-[#ff4ecd] [&>.slider-thumb]:h-5 [&>.slider-thumb]:w-5 [&>.slider-thumb]:bg-background [&>.slider-thumb]:border-2 [&>.slider-thumb]:border-primary [&>.slider-thumb]:shadow-glow"
