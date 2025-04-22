@@ -90,3 +90,33 @@ export async function createGroup(
 
 	return { groupId };
 }
+
+export async function fetchBalances(userId: string) {
+	const { data, error } = await supabase.rpc("get_user_balances", {
+		current_user_id: userId,
+	});
+
+	if (error) {
+		console.error("Error fetching balances:", error);
+		throw error;
+	}
+
+	console.log("User Balances:", data); // Log user balances
+
+	return data;
+}
+
+export async function fetchGroupBalances(userId: string) {
+	const { data, error } = await supabase.rpc("get_user_group_balances", {
+		p_current_user_id: userId,
+	});
+
+	if (error) {
+		console.error("Error fetching group balances:", error);
+		throw error;
+	}
+
+	console.log("Group Balances:", data); // Log group balances
+
+	return data;
+}
