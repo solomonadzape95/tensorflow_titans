@@ -16,7 +16,7 @@ import type { Group } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Receipt, Users } from "lucide-react";
 import { Link, useParams } from "react-router";
-	Breadcrumb,
+import {Breadcrumb,
 	BreadcrumbItem,
 	BreadcrumbLink,
 	BreadcrumbList,
