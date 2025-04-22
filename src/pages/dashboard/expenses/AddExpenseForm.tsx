@@ -1,4 +1,9 @@
 import type React from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLoaderData } from "react-router";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useForm} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,9 +24,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+// import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { toast } from "sonner";
 import {
 	CalendarIcon,
 	Car,
@@ -34,8 +48,12 @@ import {
 	Utensils,
 	Wifi,
 } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router";
+
+import { getInitials } from "@/lib/utils";
+import { getMembersOfMyGroups, getMyGroups, createExpense } from "@/lib/services/userService";
+import { createExpenseSchema, type CreateExpenseFormData } from "@/lib/schema";
+import type { Tables } from "@/types/database.types";
+import type { protectPage } from "@/lib/services/authService";
 
 const categories = [
 	{ id: "food", name: "Food & Drink", icon: Utensils },
@@ -48,354 +66,584 @@ const categories = [
 	{ id: "other", name: "Other", icon: Receipt },
 ];
 
-const groups = [
-	{ id: 1, name: "Roommates" },
-	{ id: 2, name: "Trip to Paris" },
-	{ id: 3, name: "Dinner Club" },
-	{ id: 4, name: "Office Lunch" },
-];
-
-const members = [
-	{
-		id: 1,
-		name: "You",
-		email: "you@example.com",
-		avatar: "/placeholder.svg?height=40&width=40&text=You",
-		initials: "You",
-	},
-	{
-		id: 2,
-		name: "Alex Johnson",
-		email: "alex@example.com",
-		avatar: "/placeholder.svg?height=40&width=40&text=AJ",
-		initials: "AJ",
-	},
-	{
-		id: 3,
-		name: "Sarah Miller",
-		email: "sarah@example.com",
-		avatar: "/placeholder.svg?height=40&width=40&text=SM",
-		initials: "SM",
-	},
-	{
-		id: 4,
-		name: "Mike Wilson",
-		email: "mike@example.com",
-		avatar: "/placeholder.svg?height=40&width=40&text=MW",
-		initials: "MW",
-	},
-];
+type MemberProfile = Omit<Tables<"profiles">, "created_at" | "updated_at">;
+type Group = Tables<"groups">;
 
 export function AddExpenseForm() {
 	const navigate = useNavigate();
-	const [splitMethod, setSplitMethod] = useState("equal");
-	const [selectedCategory, setSelectedCategory] = useState("food");
-	const [isLoading, setIsLoading] = useState(false);
-	const [customSplits, setCustomSplits] = useState<Record<number, number>>({
-		1: 25,
-		2: 25,
-		3: 25,
-		4: 25,
+	const loaderData = useLoaderData() as Awaited<ReturnType<typeof protectPage>>;
+	const [paidByUser, setPaidByUser] = useState("you-paid");
+	const queryClient = useQueryClient();
+
+	const form = useForm<CreateExpenseFormData>({
+		resolver: zodResolver(createExpenseSchema),
+		defaultValues: {
+			description: "",
+			amount: 0,
+			date: new Date().toISOString().split("T")[0],
+			groupId: "",
+			category: "food",
+			notes: "",
+			splitMethod: "equal",
+			splits: {},
+		},
+		mode: "onChange",
 	});
 
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		setIsLoading(true);
-		// Simulate API call
-		setTimeout(() => {
-			setIsLoading(false);
+	const { groupId, splitMethod } = form.watch();
+
+	const { data: groups } = useSuspenseQuery<Group[]>({
+		queryKey: ["userGroups"],
+		queryFn: async () => {
+			return await getMyGroups(loaderData.user.id);
+		},
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+
+	// Fetch members based on selected group
+	const { data: groupMembers } = useSuspenseQuery<MemberProfile[]>({
+		queryKey: ["groupMembers", groupId],
+		queryFn: async () => {
+			if (!groupId) return [];
+			return await getMembersOfMyGroups(loaderData.user.id, groupId);
+		},
+		staleTime: Number.POSITIVE_INFINITY,
+	});
+
+	const { mutate: submitExpense, isPending: isSubmitting } = useMutation({
+		mutationFn: async (data: CreateExpenseFormData) => {
+			return await createExpense(data, loaderData.user.id);
+		},
+		onSuccess: () => {
+			toast.success("Expense saved successfully!");
 			navigate("/dashboard");
-		}, 1500);
+
+			queryClient.invalidateQueries({ queryKey: ["expenses"] });
+			queryClient.invalidateQueries({ queryKey: ["balances"] });
+		},
+		onError: (error) => {
+			toast.error(`Failed to save expense: ${error.message}`);
+		},
+	});
+
+	useEffect(() => {
+		if (Array.isArray(groupMembers) && groupMembers.length > 0 && splitMethod) {
+			const newSplits: Record<string, number> = {};
+			const allMembers = [
+				...(Array.isArray(groupMembers) ? groupMembers : []),
+				// Add current user if not already in the list
+				...(Array.isArray(groupMembers) && !groupMembers.some(m => m.id === loaderData.user.id)
+					? [{ id: loaderData.user.id, full_name: "You" }] as MemberProfile[]
+					: [])
+			];
+
+			if (splitMethod === "equal") {
+				const equalShare = 100 / allMembers.length;
+				allMembers.forEach(member => {
+					newSplits[member.id] = equalShare;
+				});
+			} else {
+				allMembers.forEach(member => {
+					newSplits[member.id] = 0;
+				});
+				newSplits[loaderData.user.id] = 100;
+			}
+
+			form.setValue("splits", newSplits);
+		}
+	}, [groupMembers, splitMethod, form, loaderData.user.id]);
+
+	const handleSplitMethodChange = (value: string) => {
+		form.setValue("splitMethod", value as "equal" | "custom" | "percentage");
 	};
 
-	const handleSliderChange = (memberId: number, value: number[]) => {
-		const newValue = value[0];
-		const currentTotal = Object.values(customSplits).reduce(
-			(sum, val) => sum + val,
-			0,
-		);
-		const currentMemberValue = customSplits[memberId] || 0;
-		const difference = newValue - currentMemberValue;
-
-		if (currentTotal + difference > 100) return;
-
-		setCustomSplits((prev) => ({
-			...prev,
-			[memberId]: newValue,
-		}));
-
-		// Distribute the remaining percentage
-		const remaining = 100 - (currentTotal + difference);
-		const otherMembers = Object.keys(customSplits)
-			.map(Number)
-			.filter((id) => id !== memberId);
-
-		if (remaining > 0 && otherMembers.length > 0) {
-			const perMember = remaining / otherMembers.length;
-			const newSplits = { ...customSplits, [memberId]: newValue };
-
-			otherMembers.forEach((id) => {
-				newSplits[id] = perMember;
-			});
-
-			setCustomSplits(newSplits);
+	const handlePaidByChange = (value: string) => {
+		setPaidByUser(value);
+		if (value === "you-paid") {
+			form.setValue("paidBy", loaderData.user.id);
+		} else {
+			form.setValue("paidBy", "");
 		}
 	};
 
+	const onSubmit = (data: CreateExpenseFormData) => {
+		const formattedData = {
+			...data,
+			amount: typeof data.amount === 'string' ? parseFloat(data.amount) : data.amount
+		};
+
+		submitExpense(formattedData);
+	};
+
 	return (
-		<form onSubmit={handleSubmit} className="animate-in">
-			<Card className="hover:shadow-glow transition-all duration-300">
-				<CardHeader>
-					<CardTitle className="font-display">Expense Details</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-6">
-					<div className="space-y-2 animate-in">
-						<Label htmlFor="description">Description</Label>
-						<Input
-							id="description"
-							placeholder="What was this expense for?"
-							required
-						/>
-					</div>
-
-					<div className="space-y-2 animate-in animate-in-delay-1">
-						<Label htmlFor="amount">Amount</Label>
-						<div className="relative">
-							<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-							<Input
-								id="amount"
-								type="number"
-								step="0.01"
-								min="0.01"
-								placeholder="0.00"
-								className="pl-10"
-							/>
-						</div>
-					</div>
-
-					<div className="space-y-2 animate-in animate-in-delay-2">
-						<Label htmlFor="date">Date</Label>
-						<div className="relative">
-							<CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-							<Input
-								id="date"
-								type="date"
-								className="pl-10"
-								defaultValue={new Date().toISOString().split("T")[0]}
-								required
-							/>
-						</div>
-					</div>
-
-					<div className="space-y-2 animate-in animate-in-delay-3">
-						<Label htmlFor="group">Group</Label>
-						<Select defaultValue="1">
-							<SelectTrigger id="group" className="glass">
-								<SelectValue placeholder="Select a group" />
-							</SelectTrigger>
-							<SelectContent className="glass">
-								{groups.map((group) => (
-									<SelectItem key={group.id} value={group.id.toString()}>
-										{group.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-
-					<div className="space-y-2 animate-in animate-in-delay-3">
-						<Label>Category</Label>
-						<div className="grid grid-cols-4 gap-2">
-							{categories.map((category) => {
-								const Icon = category.icon;
-								return (
-									<div
-										key={category.id}
-										className={`flex cursor-pointer flex-col items-center justify-center rounded-lg glass transition-all duration-300 p-3 ${
-											selectedCategory === category.id
-												? "border-primary bg-primary/10 shadow-glow"
-												: "hover:bg-accent/20"
-										}`}
-										onClick={() => setSelectedCategory(category.id)}
-									>
-										<Icon
-											className={`mb-1 h-6 w-6 transition-all duration-300 ${
-												selectedCategory === category.id
-													? "text-primary animate-bounce-subtle"
-													: ""
-											}`}
+		<Form {...form}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="animate-in">
+				<Card className="hover:shadow-glow transition-all duration-300">
+					<CardHeader>
+						<CardTitle className="font-display">Expense Details</CardTitle>
+					</CardHeader>
+					<CardContent className="space-y-6">
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in">
+									<FormLabel>Description</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="What was this expense for?"
+											{...field}
 										/>
-										<span className="text-xs">{category.name}</span>
-									</div>
-								);
-							})}
-						</div>
-					</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-					<div className="space-y-4">
-						<Label>Split Method</Label>
-						<Tabs
-							value={splitMethod}
-							onValueChange={setSplitMethod}
-							className="w-full"
-						>
-							<TabsList className="grid w-full grid-cols-3 glass">
-								<TabsTrigger
-									value="equal"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Equal
-								</TabsTrigger>
-								<TabsTrigger
-									value="custom"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Custom
-								</TabsTrigger>
-								<TabsTrigger
-									value="percentage"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Percentage
-								</TabsTrigger>
-							</TabsList>
-							<TabsContent value="equal" className="mt-4 space-y-4 animate-in">
-								<p className="text-sm text-muted-foreground">
-									Split equally among all members
-								</p>
-								<div className="space-y-2">
-									{members.map((member) => (
-										<div
-											key={member.id}
-											className="flex items-center justify-between rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
-										>
-											<div className="flex items-center gap-3">
-												<Avatar
-													className="animate-float"
-													style={{ animationDelay: `${member.id * 0.1}s` }}
-												>
-													<AvatarImage src={member.avatar} alt={member.name} />
-													<AvatarFallback>{member.initials}</AvatarFallback>
-												</Avatar>
-												<span>{member.name}</span>
-											</div>
-											<span className="font-medium text-gradient">25%</span>
-										</div>
-									))}
-								</div>
-							</TabsContent>
-							<TabsContent value="custom" className="mt-4 space-y-4 animate-in">
-								<p className="text-sm text-muted-foreground">
-									Enter custom amounts for each person
-								</p>
-								<RadioGroup
-									defaultValue="you-paid"
-									className="glass p-4 rounded-lg"
-								>
-									<div className="flex items-center space-x-2">
-										<RadioGroupItem value="you-paid" id="you-paid" />
-										<Label htmlFor="you-paid">
-											You paid, split multiple ways
-										</Label>
-									</div>
-									<div className="flex items-center space-x-2">
-										<RadioGroupItem value="someone-paid" id="someone-paid" />
-										<Label htmlFor="someone-paid">Someone else paid</Label>
-									</div>
-								</RadioGroup>
-								<div className="space-y-2">
-									{members.map((member) => (
-										<div
-											key={member.id}
-											className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
-										>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-3">
-													<Avatar
-														className="animate-float"
-														style={{ animationDelay: `${member.id * 0.1}s` }}
-													>
-														<AvatarImage
-															src={member.avatar}
-															alt={member.name}
-														/>
-														<AvatarFallback>{member.initials}</AvatarFallback>
-													</Avatar>
-													<span>{member.name}</span>
-												</div>
-												<div className="relative">
-													<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-													<Input placeholder="0.00" className="w-24 pl-10" />
-												</div>
-											</div>
-										</div>
-									))}
-								</div>
-							</TabsContent>
-							<TabsContent
-								value="percentage"
-								className="mt-4 space-y-4 animate-in"
-							>
-								<p className="text-sm text-muted-foreground">
-									Adjust percentages for each person
-								</p>
-								<div className="space-y-4">
-									{members.map((member) => (
-										<div
-											key={member.id}
-											className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
-										>
-											<div className="flex items-center justify-between">
-												<div className="flex items-center gap-3">
-													<Avatar
-														className="animate-float"
-														style={{ animationDelay: `${member.id * 0.1}s` }}
-													>
-														<AvatarImage
-															src={member.avatar}
-															alt={member.name}
-														/>
-														<AvatarFallback>{member.initials}</AvatarFallback>
-													</Avatar>
-													<span>{member.name}</span>
-												</div>
-												<span className="font-medium text-gradient">
-													{customSplits[member.id]}%
-												</span>
-											</div>
-											<Slider
-												defaultValue={[customSplits[member.id]]}
-												max={100}
-												step={1}
-												onValueChange={(value) =>
-													handleSliderChange(member.id, value)
-												}
-												className="[&>.slider-track]:h-2 [&>.slider-track]:bg-secondary [&>.slider-range]:bg-gradient-to-r [&>.slider-range]:from-primary [&>.slider-range]:to-[#ff4ecd] [&>.slider-thumb]:h-5 [&>.slider-thumb]:w-5 [&>.slider-thumb]:bg-background [&>.slider-thumb]:border-2 [&>.slider-thumb]:border-primary [&>.slider-thumb]:shadow-glow"
+						<FormField
+							control={form.control}
+							name="amount"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in animate-in-delay-1">
+									<FormLabel>Amount</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+											<Input
+												type="number"
+												step="0.01"
+												min="0.01"
+												placeholder="0.00"
+												className="pl-10"
+												onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+												value={field.value}
 											/>
 										</div>
-									))}
-								</div>
-							</TabsContent>
-						</Tabs>
-					</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-					<div className="space-y-2">
-						<Label htmlFor="notes">Notes (Optional)</Label>
-						<Textarea id="notes" placeholder="Add any additional details..." />
-					</div>
-				</CardContent>
-				<CardFooter className="flex justify-between">
-					<Button type="button" onClick={() => navigate(-1)}>
-						Cancel
-					</Button>
-					<Button
-						type="submit"
-						variant="gradient"
-						disabled={isLoading}
-						className="min-w-[120px]"
-					>
-						{isLoading ? (
-							<div className="flex items-center gap-2">
+						<FormField
+							control={form.control}
+							name="date"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in animate-in-delay-2">
+									<FormLabel>Date</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<CalendarIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+											<Input
+												type="date"
+												className="pl-10"
+												{...field}
+											/>
+										</div>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="groupId"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in animate-in-delay-3">
+									<FormLabel>Group</FormLabel>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
+										<FormControl>
+											<SelectTrigger className="glass">
+												<SelectValue placeholder="Select a group" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent className="glass">
+											{groups && groups.map((group) => (
+												<SelectItem key={group.id} value={group.id}>
+													{group.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormField
+							control={form.control}
+							name="category"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in animate-in-delay-3">
+									<FormLabel>Category</FormLabel>
+									<div className="grid grid-cols-4 gap-2">
+										{categories.map((category) => {
+											const Icon = category.icon;
+											return (
+												<div
+													key={category.id}
+													className={`flex cursor-pointer flex-col items-center justify-center rounded-lg glass transition-all duration-300 p-3 ${field.value === category.id
+															? "border-primary bg-primary/10 shadow-glow"
+															: "hover:bg-accent/20"
+														}`}
+													onClick={() => field.onChange(category.id)}
+												>
+													<Icon
+														className={`mb-1 h-6 w-6 transition-all duration-300 ${field.value === category.id
+																? "text-primary animate-bounce-subtle"
+																: ""
+															}`}
+													/>
+													<span className="text-xs">{category.name}</span>
+												</div>
+											);
+										})}
+									</div>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						{groupId && groupMembers && groupMembers.length > 0 && (
+							<div className="space-y-4">
+								<FormLabel>Split Method</FormLabel>
+								<Tabs
+									value={splitMethod}
+									onValueChange={handleSplitMethodChange}
+									className="w-full"
+								>
+									<TabsList className="grid w-full grid-cols-3 glass">
+										<TabsTrigger
+											value="equal"
+											className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+										>
+											Equal
+										</TabsTrigger>
+										<TabsTrigger
+											value="custom"
+											className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+										>
+											Custom
+										</TabsTrigger>
+										<TabsTrigger
+											value="percentage"
+											className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+										>
+											Percentage
+										</TabsTrigger>
+									</TabsList>
+									<TabsContent value="equal" className="mt-4 space-y-4 animate-in">
+										<p className="text-sm text-muted-foreground">
+											Split equally among all members
+										</p>
+
+										<RadioGroup
+											value={paidByUser}
+											onValueChange={handlePaidByChange}
+											className="glass p-4 rounded-lg mb-4"
+										>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="you-paid" id="you-paid" />
+												<Label htmlFor="you-paid">
+													You paid, split with everyone
+												</Label>
+											</div>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="someone-paid" id="someone-paid" />
+												<Label htmlFor="someone-paid">Someone else paid</Label>
+											</div>
+										</RadioGroup>
+
+										{paidByUser === "someone-paid" && (
+											<FormField
+												control={form.control}
+												name="paidBy"
+												render={({ field }) => (
+													<FormItem className="mb-4">
+														<FormLabel>Who paid?</FormLabel>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
+															<FormControl>
+																<SelectTrigger className="glass">
+																	<SelectValue placeholder="Select who paid" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{groupMembers.map((member) => (
+																	<SelectItem key={member.id} value={member.id}>
+																		{member.full_name}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										)}
+
+										<div className="space-y-2">
+											{/* Display current user first */}
+											<div
+												className="flex items-center justify-between rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
+											>
+												<div className="flex items-center gap-3">
+													<Avatar className="animate-float">
+														<AvatarImage
+															src={loaderData.user.avatar_url}
+															alt="You"
+														/>
+														<AvatarFallback>You</AvatarFallback>
+													</Avatar>
+													<span>You</span>
+												</div>
+												<span className="font-medium text-gradient">
+													{groupMembers.length > 0 ? Math.round(100 / (groupMembers.length + 1)) : 100}%
+												</span>
+											</div>
+
+											{/* Then display other members */}
+											{groupMembers.map((member) => (
+												<div
+													key={member.id}
+													className="flex items-center justify-between rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
+												>
+													<div className="flex items-center gap-3">
+														<Avatar className="animate-float">
+															<AvatarImage
+																src={member.avatar_url ?? undefined}
+																alt={member.full_name}
+															/>
+															<AvatarFallback>{getInitials(member.full_name)}</AvatarFallback>
+														</Avatar>
+														<span className="capitalize">{member.full_name.toLowerCase()}</span>
+													</div>
+													<span className="font-medium text-gradient">
+														{Math.round(100 / (groupMembers.length + 1))}%
+													</span>
+												</div>
+											))}
+										</div>
+									</TabsContent>
+
+									<TabsContent value="custom" className="mt-4 space-y-4 animate-in">
+										<p className="text-sm text-muted-foreground">
+											Enter custom amounts for each person
+										</p>
+
+										<RadioGroup
+											value={paidByUser}
+											onValueChange={handlePaidByChange}
+											className="glass p-4 rounded-lg mb-4"
+										>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="you-paid" id="you-paid-custom" />
+												<Label htmlFor="you-paid-custom">
+													You paid, split multiple ways
+												</Label>
+											</div>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="someone-paid" id="someone-paid-custom" />
+												<Label htmlFor="someone-paid-custom">Someone else paid</Label>
+											</div>
+										</RadioGroup>
+
+										{paidByUser === "someone-paid" && (
+											<FormField
+												control={form.control}
+												name="paidBy"
+												render={({ field }) => (
+													<FormItem className="mb-4">
+														<FormLabel>Who paid?</FormLabel>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
+															<FormControl>
+																<SelectTrigger className="glass">
+																	<SelectValue placeholder="Select who paid" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{groupMembers.map((member) => (
+																	<SelectItem key={member.id} value={member.id}>
+																		{member.full_name}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										)}
+
+										<FormField
+											control={form.control}
+											name="splits"
+											render={() => (
+												<FormItem>
+													<div className="space-y-2">
+														{/* Current user first */}
+														<div className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300">
+															<div className="flex items-center justify-between">
+																<div className="flex items-center gap-3">
+																	<Avatar className="animate-float">
+																		<AvatarImage
+																			src={loaderData.user.avatar_url}
+																			alt="You"
+																		/>
+																		<AvatarFallback>You</AvatarFallback>
+																	</Avatar>
+																	<span>You</span>
+																</div>
+																<div className="relative">
+																	<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+																	<Input
+																		placeholder="0.00"
+																		className="w-24 pl-10"
+																		type="number"
+																		step="0.01"
+																		min="0"
+																		onChange={(e) => {
+																			const newSplits = { ...form.getValues("splits") };
+																			newSplits[loaderData.user.id] = parseFloat(e.target.value) || 0;
+																			form.setValue("splits", newSplits);
+																		}}
+																		value={form.getValues("splits")[loaderData.user.id] || ""}
+																	/>
+																</div>
+															</div>
+														</div>
+
+														{/* Other members */}
+														{groupMembers.map((member) => (
+															<div
+																key={member.id}
+																className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
+															>
+																<div className="flex items-center justify-between">
+																	<div className="flex items-center gap-3">
+																		<Avatar className="animate-float">
+																			<AvatarImage
+																				src={member.avatar_url ?? undefined}
+																				alt={member.full_name}
+																			/>
+																			<AvatarFallback>{getInitials(member.full_name)}</AvatarFallback>
+																		</Avatar>
+																		<span className="capitalize">{member.full_name.toLowerCase()}</span>
+																	</div>
+																	<div className="relative">
+																		<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+																		<Input
+																			placeholder="0.00"
+																			className="w-24 pl-10"
+																			type="number"
+																			step="0.01"
+																			min="0"
+																			onChange={(e) => {
+																				const newSplits = { ...form.getValues("splits") };
+																				newSplits[member.id] = parseFloat(e.target.value) || 0;
+																				form.setValue("splits", newSplits);
+																			}}
+																			value={form.getValues("splits")[member.id] || ""}
+																		/>
+																	</div>
+																</div>
+															</div>
+														))}
+													</div>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									</TabsContent>
+
+									<TabsContent value="percentage" className="mt-4 space-y-4 animate-in">
+										<p className="text-sm text-muted-foreground">
+											Adjust percentages for each person
+										</p>
+
+										<RadioGroup
+											value={paidByUser}
+											onValueChange={handlePaidByChange}
+											className="glass p-4 rounded-lg mb-4"
+										>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="you-paid" id="you-paid-percent" />
+												<Label htmlFor="you-paid-percent">
+													You paid, split by percentage
+												</Label>
+											</div>
+											<div className="flex items-center space-x-2">
+												<RadioGroupItem value="someone-paid" id="someone-paid-percent" />
+												<Label htmlFor="someone-paid-percent">Someone else paid</Label>
+											</div>
+										</RadioGroup>
+
+										{paidByUser === "someone-paid" && (
+											<FormField
+												control={form.control}
+												name="paidBy"
+												render={({ field }) => (
+													<FormItem className="mb-4">
+														<FormLabel>Who paid?</FormLabel>
+														<Select
+															onValueChange={field.onChange}
+															defaultValue={field.value}
+														>
+															<FormControl>
+																<SelectTrigger className="glass">
+																	<SelectValue placeholder="Select who paid" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{groupMembers.map((member) => (
+																	<SelectItem key={member.id} value={member.id}>
+																		{member.full_name}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+														<FormMessage />
+													</FormItem>
+												)}
+											/>
+										)}
+									</TabsContent>
+								</Tabs>
+							</div>
+						)}
+						<FormField
+							control={form.control}
+							name="notes"
+							render={({ field }) => (
+								<FormItem className="space-y-2 animate-in animate-in-delay-4">
+									<FormLabel>Notes</FormLabel>
+									<FormControl>
+										<Textarea
+											placeholder="Any additional notes?"
+											rows={3}
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</CardContent>
+					<CardFooter className="flex justify-end space-x-2 p-4">
+						<Button type="button" onClick={() => navigate(-1)}>
+							Cancel
+						</Button>
+						<Button type="submit" disabled={isSubmitting} className="min-w-[120px]" variant="gradient">
+							{isSubmitting ? (<div className="flex items-center gap-2">
 								<svg
 									className="animate-spin h-4 w-4 text-white"
 									xmlns="http://www.w3.org/2000/svg"
@@ -418,12 +666,11 @@ export function AddExpenseForm() {
 								</svg>
 								<span>Saving...</span>
 							</div>
-						) : (
-							"Save Expense"
-						)}
-					</Button>
-				</CardFooter>
-			</Card>
-		</form>
+						) : ("Save Expense")}
+						</Button>
+					</CardFooter>
+				</Card>
+			</form>
+		</Form>
 	);
 }

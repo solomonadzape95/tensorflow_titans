@@ -1,4 +1,4 @@
-import type { CreateGroupFormData } from "../schema";
+import type { CreateGroupFormData, CreateExpenseFormData } from "../schema";
 import supabase from "../supabase";
 
 export async function getMembersOfMyCreatedGroups(currentUserId: string) {
@@ -89,4 +89,71 @@ export async function createGroup(
 	}
 
 	return { groupId };
+}
+
+export async function getMyGroups(userId: string) {
+  const { data, error } = await supabase
+    .from("group_members")
+    .select(`
+      groups (
+        id,
+        name,
+        description,
+        creator_id,
+        created_at
+      )
+    `)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  }
+  const groups = data?.map((item) => item.groups).filter(Boolean);
+  return groups;
+}
+
+export async function getMembersOfMyGroups(userId: string, groupId: string) {
+  const { data, error } = await supabase
+    .from("group_members")
+    .select(`
+      user_id,
+      profiles (id, full_name, email, avatar_url)
+    `)
+    .eq("group_id", groupId);
+
+  if (error) {
+    throw error;
+  }
+
+  const memberProfiles = data
+    ?.map((item) => item.profiles)
+    .filter((profile) => profile !== null);
+
+  return memberProfiles;
+}
+
+export async function createExpense(formData: CreateExpenseFormData, creatorId: string) {
+  const { data: expenseData, error: expenseError } = await supabase
+    .from("expenses")
+    .insert({
+      description: formData.description,
+      amount: formData.amount,
+      date: formData.date,
+      group_id: formData.groupId,
+      category: formData.category,
+      notes: formData.notes,
+      created_by: creatorId,
+      paid_by: formData.paidBy || creatorId, // If 'formData.paidBy' is not provided, default 'paid_by' to 'creatorId'
+    })
+    .select("id")
+    .single();
+
+  if (expenseError) {
+    throw expenseError;
+  }
+
+  const expenseId = expenseData.id;
+
+  return { expenseId };
+  
 }
