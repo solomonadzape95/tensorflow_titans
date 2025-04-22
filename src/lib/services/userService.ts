@@ -97,11 +97,8 @@ export async function fetchBalances(userId: string) {
 	});
 
 	if (error) {
-		console.error("Error fetching balances:", error);
 		throw error;
 	}
-
-	console.log("User Balances:", data); // Log user balances
 
 	return data;
 }
@@ -112,11 +109,8 @@ export async function fetchGroupBalances(userId: string) {
 	});
 
 	if (error) {
-		console.error("Error fetching group balances:", error);
 		throw error;
 	}
-
-	console.log("Group Balances:", data); // Log group balances
 
 	return data;
 }
