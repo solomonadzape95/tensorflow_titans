@@ -114,7 +114,7 @@ const Balances = () => {
 				</Card>
 			</div>
 
-			<Card className="gap-3 py-4 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
+			{/* <Card className="gap-3 py-4 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
 				<CardHeader>
 					<CardTitle className="font-display text-2xl">
 						Balance Overview
@@ -122,9 +122,9 @@ const Balances = () => {
 					<CardDescription>Your current balances with friends</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="h-80" /> {/* Placeholder for chart */}
+					<div className="h-80" />
 				</CardContent>
-			</Card>
+			</Card> */}
 
 			<Tabs defaultValue="friends" className="space-y-4">
 				<TabsList className="glass">
@@ -292,7 +292,7 @@ const Balances = () => {
 													asChild
 												>
 													<Link
-														to={`/dashboard/group/${groupBalance.group_id}`}
+														to={`/dashboard/groups/${groupBalance.group_id}`}
 													>
 														View
 														<ArrowRight className="ml-2 h-4 w-4" />
