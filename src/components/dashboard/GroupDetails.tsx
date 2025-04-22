@@ -1,8 +1,6 @@
 import { getGroupById } from "@/lib/services/groups/groupService";
 
 import { Button } from "../ui/button";
-import { Link, Outlet, useLocation, useParams } from "react-router";
-import { Plus, Receipt, Users } from "lucide-react";
 import {
   Card,
   CardContent,
