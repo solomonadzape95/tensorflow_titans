@@ -1,4 +1,3 @@
-// import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Activities from "./dashboard/Activities";
 
