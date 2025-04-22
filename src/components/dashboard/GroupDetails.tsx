@@ -1,6 +1,6 @@
-import { getGroupById } from "@/lib/services/groups/groupService";
-
 import { Button } from "../ui/button";
+import { Link, Outlet, useLocation, useParams } from "react-router";
+import { Plus, Receipt, Users } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,19 +10,19 @@ import {
 } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-
 import NotFound from "@/pages/not-found";
-import type { Group } from "@/types";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Receipt, Users } from "lucide-react";
-import { Link, useParams } from "react-router";
-import {Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
+import { getGroupById } from "@/lib/services/groups/groupService";
+import { Group } from "@/types";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+
 
 // const groups: Record<string, Group> = {
 //   "1": {
