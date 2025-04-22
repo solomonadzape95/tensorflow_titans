@@ -456,6 +456,12 @@ export function AddExpenseForm() {
                                         parseInt(e.target.value) || 1
                                       )
                                     }
+                                    disabled={
+                                      form.watch("recurring_frequency") ===
+                                        "" || form.watch("recurring_end_date")
+                                        ? true
+                                        : false
+                                    }
                                     className="w-20 text-center"
                                   />
                                   <FormDescription>time(s)</FormDescription>
@@ -505,7 +511,14 @@ export function AddExpenseForm() {
                                     mode="single"
                                     selected={field.value}
                                     onSelect={field.onChange}
-                                    disabled={(date) => date < new Date()}
+                                    disabled={(date) =>
+                                      date < new Date() ||
+                                      form.watch("recurring_frequency") ===
+                                        "" ||
+                                      form.watch("recurring_end_date")
+                                        ? true
+                                        : false
+                                    }
                                     initialFocus
                                   />
                                 </PopoverContent>
