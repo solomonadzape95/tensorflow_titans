@@ -2,6 +2,7 @@ import type { Session } from "@supabase/supabase-js";
 import { redirect } from "react-router";
 import { toast } from "sonner";
 import supabase from "../supabase";
+
 export const signUpWithEmail = async (email: string, password: string) => {
 	const { data, error } = await supabase.auth.signUp({
 		email,
@@ -96,4 +97,20 @@ export const protectPage = async () => {
 		user: data.user,
 		profile: profileData,
 	};
+};
+
+export const redirectIfLoggedIn = async () => {
+	const { data, error } = await supabase.auth.getUser();
+
+	// If there's an error fetching the user, proceed as if not logged in.
+	if (error) return null;
+
+	if (data.user) {
+		toast.info("You are already logged in.", {
+			description: "Redirecting to dashboard...",
+		});
+		throw redirect("/dashboard");
+	}
+
+	return null;
 };

@@ -89,6 +89,7 @@ export type Database = {
           expense_date: string | null
           group_id: string
           id: string
+          name: string | null
           payer_id: string | null
           split_type: string
           updated_at: string | null
@@ -100,6 +101,7 @@ export type Database = {
           expense_date?: string | null
           group_id: string
           id?: string
+          name?: string | null
           payer_id?: string | null
           split_type?: string
           updated_at?: string | null
@@ -111,6 +113,7 @@ export type Database = {
           expense_date?: string | null
           group_id?: string
           id?: string
+          name?: string | null
           payer_id?: string | null
           split_type?: string
           updated_at?: string | null
@@ -281,12 +284,40 @@ export type Database = {
           email: string
         }[]
       }
+      get_user_balances: {
+        Args: { current_user_id: string }
+        Returns: Database["public"]["CompositeTypes"]["user_balance_entry"][]
+      }
+      get_user_group_balances: {
+        Args: { p_current_user_id: string }
+        Returns: {
+          group_id: string
+          group_name: string
+          net_group_balance: number
+          members: Json
+        }[]
+      }
+      is_group_member: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      group_balance_entry: {
+        group_id: string | null
+        group_name: string | null
+        net_group_balance: number | null
+        member_avatars: string[] | null
+      }
+      user_balance_entry: {
+        other_user_id: string | null
+        other_user_name: string | null
+        net_amount: number | null
+        other_user_avatar_url: string | null
+      }
     }
   }
 }

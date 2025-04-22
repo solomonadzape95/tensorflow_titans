@@ -1,4 +1,3 @@
-// import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import {
   Card,
   CardContent,
@@ -12,43 +11,12 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import CreateGroup from "./CreateGroup";
 
+
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import useGetGroups from "@/lib/services/groups/getGroupsForUser";
 
 const Group = () => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // const groups: GroupData[] = [
-  //   {
-  //     id: "1",
-  //     title: "Roommates",
-  //     description: "Rent, utilities, and household expenses",
-  //     memberCount: 4,
-  //     expenseCount: 12,
-  //     balance: {
-  //       amount: 195.0,
-  //       isOwed: true,
-  //     },
-  //     members: [
-  //       { initial: "A" },
-  //       { initial: "B" },
-  //       { initial: "C" },
-  //       { initial: "1+" },
-  //     ],
-  //   },
-  //   {
-  //     id: "2",
-  //     title: "Trip to Vegas",
-  //     description: "Travel expenses for our vacation",
-  //     memberCount: 3,
-  //     expenseCount: 8,
-  //     balance: {
-  //       amount: 74.61,
-  //       isOwed: false,
-  //     },
-  //     members: [{ initial: "A" }, { initial: "B" }],
-  //   },
-  // ];
   const { groups: filteredGroups, isLoading: isLoadingGroups } = useGetGroups();
   console.log(isLoadingGroups);
   return (

@@ -14,11 +14,13 @@ import type { UserData } from "@/types";
 import { LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
+import { useLogOutHandler } from "@/hooks/use-logout";
 
 function Navbar({ user }: { user: UserData }) {
 	const [isOpenUser, setIsOpenUser] = useState<boolean>(false);
 	const [isOpenTheme, setIsOpenTheme] = useState<boolean>(false);
 	const [, toggleDarkMode] = useDarkMode();
+	const { handleLogOut} = useLogOutHandler()
 
 	const slidevariants: Variants = {
 		hidden: { y: 20, opacity: 0 },
@@ -79,74 +81,77 @@ function Navbar({ user }: { user: UserData }) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu open={isOpenUser} onOpenChange={setIsOpenUser}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="relative h-8 w-8 rounded-full text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
-            >
-              <User className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-56 rounded-md border dark:border-border-dark bg-popover dark:bg-popover-dark text-popover-foreground dark:text-popover-foreground-dark shadow-md"
-            align="end"
-            forceMount
-          >
-            <motion.div
-              variants={slidevariants}
-              initial="hidden"
-              animate={isOpenUser ? "visible" : "hidden"}
-              transition={{
-                duration: 0.2,
-                ease: "easeOut",
-              }}
-            >
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {user.profile.full_name}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground dark:text-muted-foreground-dark">
-                    {user.user.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-border dark:bg-border-dark" />
-              <DropdownMenuItem
-                asChild
-                className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
-              >
-                <Link to="/dashboard/profile" className="flex items-center">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                asChild
-                className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
-              >
-                <Link to="/dashboard/settings" className="flex items-center">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border dark:bg-border-dark" />
-              <DropdownMenuItem
-                asChild
-                className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
-              >
-                <Link to="/auth/login" className="flex items-center">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </Link>
-              </DropdownMenuItem>
-            </motion.div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
-  );
+				<DropdownMenu open={isOpenUser} onOpenChange={setIsOpenUser}>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant="ghost"
+							className="relative h-8 w-8 rounded-full text-foreground dark:text-foreground-dark hover:bg-accent dark:hover:bg-accent-dark"
+						>
+							<User className="h-5 w-5" />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						className="w-56 rounded-md border dark:border-border-dark bg-popover dark:bg-popover-dark text-popover-foreground dark:text-popover-foreground-dark shadow-md"
+						align="end"
+						forceMount
+					>
+						<motion.div
+							variants={slidevariants}
+							initial="hidden"
+							animate={isOpenUser ? "visible" : "hidden"}
+							transition={{
+								duration: 0.2,
+								ease: "easeOut",
+							}}
+						>
+							<DropdownMenuLabel className="font-normal">
+								<div className="flex flex-col space-y-1">
+									<p className="text-sm font-medium leading-none">
+										{user.profile.full_name}
+									</p>
+									<p className="text-xs leading-none text-muted-foreground dark:text-muted-foreground-dark">
+										{user.user.email}
+									</p>
+								</div>
+							</DropdownMenuLabel>
+							<DropdownMenuSeparator className="bg-border dark:bg-border-dark" />
+							<DropdownMenuItem
+								asChild
+								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
+							>
+								<Link to="/dashboard/profile" className="flex items-center">
+									<User className="mr-2 h-4 w-4" />
+									<span>Profile</span>
+								</Link>
+							</DropdownMenuItem>
+							<DropdownMenuItem
+								asChild
+								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
+							>
+								<Link to="/dashboard/settings" className="flex items-center">
+									<Settings className="mr-2 h-4 w-4" />
+									<span>Settings</span>
+								</Link>
+							</DropdownMenuItem>
+							<DropdownMenuSeparator className="bg-border dark:bg-border-dark" />
+							<DropdownMenuItem
+								asChild
+								className="cursor-pointer hover:bg-accent dark:hover:bg-accent-dark transition-colors duration-200 focus:bg-accent dark:focus:bg-accent-dark"
+							>
+								<button
+								onClick={()=> handleLogOut()}
+								 className="flex w-full items-center">
+									<LogOut className="mr-2 h-4 w-4" />
+									<span>Log out</span>
+								</button>
+							</DropdownMenuItem>
+						</motion.div>
+					</DropdownMenuContent>
+				</DropdownMenu>
+			</div>
+		</div>
+	);
+ 
 }
 
 export default Navbar;
