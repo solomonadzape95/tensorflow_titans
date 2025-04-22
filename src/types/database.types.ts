@@ -92,6 +92,7 @@ export type Database = {
           payer_id: string | null
           split_type: string
           updated_at: string | null
+          category: string;
         }
         Insert: {
           amount: number
@@ -103,6 +104,7 @@ export type Database = {
           payer_id?: string | null
           split_type?: string
           updated_at?: string | null
+          category: string;
         }
         Update: {
           amount?: number
@@ -114,6 +116,7 @@ export type Database = {
           payer_id?: string | null
           split_type?: string
           updated_at?: string | null
+          category?: string;
         }
         Relationships: [
           {

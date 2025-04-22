@@ -112,7 +112,7 @@ export async function getMyGroups(userId: string) {
   return groups;
 }
 
-export async function getMembersOfMyGroups(userId: string, groupId: string) {
+export async function getMembersOfMyGroups(groupId: string) {
   const { data, error } = await supabase
     .from("group_members")
     .select(`
