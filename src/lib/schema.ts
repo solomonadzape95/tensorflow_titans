@@ -58,7 +58,11 @@ export const createExpenseSchema = z.object({
   description: z.string().optional(),
   payer_id: z.string().min(1, { message: "Payer ID is required" }),
   amount: z.string().min(1, { message: "Amount is required" }),
-  expense_date: z.date({required_error: "Expense date is required"}),
+  expense_date: z.date({ required_error: "Expense date is required" }),
   group_id: z.string().min(1, { message: "Group is required" }),
   split_type: z.string().min(1, { message: "Split Type is required" }),
+  is_recurring: z.boolean().optional(),
+  recurring_frequency: z.string().optional(),
+  recurring_end_date: z.date().optional(),
+  recurring_count: z.number().optional(),
 });

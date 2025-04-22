@@ -1,4 +1,18 @@
 import { getGroupById } from "@/lib/services/groups/groupService";
+
+import { Button } from "../ui/button";
+import { Link, Outlet, useLocation, useParams } from "react-router";
+import { Plus, Receipt, Users } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+
 import NotFound from "@/pages/not-found";
 import type { Group } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -13,15 +27,6 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "../ui/breadcrumb";
-import { Button } from "../ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 // const groups: Record<string, Group> = {
 //   "1": {
@@ -54,24 +59,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 // };
 
 function GroupDetails() {
-	const { id } = useParams<{ id: string }>();
-	const { data: group, isLoading } = useQuery<Group>({
-		queryKey: ["group"],
-		queryFn: async () => {
-			const group = await getGroupById(id as string);
-			return group;
-		},
-	});
-	console.log(group);
-	if (!id) return <NotFound />;
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const creatingExpense = pathname.includes("expenses/new");
+  const { data: group, isLoading } = useQuery<Group>({
+    queryKey: ["group", id],
+    queryFn: async () => {
+      const group = await getGroupById(id as string);
+      return group;
+    },
+  });
+  console.log(group);
+  if (!id) return <NotFound />;
 
-	return (
-		<>
-			{isLoading || !group ? (
-				<div>Loading Group....</div>
-			) : (
-				<>
-					<Breadcrumb className="px-6">
+  return (
+    <>
+      {isLoading || !group ? (
+        <div>Loading Group....</div>
+      ) : creatingExpense ? (
+        <Outlet />
+      ) : (
+        <>
+        <Breadcrumb className="px-6">
 						<BreadcrumbItem>
 							<BreadcrumbList>
 								<BreadcrumbItem>
@@ -114,7 +124,6 @@ function GroupDetails() {
 								</Button>
 							</div>
 						</div>
-
 						<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 							<Card
 								// variant="glass"

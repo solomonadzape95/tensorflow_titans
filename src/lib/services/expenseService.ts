@@ -24,6 +24,12 @@ export async function createExpense(
           payer_id: data.payer_id,
           expense_date: data.expense_date.toISOString(),
           split_type: data.split_type,
+          is_recurring: data.is_recurring || false,
+          recurring_frequency: data.recurring_frequency || null,
+          recurring_end_date: data.recurring_end_date
+            ? data.recurring_end_date.toISOString()
+            : null,
+          recurring_count: data.recurring_count || null,
         },
       ])
       .select();

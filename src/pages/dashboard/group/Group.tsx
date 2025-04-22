@@ -108,22 +108,22 @@ const Group = () => {
                                 </span>
                               </span>
                             ))} */}
-													</div>
-													<div className="flex gap-2">
-														<button className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
-															<Link2 className="h-4 w-4" />
-														</button>
-														<Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
-															<Link to={`/dashboard/groups/${group.id}`}>
-																View
-															</Link>
-														</Button>
-													</div>
-												</div>
-											</CardContent>
-										</Card>
-									))
-								)}
+                          </div>
+                          <div className="flex gap-2">
+                            <button className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
+                              <Link2 className="h-4 w-4" />
+                            </button>
+                            <Link to={`/dashboard/groups/${group.id}`}>
+                              <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
+                                View
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
 
 								<Card className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
 									<CardContent className="flex flex-col items-center justify-center p-0">
