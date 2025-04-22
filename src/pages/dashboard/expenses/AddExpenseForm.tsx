@@ -44,7 +44,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { CreateExpenseFormData, createExpenseSchema } from "@/lib/schema";
 import { cn } from "@/lib/utils";
 import useGetGroupMembers from "@/lib/services/groups/getGroupMembers";
@@ -68,7 +68,11 @@ type SplitData = {
 };
 
 export function AddExpenseForm() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const fromGroups = pathname.includes("/groups/");
   const [splitMethod, setSplitMethod] = useState("equal");
   const [splitData, setSplitData] = useState<SplitData>({});
   const [isRecurring, setIsRecurring] = useState(false);
@@ -80,6 +84,7 @@ export function AddExpenseForm() {
       name: "",
       description: "",
       split_type: "equal",
+      group_id: id || "",
     },
   });
 
@@ -121,9 +126,11 @@ export function AddExpenseForm() {
           });
         }
 
-        navigate("/dashboard/expenses", {
-          replace: true,
-        });
+        return !fromGroups
+          ? navigate("/dashboard/expenses", {
+              replace: true,
+            })
+          : navigate(pathname.split("expenses")[0], { replace: true });
       },
     });
   // Update split data when members or expense amount changes
@@ -457,8 +464,7 @@ export function AddExpenseForm() {
                                       )
                                     }
                                     disabled={
-                                      form.watch("recurring_frequency") ===
-                                        "" || form.watch("recurring_end_date")
+                                      form.watch("recurring_frequency") === ""
                                         ? true
                                         : false
                                     }
@@ -513,9 +519,7 @@ export function AddExpenseForm() {
                                     onSelect={field.onChange}
                                     disabled={(date) =>
                                       date < new Date() ||
-                                      form.watch("recurring_frequency") ===
-                                        "" ||
-                                      form.watch("recurring_end_date")
+                                      form.watch("recurring_frequency")
                                         ? true
                                         : false
                                     }
@@ -540,7 +544,11 @@ export function AddExpenseForm() {
                 render={({ field }) => (
                   <FormItem className="w-full">
                     <FormLabel>Group</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!!id}
+                    >
                       <FormControl>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select Group" />

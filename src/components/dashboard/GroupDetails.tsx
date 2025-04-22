@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { Link, useParams } from "react-router";
+import { Link, Outlet, useLocation, useParams } from "react-router";
 import { Plus, Receipt, Users } from "lucide-react";
 import {
   Card,
@@ -55,8 +55,11 @@ import {
 
 function GroupDetails() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const pathname = location.pathname;
+  const creatingExpense = pathname.includes("expenses/new");
   const { data: group, isLoading } = useQuery<Group>({
-    queryKey: ["group"],
+    queryKey: ["group", id],
     queryFn: async () => {
       const group = await getGroupById(id as string);
       return group;
@@ -69,6 +72,8 @@ function GroupDetails() {
     <>
       {isLoading || !group ? (
         <div>Loading Group....</div>
+      ) : creatingExpense ? (
+        <Outlet />
       ) : (
         <>
           <Breadcrumb className="px-6">
@@ -107,7 +112,7 @@ function GroupDetails() {
                   asChild
                   className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
                 >
-                  <Link to="/dashboard/expenses/new">
+                  <Link to={`/dashboard/groups/${id}/expenses/new`}>
                     <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
                     Add Expense
                   </Link>

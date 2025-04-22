@@ -18,78 +18,85 @@ import Group from "./pages/dashboard/group/Group";
 import NotFound from "./pages/not-found";
 
 const protectedLoader = async () => {
-	return await queryClient.fetchQuery({
-		queryKey: ["auth", "user"],
-		queryFn: protectPage,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-	});
+  return await queryClient.fetchQuery({
+    queryKey: ["auth", "user"],
+    queryFn: protectPage,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };
 
 const redirectIfLoggedInLoader = async () => {
-	return await queryClient.fetchQuery({
-		queryKey: ["auth", "get-user"],
-		queryFn: redirectIfLoggedIn,
-		staleTime: 5 * 60 * 1000, // 5 minutes
-	});
+  return await queryClient.fetchQuery({
+    queryKey: ["auth", "get-user"],
+    queryFn: redirectIfLoggedIn,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 };
 
 const routes: RouteObject[] = [
-	{ path: "/", Component: LandingPage },
-	{ path: "/login", Component: Login, loader: redirectIfLoggedInLoader },
-	{ path: "/signup", Component: SignUp, loader: redirectIfLoggedInLoader },
-	{
-		path: "/dashboard",
-		Component: Dashboard,
-		loader: protectedLoader,
-		children: [
-			{
-				index: true,
-				Component: Overview,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups",
-				Component: Group,
-				loader: protectedLoader,
-			},
-			{
-				path: "groups/:id",
-				Component: GroupDetails,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses",
-				Component: ExpensesOverview,
-				loader: protectedLoader,
-			},
-			{
-				path: "expenses/new",
-				Component: NewExpense,
-				loader: protectedLoader,
-			},
-			{
-				path: "recurring",
-				Component: RecurringExpences,
-				loader: protectedLoader,
-			},
-			{
-				path: "recurring/:id",
-				Component: GroupDetails,
-				loader: protectedLoader,
-			},
-			{
-				path: "balances",
-				Component: Balances,
-				loader: protectedLoader,
-			},
-			{
-				path: "settings",
-				Component: Settings,
-				loader: protectedLoader,
-			},
-		],
-	},
-	{ path: "*", Component: NotFound }, // Consider a dedicated 404 page later
+  { path: "/", Component: LandingPage },
+  { path: "/login", Component: Login, loader: redirectIfLoggedInLoader },
+  { path: "/signup", Component: SignUp, loader: redirectIfLoggedInLoader },
+  {
+    path: "/dashboard",
+    Component: Dashboard,
+    loader: protectedLoader,
+    children: [
+      {
+        index: true,
+        Component: Overview,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups",
+        Component: Group,
+        loader: protectedLoader,
+      },
+      {
+        path: "groups/:id",
+        Component: GroupDetails,
+        loader: protectedLoader,
+        children: [
+          {
+            path: "expenses/new",
+            Component: NewExpense,
+            loader: protectedLoader,
+          },
+        ],
+      },
+      {
+        path: "expenses",
+        Component: ExpensesOverview,
+        loader: protectedLoader,
+      },
+      {
+        path: "expenses/new",
+        Component: NewExpense,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring",
+        Component: RecurringExpences,
+        loader: protectedLoader,
+      },
+      {
+        path: "recurring/:id",
+        Component: GroupDetails,
+        loader: protectedLoader,
+      },
+      {
+        path: "balances",
+        Component: Balances,
+        loader: protectedLoader,
+      },
+      {
+        path: "settings",
+        Component: Settings,
+        loader: protectedLoader,
+      },
+    ],
+  },
+  { path: "*", Component: NotFound }, // Consider a dedicated 404 page later
 ];
 
 export const router = createBrowserRouter(routes);

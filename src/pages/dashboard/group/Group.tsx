@@ -11,7 +11,6 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import CreateGroup from "./CreateGroup";
 
-
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import useGetGroups from "@/lib/services/groups/getGroupsForUser";
 
@@ -114,11 +113,11 @@ const Group = () => {
                             <button className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
                               <Link2 className="h-4 w-4" />
                             </button>
-                            <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
-                              <Link to={`/dashboard/groups/${group.id}`}>
+                            <Link to={`/dashboard/groups/${group.id}`}>
+                              <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
                                 View
-                              </Link>
-                            </Button>
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </CardContent>
