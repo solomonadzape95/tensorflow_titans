@@ -58,11 +58,6 @@ const routes: RouteObject[] = [
 				loader: protectedLoader,
 			},
 			{
-				path: "groups/create",
-				Component: CreateGroup,
-				loader: protectedLoader,
-			},
-			{
 				path: "expenses",
 				Component: ExpensesOverview,
 				loader: protectedLoader,
