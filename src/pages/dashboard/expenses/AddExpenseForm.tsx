@@ -1,33 +1,40 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+	CardTitle,
 } from "@/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+
 import {
   CalendarDaysIcon,
   CalendarIcon,
@@ -35,12 +42,6 @@ import {
   Loader,
   RepeatIcon,
 } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,18 +54,19 @@ import { GroupData } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
 import { Switch } from "@/components/ui/switch";
+
 type GroupMember = {
-  id: string;
-  name: string;
-  avatar_url: string | null;
-  email: string;
+	id: string;
+	name: string;
+	avatar_url: string | null;
+	email: string;
 };
 
 type SplitData = {
-  [userId: string]: {
-    share_amount: number;
-    percentage?: number;
-  };
+	[userId: string]: {
+		share_amount: number;
+		percentage?: number;
+	};
 };
 
 export function AddExpenseForm() {
@@ -88,8 +90,8 @@ export function AddExpenseForm() {
     },
   });
 
-  const groupID = form.watch("group_id");
-  const expenseAmount = form.watch("amount");
+	const groupID = form.watch("group_id");
+	const expenseAmount = form.watch("amount");
 
   const { groupMembers, isLoading: isLoadingMembers } =
     useGetGroupMembers(groupID);
@@ -119,12 +121,12 @@ export function AddExpenseForm() {
           queryKey: ["expenses"],
         });
 
-        // If you have specific expense queries by group
-        if (form.watch("group_id")) {
-          queryClient.invalidateQueries({
-            queryKey: ["expenses", form.watch("group_id")],
-          });
-        }
+				// If you have specific expense queries by group
+				if (form.watch("group_id")) {
+					queryClient.invalidateQueries({
+						queryKey: ["expenses", form.watch("group_id")],
+					});
+				}
 
         return !fromGroups
           ? navigate("/dashboard/expenses", {
@@ -140,106 +142,113 @@ export function AddExpenseForm() {
     }
   }, [groupMembers, expenseAmount, splitMethod]);
 
-  // Calculate and update split data based on selected method
-  const updateSplitData = () => {
-    if (!groupMembers || !expenseAmount) return;
+	// Calculate and update split data based on selected method
+	const updateSplitData = () => {
+		if (!groupMembers || !expenseAmount) return;
 
-    const newSplitData: SplitData = {};
+		const newSplitData: SplitData = {};
 
-    if (splitMethod === "equal") {
-      const splitAmount = parseFloat(expenseAmount) / groupMembers.length;
-      const splitPercentage = 100 / groupMembers.length;
+		if (splitMethod === "equal") {
+			const splitAmount =
+				Number.parseFloat(expenseAmount) / groupMembers.length;
+			const splitPercentage = 100 / groupMembers.length;
 
-      groupMembers.forEach((member: GroupMember) => {
-        newSplitData[member.id] = {
-          share_amount: parseFloat(splitAmount.toFixed(2)),
-          percentage: parseFloat(splitPercentage.toFixed(2)),
-        };
-      });
-    } else if (splitMethod === "custom") {
-      // Maintain any existing custom amounts or initialize with 0
-      groupMembers.forEach((member: GroupMember) => {
-        newSplitData[member.id] = splitData[member.id] || {
-          amount: 0,
-          percentage: 0,
-        };
-      });
-    } else if (splitMethod === "percentage") {
-      // Initialize with equal percentages if not set
-      const defaultPercentage = 100 / groupMembers.length;
-      // Add validation check before updating split data for percentage method
-      let totalPercentage = 0;
-      groupMembers.forEach((member: GroupMember) => {
-        const percentage =
-          splitData[member.id]?.percentage || defaultPercentage;
-        totalPercentage += percentage;
-        if (totalPercentage > 100) return; // Skip if total exceeds 100%
-      });
-      groupMembers.forEach((member: GroupMember) => {
-        const percentage =
-          splitData[member.id]?.percentage || defaultPercentage;
-        newSplitData[member.id] = {
-          share_amount: parseFloat(
-            ((parseFloat(expenseAmount) * percentage) / 100).toFixed(2)
-          ),
-          percentage: percentage,
-        };
-      });
-    }
-    setSplitData(newSplitData);
-  };
+			groupMembers.forEach((member: GroupMember) => {
+				newSplitData[member.id] = {
+					share_amount: Number.parseFloat(splitAmount.toFixed(2)),
+					percentage: Number.parseFloat(splitPercentage.toFixed(2)),
+				};
+			});
+		} else if (splitMethod === "custom") {
+			// Maintain any existing custom amounts or initialize with 0
+			groupMembers.forEach((member: GroupMember) => {
+				newSplitData[member.id] = splitData[member.id] || {
+					amount: 0,
+					percentage: 0,
+				};
+			});
+		} else if (splitMethod === "percentage") {
+			// Initialize with equal percentages if not set
+			const defaultPercentage = 100 / groupMembers.length;
+			// Add validation check before updating split data for percentage method
+			let totalPercentage = 0;
+			groupMembers.forEach((member: GroupMember) => {
+				const percentage =
+					splitData[member.id]?.percentage || defaultPercentage;
+				totalPercentage += percentage;
+				if (totalPercentage > 100) return; // Skip if total exceeds 100%
+			});
+			groupMembers.forEach((member: GroupMember) => {
+				const percentage =
+					splitData[member.id]?.percentage || defaultPercentage;
+				newSplitData[member.id] = {
+					share_amount: Number.parseFloat(
+						((Number.parseFloat(expenseAmount) * percentage) / 100).toFixed(2),
+					),
+					percentage: percentage,
+				};
+			});
+		}
+		setSplitData(newSplitData);
+	};
 
-  // Handle custom amount change
-  const handleCustomAmountChange = (memberId: string, amount: string) => {
-    const numAmount = parseFloat(amount) || 0;
+	// Handle custom amount change
+	const handleCustomAmountChange = (memberId: string, amount: string) => {
+		const numAmount = Number.parseFloat(amount) || 0;
 
-    setSplitData((prev) => {
-      const newData = { ...prev };
-      newData[memberId] = {
-        share_amount: numAmount,
-        percentage: expenseAmount
-          ? (numAmount / parseFloat(expenseAmount)) * 100
-          : 0,
-      };
-      return newData;
-    });
-  };
+		setSplitData((prev) => {
+			const newData = { ...prev };
+			newData[memberId] = {
+				share_amount: numAmount,
+				percentage: expenseAmount
+					? (numAmount / Number.parseFloat(expenseAmount)) * 100
+					: 0,
+			};
+			return newData;
+		});
+	};
 
-  // Handle percentage slider change
-  const handlePercentageChange = (memberId: string, value: number[]) => {
-    const newPercentage = value[0];
+	// Handle percentage slider change
+	const handlePercentageChange = (memberId: string, value: number[]) => {
+		const newPercentage = value[0];
 
-    setSplitData((prev) => {
-      const newData = { ...prev };
-      const otherMembers = Object.keys(prev).filter((id) => id !== memberId);
+		setSplitData((prev) => {
+			const newData = { ...prev };
+			const otherMembers = Object.keys(prev).filter((id) => id !== memberId);
 
-      // Update the current member's percentage and amount
-      newData[memberId] = {
-        percentage: newPercentage,
-        share_amount: parseFloat(
-          ((parseFloat(expenseAmount || "0") * newPercentage) / 100).toFixed(2)
-        ),
-      };
+			// Update the current member's percentage and amount
+			newData[memberId] = {
+				percentage: newPercentage,
+				share_amount: Number.parseFloat(
+					(
+						(Number.parseFloat(expenseAmount || "0") * newPercentage) /
+						100
+					).toFixed(2),
+				),
+			};
 
-      // Calculate remaining percentage
-      const remaining = Math.max(0, 100 - newPercentage);
+			// Calculate remaining percentage
+			const remaining = Math.max(0, 100 - newPercentage);
 
-      // Distribute remaining percentage equally among other members
-      if (otherMembers.length > 0) {
-        const equalShare = remaining / otherMembers.length;
-        otherMembers.forEach((id) => {
-          newData[id] = {
-            percentage: equalShare,
-            share_amount: parseFloat(
-              ((parseFloat(expenseAmount || "0") * equalShare) / 100).toFixed(2)
-            ),
-          };
-        });
-      }
+			// Distribute remaining percentage equally among other members
+			if (otherMembers.length > 0) {
+				const equalShare = remaining / otherMembers.length;
+				otherMembers.forEach((id) => {
+					newData[id] = {
+						percentage: equalShare,
+						share_amount: Number.parseFloat(
+							(
+								(Number.parseFloat(expenseAmount || "0") * equalShare) /
+								100
+							).toFixed(2),
+						),
+					};
+				});
+			}
 
-      return newData;
-    });
-  };
+			return newData;
+		});
+	};
 
   const onSubmit = (data: CreateExpenseFormData) => {
     // Include the split data in your submission

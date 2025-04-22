@@ -17,3 +17,10 @@ export function capitalizeWords(str: string) {
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(" ");
 }
+
+export function formatNaira(amount: number) {
+	return new Intl.NumberFormat("en-NG", {
+		style: "currency",
+		currency: "NGN",
+	}).format(amount);
+}
