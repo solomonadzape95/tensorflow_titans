@@ -1,5 +1,7 @@
+// Improved IndexedDB service for offline expenses
 import { Group } from "@/types";
 import { CreateExpenseFormData } from "../schema";
+
 type ExpenseData = {
   id: number;
   name: string;
@@ -21,6 +23,15 @@ type ExpenseData = {
     settled_at: string | null;
   }[];
 };
+
+export type GroupMember = {
+  user_id: string;
+  name: string;
+  email: string;
+  initials: string;
+  avatar_url?: string;
+};
+
 export async function initializeDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = window.indexedDB.open("Splitwise Database", 1);
@@ -54,21 +65,35 @@ export async function initializeDatabase(): Promise<IDBDatabase> {
           });
         }
         if (!db.objectStoreNames.contains("groups")) {
-          db.createObjectStore("groups", {
+          const groupStore = db.createObjectStore("groups", {
+            keyPath: "id",
+          });
+          // Add indices to improve query performance
+          groupStore.createIndex("id", "id", { unique: true });
+        }
+        if (!db.objectStoreNames.contains("group_members")) {
+          const membersStore = db.createObjectStore("group_members", {
             keyPath: "id",
             autoIncrement: true,
           });
-        }
-        if (!db.objectStoreNames.contains("group_members")) {
-          db.createObjectStore("group_members", {
-            keyPath: "id",
-            autoIncrement: true,
+          // Add indices to improve query performance
+          membersStore.createIndex("group_id", "group_id", { unique: false });
+          membersStore.createIndex("user_id", "user_id", { unique: false });
+          membersStore.createIndex("group_user", ["group_id", "user_id"], {
+            unique: true,
           });
         }
         if (!db.objectStoreNames.contains("expense_participants")) {
-          db.createObjectStore("expense_participants", {
-            keyPath: "id",
-            autoIncrement: true,
+          const participantsStore = db.createObjectStore(
+            "expense_participants",
+            {
+              keyPath: "id",
+              autoIncrement: true,
+            }
+          );
+          // Add indices to improve query performance
+          participantsStore.createIndex("expense_id", "expense_id", {
+            unique: false,
           });
         }
       }
@@ -76,15 +101,11 @@ export async function initializeDatabase(): Promise<IDBDatabase> {
   });
 }
 
-// Function to add group data and its members to the database
+// Updated function to fix the storage of group members
+// Updated function to add group members without deleting other groups' members
 export async function addGroupData(
   group: Group & {
-    group_members: {
-      user_id: string;
-      name: string;
-      email: string;
-      initials: string;
-    }[];
+    group_members: GroupMember[];
   }
 ) {
   const db = await initializeDatabase();
@@ -94,9 +115,14 @@ export async function addGroupData(
       "readwrite"
     );
 
-    // Add the group to the "groups" object store
     const groupStore = transaction.objectStore("groups");
-    const groupRequest = groupStore.add({
+    const membersStore = transaction.objectStore("group_members");
+    
+    console.log("Adding group with members:", group);
+    console.log("Group members to store:", group.group_members);
+    
+    // Add or update the group in the "groups" object store
+    const groupRequest = groupStore.put({
       id: group.id,
       name: group.name,
       description: group.description,
@@ -104,26 +130,114 @@ export async function addGroupData(
       balance: group.balance,
       youOwe: group.youOwe,
       settled: group.settled,
+      updated_at: new Date().toISOString(), // Add timestamp for sync purposes
     });
 
-    groupRequest.onsuccess = (event) => {
-      const groupId = (event.target as IDBRequest).result;
-
-      // Add members to the "group_members" object store, referencing the group ID
-      const membersStore = transaction.objectStore("group_members");
-      group.group_members.forEach((member) => {
-        membersStore.add({ ...member, groupId });
-      });
-
-      console.log("Group and members added successfully:", group);
-      resolve(groupId);
+    groupRequest.onsuccess = () => {
+      // Only delete members associated with THIS group
+      const memberIndex = membersStore.index("group_id");
+      const membersRequest = memberIndex.getAll(group.id);
+      
+      membersRequest.onsuccess = () => {
+        const existingMembers = membersRequest.result;
+        
+        // If there are existing members for this group, delete them
+        if (existingMembers && existingMembers.length > 0) {
+          const deleteRequests = existingMembers.map((member: { id: number; group_id: string; user_id: string }) => {
+            return new Promise<void>((resolveDelete, rejectDelete) => {
+              const deleteRequest = membersStore.delete(member.id);
+              deleteRequest.onsuccess = () => resolveDelete();
+              deleteRequest.onerror = (event) => {
+                console.error("Error deleting member:", event);
+                rejectDelete(event);
+              };
+            });
+          });
+          
+          Promise.all(deleteRequests)
+            .then(() => addNewMembers())
+            .catch((error) => {
+              console.error("Error deleting existing members:", error);
+              reject(error);
+            });
+        } else {
+          // No existing members for this group, just add the new ones
+          addNewMembers();
+        }
+      };
+      
+      membersRequest.onerror = (event) => {
+        console.error("Error getting existing members:", event);
+        reject(event);
+      };
+      
+      // Function to add new members
+      const addNewMembers = () => {
+        if (!group.group_members || group.group_members.length === 0) {
+          console.log("No members to add for group:", group.id);
+          resolve(group.id);
+          return;
+        }
+        
+        console.log(`Adding ${group.group_members.length} members for group ${group.id}`);
+        
+        // Array to track completion of all member additions
+        const memberPromises: Promise<void>[] = [];
+        
+        // Add each member with explicit error handling
+        group.group_members.forEach((member) => {
+          const memberPromise = new Promise<void>((resolveMember, rejectMember) => {
+            try {
+              // Create a complete member record
+              const memberRecord = {
+                group_id: group.id,
+                user_id: member.user_id,
+                name: member.name || "",
+                email: member.email || "",
+                initials: member.initials || "",
+                avatar_url: member.avatar_url || "",
+              };
+              
+              console.log("Adding member record:", memberRecord);
+              
+              const addRequest = membersStore.add(memberRecord);
+              
+              addRequest.onsuccess = () => {
+                console.log(`Successfully added member ${member.user_id} to group ${group.id}`);
+                resolveMember();
+              };
+              
+              addRequest.onerror = (event) => {
+                console.error(`Error adding member ${member.user_id}:`, event);
+                rejectMember(event);
+              };
+            } catch (error) {
+              console.error("Exception while adding member:", error);
+              rejectMember(error);
+            }
+          });
+          
+          memberPromises.push(memberPromise);
+        });
+        
+        // Wait for all member additions to complete
+        Promise.all(memberPromises)
+          .then(() => {
+            console.log(`Successfully added all ${group.group_members.length} members to group ${group.id}`);
+            resolve(group.id);
+          })
+          .catch((error) => {
+            console.error("Error adding members:", error);
+            reject(error);
+          });
+      };
     };
 
     groupRequest.onerror = (event) => {
-      console.error("Failed to add group data:", event);
+      console.error("Failed to add/update group data:", event);
       reject(event);
     };
-
+    
     transaction.onerror = (event) => {
       console.error("Transaction failed:", event);
       reject(event);
@@ -131,17 +245,218 @@ export async function addGroupData(
   });
 }
 
+// Function to retrieve all group members across all groups
+export async function getAllGroupMembers(): Promise<{[groupId: string]: GroupMember[]}> {
+  const db = await initializeDatabase();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["group_members"], "readonly");
+    const membersStore = transaction.objectStore("group_members");
+    const membersRequest = membersStore.getAll();
+    
+    membersRequest.onsuccess = () => {
+      const allMembers = membersRequest.result;
+      
+      // Group members by group_id
+      const membersByGroup: {[groupId: string]: GroupMember[]} = {};
+      
+      allMembers.forEach((member: GroupMember & { group_id: string }) => {
+        if (!membersByGroup[member.group_id]) {
+          membersByGroup[member.group_id] = [];
+        }
+        membersByGroup[member.group_id].push({
+          user_id: member.user_id,
+          name: member.name,
+          email: member.email,
+          initials: member.initials,
+          avatar_url: member.avatar_url
+        });
+      });
+      
+      console.log("Retrieved all group members:", membersByGroup);
+      resolve(membersByGroup);
+    };
+    
+    membersRequest.onerror = (event) => {
+      console.error("Failed to retrieve all group members:", event);
+      reject(event);
+    };
+  });
+}
+
+// Function to get members of all groups the user belongs to
+export async function getAllMyGroupMembers(userId: string): Promise<{[groupId: string]: GroupMember[]}> {
+  const db = await initializeDatabase();
+  
+  return new Promise((resolve, reject) => {
+    // First, get all groups the user belongs to
+    const transaction = db.transaction(["group_members"], "readonly");
+    const membersStore = transaction.objectStore("group_members");
+    const userIndex = membersStore.index("user_id");
+    const userGroupsRequest = userIndex.getAll(userId);
+    
+    userGroupsRequest.onsuccess = () => {
+      const userGroups = userGroupsRequest.result;
+      const groupIds = userGroups.map((group: { group_id: string }) => group.group_id);
+      
+      if (groupIds.length === 0) {
+        resolve({});
+        return;
+      }
+      
+      // Now get all members for these groups
+      const membersByGroup: {[groupId: string]: GroupMember[]} = {};
+      let completedGroups = 0;
+      
+      groupIds.forEach(groupId => {
+        const groupIndex = membersStore.index("group_id");
+        const groupMembersRequest = groupIndex.getAll(groupId);
+        
+        groupMembersRequest.onsuccess = () => {
+          const groupMembers = groupMembersRequest.result;
+          membersByGroup[groupId] = groupMembers.map((member: { user_id: string; name: string; email: string; initials: string; avatar_url?: string }) => ({
+            user_id: member.user_id,
+            name: member.name,
+            email: member.email,
+            initials: member.initials,
+            avatar_url: member.avatar_url
+          }));
+          
+          completedGroups++;
+          if (completedGroups === groupIds.length) {
+            console.log("Retrieved all members for user's groups:", membersByGroup);
+            resolve(membersByGroup);
+          }
+        };
+        
+        groupMembersRequest.onerror = (event) => {
+          console.error(`Failed to retrieve members for group ${groupId}:`, event);
+          reject(event);
+        };
+      });
+    };
+    
+    userGroupsRequest.onerror = (event) => {
+      console.error(`Failed to retrieve groups for user ${userId}:`, event);
+      reject(event);
+    };
+  });
+}
+
+// Function to get members of a specific group
+export async function getGroupMembersFromIndexedDB(groupId: string): Promise<GroupMember[]> {
+  const db = await initializeDatabase();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["group_members"], "readonly");
+    const membersStore = transaction.objectStore("group_members");
+    const memberIndex = membersStore.index("group_id");
+    const membersRequest = memberIndex.getAll(groupId);
+    
+    membersRequest.onsuccess = () => {
+      const members = membersRequest.result.map((member: { user_id: string; name: string; email: string; initials: string; avatar_url?: string }) => ({
+        user_id: member.user_id,
+        name: member.name,
+        email: member.email,
+        initials: member.initials,
+        avatar_url: member.avatar_url
+      }));
+      
+      console.log(`Retrieved ${members.length} members for group ${groupId}:`, members);
+      resolve(members);
+    };
+    
+    membersRequest.onerror = (event) => {
+      console.error(`Failed to retrieve members for group ${groupId}:`, event);
+      reject(event);
+    };
+  });
+}
+
+// Helper function to verify group members exist in IndexedDB
+export async function verifyGroupMembersInDB(groupId: string): Promise<GroupMember[]> {
+  const db = await initializeDatabase();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["group_members"], "readonly");
+    const membersStore = transaction.objectStore("group_members");
+    const memberIndex = membersStore.index("group_id");
+    const membersRequest = memberIndex.getAll(groupId);
+    
+    membersRequest.onsuccess = () => {
+      const members = membersRequest.result;
+      console.log(`Found ${members.length} members for group ${groupId} in IndexedDB:`, members);
+      resolve(members);
+    };
+    
+    membersRequest.onerror = (event) => {
+      console.error(`Failed to verify members for group ${groupId}:`, event);
+      reject(event);
+    };
+  });
+}
+
+// Function to retrieve a specific group with its members
+export async function getGroupByIdFromIndexedDB(
+  groupId: string
+): Promise<Group | null> {
+  const db = await initializeDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["groups", "group_members"], "readonly");
+    const groupStore = transaction.objectStore("groups");
+    const groupRequest = groupStore.get(groupId);
+
+    groupRequest.onsuccess = () => {
+      const group = groupRequest.result;
+
+      if (!group) {
+        resolve(null);
+        return;
+      }
+
+      const membersStore = transaction.objectStore("group_members");
+      const memberIndex = membersStore.index("group_id");
+      const membersRequest = memberIndex.getAll(groupId);
+
+      membersRequest.onsuccess = () => {
+        const members = membersRequest.result.map(
+          (member: {
+            user_id: string;
+            name: string;
+            initials: string;
+            email: string;
+            avatar_url?: string;
+          }) => ({
+            id: member.user_id,
+            name: member.name,
+            initials: member.initials,
+            email: member.email,
+            avatar_url: member.avatar_url,
+          })
+        );
+
+        resolve({
+          ...group,
+          members,
+        });
+      };
+
+      membersRequest.onerror = (event) => {
+        console.error("Failed to retrieve group members:", event);
+        reject(event);
+      };
+    };
+
+    groupRequest.onerror = (event) => {
+      console.error("Failed to retrieve group:", event);
+      reject(event);
+    };
+  });
+}
+
 // Function to retrieve all group data along with their members
-export async function getAllGroupsWithMembers(): Promise<
-  (Group & {
-    group_members: {
-      user_id: string;
-      name: string;
-      email: string;
-      initials: string;
-    }[];
-  })[]
-> {
+export async function getAllGroupsWithMembers() {
   const db = await initializeDatabase();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(["groups", "group_members"], "readonly");
@@ -151,40 +466,55 @@ export async function getAllGroupsWithMembers(): Promise<
 
     groupRequest.onsuccess = async () => {
       const groups = groupRequest.result;
+      if (!groups || groups.length === 0) {
+        resolve([]);
+        return;
+      }
 
-      const membersStore = transaction.objectStore("group_members");
-      const membersRequest = membersStore.getAll();
+      try {
+        const groupsWithMembers = await Promise.all(
+          groups.map(async (group) => {
+            return new Promise((resolveGroup, rejectGroup) => {
+              const membersStore = transaction.objectStore("group_members");
+              const memberIndex = membersStore.index("group_id");
+              const membersRequest = memberIndex.getAll(group.id);
 
-      membersRequest.onsuccess = () => {
-        const members = membersRequest.result;
+              membersRequest.onsuccess = () => {
+                const members = membersRequest.result;
+                resolveGroup({
+                  ...group,
+                  group_members: members,
+                  members: members.map(
+                    (member: {
+                      user_id: string;
+                      name: string;
+                      initials: string;
+                    }) => ({
+                      id: member.user_id,
+                      name: member.name,
+                      initials: member.initials,
+                    })
+                  ),
+                });
+              };
 
-        // Map members to their respective groups
-        const groupsWithMembers = groups.map(
-          (
-            group: Group & {
-              group_members: {
-                user_id: string;
-                name: string;
-                email: string;
-                initials: string;
-              }[];
-            }
-          ) => ({
-            ...group,
-            group_members: members.filter(
-              (member: { groupId: string }) => member.groupId === group.id
-            ),
+              membersRequest.onerror = (event) => {
+                console.error(
+                  `Failed to retrieve members for group ${group.id}:`,
+                  event
+                );
+                rejectGroup(event);
+              };
+            });
           })
         );
 
         console.log("Retrieved groups with members:", groupsWithMembers);
         resolve(groupsWithMembers);
-      };
-
-      membersRequest.onerror = (event) => {
-        console.error("Failed to retrieve group members:", event);
-        reject(event);
-      };
+      } catch (error) {
+        console.error("Error processing groups with members:", error);
+        reject(error);
+      }
     };
 
     groupRequest.onerror = (event) => {
@@ -228,6 +558,8 @@ export async function addExpenseToIndexedDB(
         ? data.recurring_end_date.toISOString()
         : null,
       recurring_count: data.recurring_count || null,
+      created_at: new Date().toISOString(),
+      is_synced: false, // Flag to indicate if the expense has been synced to the server
     });
 
     expenseRequest.onsuccess = (event) => {
@@ -239,6 +571,7 @@ export async function addExpenseToIndexedDB(
           expense_id: expenseId,
           user_id: userId,
           share_amount: splitData.share_amount,
+          percentage: splitData.percentage || null,
           is_settled: userId === data.payer_id,
           settled_at:
             userId === data.payer_id ? new Date().toISOString() : null,
@@ -247,23 +580,43 @@ export async function addExpenseToIndexedDB(
 
       // Add participants to the "expense_participants" object store
       const participantsStore = transaction.objectStore("expense_participants");
-      participantsData.forEach((participant) => {
-        participantsStore.add(participant);
+
+      const participantPromises = participantsData.map((participant) => {
+        return new Promise<void>((resolveParticipant) => {
+          const addRequest = participantsStore.add(participant);
+          addRequest.onsuccess = () => resolveParticipant();
+        });
       });
 
-      transaction.oncomplete = () => {
+      Promise.all(participantPromises).then(() => {
         console.log("Expense and participants added successfully to IndexedDB");
-        resolve({ expenseId, participants: participantsData });
-      };
 
-      transaction.onerror = (event) => {
-        console.error("Failed to add expense or participants:", event);
-        reject(event);
-      };
+        // Update the group's expense count
+        const groupStore = db
+          .transaction("groups", "readwrite")
+          .objectStore("groups");
+        const getGroupRequest = groupStore.get(data.group_id);
+
+        getGroupRequest.onsuccess = () => {
+          const group = getGroupRequest.result;
+
+          if (group) {
+            group.expenses = (group.expenses || 0) + 1;
+            groupStore.put(group);
+          }
+        };
+
+        resolve({ expenseId, participants: participantsData });
+      });
     };
 
     expenseRequest.onerror = (event) => {
       console.error("Failed to add expense:", event);
+      reject(event);
+    };
+
+    transaction.onerror = (event) => {
+      console.error("Failed to add expense or participants:", event);
       reject(event);
     };
   });
@@ -283,6 +636,11 @@ export async function getExpensesFromIndexedDB(): Promise<ExpenseData[]> {
 
     expenseRequest.onsuccess = () => {
       const expenses = expenseRequest.result;
+
+      if (!expenses || expenses.length === 0) {
+        resolve([]);
+        return;
+      }
 
       const participantsStore = transaction.objectStore("expense_participants");
       const participantsRequest = participantsStore.getAll();
@@ -321,6 +679,185 @@ export async function getExpensesFromIndexedDB(): Promise<ExpenseData[]> {
 
     expenseRequest.onerror = (event) => {
       console.error("Failed to retrieve expenses:", event);
+      reject(event);
+    };
+  });
+}
+
+// Get group expenses by group ID
+export async function getGroupExpensesFromIndexedDB(
+  groupId: string
+): Promise<ExpenseData[]> {
+  const db = await initializeDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      ["expenses", "expense_participants"],
+      "readonly"
+    );
+
+    const expenseStore = transaction.objectStore("expenses");
+    const expenseRequest = expenseStore.getAll();
+
+    expenseRequest.onsuccess = () => {
+      const allExpenses = expenseRequest.result;
+      const groupExpenses = allExpenses.filter(
+        (expense: ExpenseData) => expense.group_id === groupId
+      );
+
+      if (groupExpenses.length === 0) {
+        resolve([]);
+        return;
+      }
+
+      const participantsStore = transaction.objectStore("expense_participants");
+      const participantsRequest = participantsStore.getAll();
+
+      participantsRequest.onsuccess = () => {
+        const participants = participantsRequest.result;
+
+        // Map participants to their respective expenses
+        const expensesWithParticipants = groupExpenses.map(
+          (expense: ExpenseData) => ({
+            ...expense,
+            participants: participants.filter(
+              (participant: {
+                expense_id: number;
+                user_id: string;
+                share_amount: number;
+                is_settled: boolean;
+                settled_at: string | null;
+              }) => participant.expense_id === expense.id
+            ),
+          })
+        );
+
+        console.log(
+          `Retrieved expenses for group ${groupId} from IndexedDB:`,
+          expensesWithParticipants
+        );
+        resolve(expensesWithParticipants);
+      };
+
+      participantsRequest.onerror = (event) => {
+        console.error("Failed to retrieve participants:", event);
+        reject(event);
+      };
+    };
+
+    expenseRequest.onerror = (event) => {
+      console.error("Failed to retrieve expenses:", event);
+      reject(event);
+    };
+  });
+}
+
+// Function to get unsynchronized expenses for syncing to Supabase
+export async function getUnsyncedExpenses(): Promise<ExpenseData[]> {
+  const db = await initializeDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      ["expenses", "expense_participants"],
+      "readonly"
+    );
+
+    const expenseStore = transaction.objectStore("expenses");
+    const expenseRequest = expenseStore.getAll();
+
+    expenseRequest.onsuccess = () => {
+      const allExpenses = expenseRequest.result;
+      const unsyncedExpenses = allExpenses.filter(
+        (expense: ExpenseData & { is_synced: boolean }) =>
+          expense.is_synced === false
+      );
+
+      if (unsyncedExpenses.length === 0) {
+        resolve([]);
+        return;
+      }
+
+      const participantsStore = transaction.objectStore("expense_participants");
+      const participantsRequest = participantsStore.getAll();
+
+      participantsRequest.onsuccess = () => {
+        const participants = participantsRequest.result;
+
+        // Map participants to their respective expenses
+        const expensesWithParticipants = unsyncedExpenses.map(
+          (expense: ExpenseData) => ({
+            ...expense,
+            participants: participants.filter(
+              (participant: {
+                expense_id: number;
+                user_id: string;
+                share_amount: number;
+                is_settled: boolean;
+                settled_at: string | null;
+              }) => participant.expense_id === expense.id
+            ),
+          })
+        );
+
+        console.log(
+          "Retrieved unsynced expenses from IndexedDB:",
+          expensesWithParticipants
+        );
+        resolve(expensesWithParticipants);
+      };
+
+      participantsRequest.onerror = (event) => {
+        console.error("Failed to retrieve participants:", event);
+        reject(event);
+      };
+    };
+
+    expenseRequest.onerror = (event) => {
+      console.error("Failed to retrieve unsynced expenses:", event);
+      reject(event);
+    };
+  });
+}
+
+// Function to mark an expense as synced after uploading to Supabase
+export async function markExpenseAsSynced(expenseId: number): Promise<void> {
+  const db = await initializeDatabase();
+
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["expenses"], "readwrite");
+    const expenseStore = transaction.objectStore("expenses");
+
+    const getRequest = expenseStore.get(expenseId);
+
+    getRequest.onsuccess = () => {
+      const expense = getRequest.result;
+
+      if (expense) {
+        expense.is_synced = true;
+        expense.synced_at = new Date().toISOString();
+
+        const updateRequest = expenseStore.put(expense);
+
+        updateRequest.onsuccess = () => {
+          console.log(`Expense ${expenseId} marked as synced`);
+          resolve();
+        };
+
+        updateRequest.onerror = (event) => {
+          console.error(
+            `Failed to mark expense ${expenseId} as synced:`,
+            event
+          );
+          reject(event);
+        };
+      } else {
+        console.error(`Expense ${expenseId} not found`);
+        reject(new Error(`Expense ${expenseId} not found`));
+      }
+    };
+
+    getRequest.onerror = (event) => {
+      console.error(`Failed to retrieve expense ${expenseId}:`, event);
       reject(event);
     };
   });

@@ -21,4 +21,5 @@ export type Group = {
   balance: number;
   youOwe: boolean;
   settled?: boolean;
+ 
 };

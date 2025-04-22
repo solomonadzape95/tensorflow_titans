@@ -56,8 +56,8 @@ import { Switch } from "@/components/ui/switch";
 type GroupMember = {
   id: string;
   name: string;
-  avatar_url: string | null;
-  email: string;
+  avatar_url?: string | null;
+  email?: string;
 };
 
 type SplitData = {
@@ -737,7 +737,7 @@ export function AddExpenseForm() {
                             <span>Loading Group Members</span>
                           </div>
                         ) : groupMembers && groupMembers.length > 0 ? (
-                          groupMembers.map((member: GroupMember) => (
+                          (groupMembers as GroupMember[]).map((member) => (
                             <div
                               key={member.id}
                               className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"
