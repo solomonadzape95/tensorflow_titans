@@ -1,10 +1,8 @@
-import type React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLoaderData } from "react-router";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useForm} from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,7 +93,11 @@ export function AddExpenseForm() {
 	const { data: groups } = useSuspenseQuery<Group[]>({
 		queryKey: ["userGroups"],
 		queryFn: async () => {
-			return await getMyGroups(loaderData.user.id);
+			const data = await getMyGroups(loaderData.user.id);
+			return data.map(item => ({
+				...item,
+				updated_at: null 
+			}));
 		},
 		staleTime: Number.POSITIVE_INFINITY,
 	});
@@ -262,7 +264,10 @@ export function AddExpenseForm() {
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent className="glass">
-											{groups && groups.map((group) => (
+											<SelectItem value="select group" disabled>
+												Select a group
+											</SelectItem>
+											{groups && groups.map((group: Group) => (
 												<SelectItem key={group.id} value={group.id}>
 													{group.name}
 												</SelectItem>
@@ -395,10 +400,10 @@ export function AddExpenseForm() {
 											>
 												<div className="flex items-center gap-3">
 													<Avatar className="animate-float">
-														<AvatarImage
+														{/* <AvatarImage
 															src={loaderData.user.avatar_url}
 															alt="You"
-														/>
+														/> */}
 														<AvatarFallback>You</AvatarFallback>
 													</Avatar>
 													<span>You</span>
@@ -495,10 +500,10 @@ export function AddExpenseForm() {
 															<div className="flex items-center justify-between">
 																<div className="flex items-center gap-3">
 																	<Avatar className="animate-float">
-																		<AvatarImage
+																		{/* <AvatarImage
 																			src={loaderData.user.avatar_url}
 																			alt="You"
-																		/>
+																		/> */}
 																		<AvatarFallback>You</AvatarFallback>
 																	</Avatar>
 																	<span>You</span>
@@ -531,10 +536,10 @@ export function AddExpenseForm() {
 																<div className="flex items-center justify-between">
 																	<div className="flex items-center gap-3">
 																		<Avatar className="animate-float">
-																			<AvatarImage
+																			{/* <AvatarImage
 																				src={member.avatar_url ?? undefined}
 																				alt={member.full_name}
-																			/>
+																			/> */}
 																			<AvatarFallback>{getInitials(member.full_name)}</AvatarFallback>
 																		</Avatar>
 																		<span className="capitalize">{member.full_name.toLowerCase()}</span>
