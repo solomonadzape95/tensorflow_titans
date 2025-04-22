@@ -64,20 +64,18 @@ export async function getMembersOfMyCreatedGroups(currentUserId: string) {
         groups!inner ( creator_id )
       `,
 		)
-		.eq("groups.creator_id", currentUserId) // Filter by creator
-		.neq("user_id", currentUserId) // Exclude the creator of the group
-		.limit(15); // Limit to 15 results cause it currently doesn't make too much sense to show all cause if the user has like 200 members in their groups, it would be a bit overwhelming to scroll through all those members
+		.eq("groups.creator_id", currentUserId)
+		.neq("user_id", currentUserId)
+		.limit(15);
 
 	if (error) {
 		throw error;
 	}
 
-	// Extract unique profiles from the results
 	const memberProfiles = data
 		?.map((item) => item.profiles)
 		.filter((profile) => profile !== null);
 
-	// Ensure uniqueness based on profile ID
 	const uniqueMembers = Array.from(
 		new Map(memberProfiles?.map((member) => [member?.id, member])).values(),
 	);
@@ -90,7 +88,7 @@ export async function findUserByEmail(email: string, userId: string) {
 		.from("profiles")
 		.select("id, full_name, email, avatar_url")
 		.eq("email", email)
-		.neq("id", userId) // Exclude the current user
+		.neq("id", userId)
 		.single();
 
 	// PGRST116: "Searched for a single row, but found 0 rows" - this is expected if user not found
@@ -104,7 +102,6 @@ export async function findUserByEmail(email: string, userId: string) {
 }
 
 export async function getAllFriendsForUser(userId: string) {
-	// 1. Get all group IDs the user is a member of
 	const { data: groupMemberships, error: groupError } = await supabase
 		.from("group_members")
 		.select("group_id")
@@ -112,16 +109,15 @@ export async function getAllFriendsForUser(userId: string) {
 
 	if (groupError) {
 		console.error("Error fetching user groups:", groupError);
-		// Return error state or throw? Returning for now.
+
 		return { count: 0, profiles: [], error: groupError };
 	}
 	if (!groupMemberships || groupMemberships.length === 0) {
-		return { count: 0, profiles: [], error: null }; // User is not in any groups
+		return { count: 0, profiles: [], error: null };
 	}
 
 	const groupIds = groupMemberships.map((gm) => gm.group_id);
 
-	// 2. Get all unique user IDs from those groups, excluding the current user
 	const { data: allMembers, error: membersError } = await supabase
 		.from("group_members")
 		.select("user_id")
@@ -136,15 +132,14 @@ export async function getAllFriendsForUser(userId: string) {
 	const uniqueFriendIds = [...new Set(allMembers?.map((m) => m.user_id) || [])];
 
 	if (uniqueFriendIds.length === 0) {
-		return { count: 0, profiles: [], error: null }; // No other members in the groups
+		return { count: 0, profiles: [], error: null };
 	}
 
-	// 3. Get profile details for these unique friends (limit for display)
 	const { data: friendProfiles, error: profilesError } = await supabase
 		.from("profiles")
 		.select("id, full_name, avatar_url")
 		.in("id", uniqueFriendIds)
-		.limit(10); // Limit for avatar display, adjust as needed
+		.limit(10);
 
 	if (profilesError) {
 		console.error("Error fetching friend profiles:", profilesError);
@@ -168,7 +163,6 @@ export async function createGroup(
 ) {
 	console.log(creatorId);
 
-	// 1. Create the group
 	const { data: groupData, error: groupError } = await supabase
 		.from("groups")
 		.insert({
@@ -280,13 +274,12 @@ export async function getDashboardCardData(userId: string) {
 				.lte("expense_date", endOfPrevMonth),
 		]);
 
-		// --- Process Balances ---
 		if (balanceResult.error) throw balanceResult.error;
 		const balanceDetails = balanceResult.data || [];
 		let total_owed_to_user = 0;
 		let total_user_owes = 0;
 		for (const balance of balanceDetails) {
-			const netAmount = balance.net_amount ?? 0; // Handle potential null value
+			const netAmount = balance.net_amount ?? 0;
 			if (netAmount > 0) {
 				total_owed_to_user += netAmount;
 			} else {
@@ -341,8 +334,47 @@ export async function getDashboardCardData(userId: string) {
 		};
 	} catch (error) {
 		console.error("Error fetching dashboard card data:", error);
-		// Depending on requirements, you might want to return a default state
-		// or re-throw the error to be handled by the caller.
-		throw error; // Re-throwing for now
+
+		throw error;
 	}
+}
+
+export async function getRecentActivities(userId: string, limit = 5) {
+	const { data: participationData, error: participationError } = await supabase
+		.from("expense_participants")
+		.select("expense_id")
+		.eq("user_id", userId);
+
+	if (participationError) {
+		console.error("Error fetching expense participations:", participationError);
+		throw participationError;
+	}
+
+	const participatedExpenseIds =
+		participationData?.map((p) => p.expense_id) || [];
+
+	let orFilter = `payer_id.eq.${userId}`;
+	if (participatedExpenseIds.length > 0) {
+		orFilter += `,id.in.(${participatedExpenseIds.join(",")})`;
+	}
+
+	const { data, error } = await supabase
+		.from("expenses")
+		.select(`
+      id,
+      description,
+       amount,
+       expense_date,
+       payer:profiles!payer_id ( full_name, avatar_url )
+     `)
+		.or(orFilter)
+		.order("expense_date", { ascending: false })
+		.limit(limit);
+
+	if (error) {
+		console.error("Error fetching recent activities:", error);
+		throw error;
+	}
+
+	return data || [];
 }
