@@ -54,12 +54,12 @@ import { GroupData } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
 import { Switch } from "@/components/ui/switch";
-
+import { toast } from "sonner";
 type GroupMember = {
-	id: string;
-	name: string;
-	avatar_url: string | null;
-	email: string;
+  id: string;
+  name: string;
+  avatar_url?: string | null;
+  email?: string;
 };
 
 type SplitData = {
@@ -89,7 +89,6 @@ export function AddExpenseForm() {
       group_id: id || "",
     },
   });
-
 	const groupID = form.watch("group_id");
 	const expenseAmount = form.watch("amount");
 
@@ -264,8 +263,12 @@ export function AddExpenseForm() {
         recurring_count: data.recurring_count,
       }),
     };
-    createNewExpense(formData);
-    console.log("Submitting expense data:", formData);
+    toast.promise(createNewExpense(formData), {
+      loading: "Creating expense...",
+      success: "Expense created successfully!",
+      error: (error) => error.message,
+    });
+    // console.log("Submitting expense data:", formData);
   };
 
   return (
@@ -746,7 +749,7 @@ export function AddExpenseForm() {
                             <span>Loading Group Members</span>
                           </div>
                         ) : groupMembers && groupMembers.length > 0 ? (
-                          groupMembers.map((member: GroupMember) => (
+                          (groupMembers as GroupMember[]).map((member) => (
                             <div
                               key={member.id}
                               className="space-y-2 rounded-lg glass p-3 hover:shadow-glow transition-all duration-300"

@@ -24,36 +24,6 @@ import {
 } from "../ui/breadcrumb";
 
 
-// const groups: Record<string, Group> = {
-//   "1": {
-//     id: 1,
-//     name: "Roommates",
-//     description: "Rent, utilities, and household expenses",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//       { id: 4, name: "Mike Wilson", initials: "MW" },
-//     ],
-//     expenses: 12,
-//     balance: 195.0,
-//     youOwe: false,
-//   },
-//   "2": {
-//     id: 2,
-//     name: "Trip to Paris",
-//     description: "Travel expenses for our vacation",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//     ],
-//     expenses: 8,
-//     balance: 74.61,
-//     youOwe: true,
-//   },
-// };
-
 function GroupDetails() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();

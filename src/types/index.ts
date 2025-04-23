@@ -16,9 +16,10 @@ export type Group = {
   id: string;
   name: string;
   description: string;
-  members: { id: string; name: string; initials: string }[];
+  members: { id: string ; name: string; initials: string }[];
   expenses: number;
   balance: number;
   youOwe: boolean;
   settled?: boolean;
+ 
 };

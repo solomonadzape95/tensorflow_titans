@@ -1,59 +1,156 @@
 import type { GroupData } from "@/types";
 import type { CreateGroupFormData } from "../schema";
 import supabase from "../supabase";
+import {
+  addGroupData,
+  getAllGroupsWithMembers,
+  GroupMember,
+} from "@/lib/services/offlineExpenses";
+
 export async function getGroupsForUser(userId: string) {
-	const { data, error } = await supabase
-		.from("group_members")
-		.select(
-			`
-    group_id,
-    groups ( id, name, description, creator_id )
-    `,
-		)
-		.eq("user_id", userId);
-	const rawGroups =
-		(data
-			?.map((item) => item.groups)
-			.filter((group) => group !== null) as unknown as GroupData[]) || [];
-	for (const group of rawGroups) {
-		const { count, error: countError } = await supabase
-			.from("group_members")
-			.select("*", { count: "exact", head: true })
-			.eq("group_id", group.id);
 
-		const { count: expenseCount, error: expenseError } = await supabase
-			.from("expenses")
-			.select("*", { count: "exact", head: true })
-			.eq("group_id", group.id);
-		console.log("count", expenseCount);
-		if (countError || expenseError) {
-			console.error(
-				`Error fetching member count for group ${group.id}:`,
-				countError || expenseError,
-			);
-			group.expenseCount = 0;
-			group.memberCount = 0;
-		} else {
-			group.expenseCount = expenseCount || 0;
-			group.memberCount = count || 0;
-		}
-	}
+  try {
+    // Fetch groups from Supabase
+    const { data, error } = await supabase
+      .from("group_members")
+      .select(
+        `
+        group_id,
+        groups ( id, name, description, creator_id )
+        `
+      )
+      .eq("user_id", userId);
 
-	if (error) {
-		throw error;
-	}
-	return (
-		rawGroups.map((group) => ({
-			id: group.id,
-			name: group.name,
-			description: group.description || "",
-			expenseCount: group.expenseCount || 0,
-			balance: group.balance || { amount: 0, isOwed: false },
-			memberCount: group.memberCount || 0,
-			members: [],
-		})) || []
-	);
+    if (error) throw error;
+
+    const rawGroups =
+      (data
+        ?.map((item) => item.groups)
+        .filter((group) => group !== null) as unknown as GroupData[]) || [];
+
+    // Fetch additional group details and members
+    for (const group of rawGroups) {
+      const { count, error: countError } = await supabase
+        .from("group_members")
+        .select("*", { count: "exact", head: true })
+        .eq("group_id", group.id);
+
+      const { count: expenseCount, error: expenseError } = await supabase
+        .from("expenses")
+        .select("*", { count: "exact", head: true })
+        .eq("group_id", group.id);
+
+      if (countError || expenseError) {
+        console.error(
+          `Error fetching counts for group ${group.id}:`,
+          countError || expenseError
+        );
+        group.expenseCount = 0;
+        group.memberCount = 0;
+      } else {
+        group.expenseCount = expenseCount || 0;
+        group.memberCount = count || 0;
+      }
+
+      // Fetch members for this group
+      const { data: membersData, error: membersError } = await supabase
+        .from("group_members")
+        .select(
+          `
+          user_id,
+          profiles ( id, full_name, email, avatar_url )
+          `
+        )
+        .eq("group_id", group.id);
+
+      if (membersError) {
+        console.error(
+          `Error fetching members for group ${group.id}:`,
+          membersError
+        );
+        continue;
+      }
+
+      // Process members data
+      const groupMembers: GroupMember[] = membersData.map((member) => ({
+        user_id: member.profiles.id,
+        name: member.profiles.full_name,
+        email: member.profiles.email || "",
+        avatar_url: member.profiles.avatar_url || "",
+        initials: member.profiles.full_name
+          .split(" ")
+          .map((word) => word[0])
+          .join("")
+          .toUpperCase(),
+      }));
+
+      // Store group data in IndexedDB
+      await addGroupData({
+        id: group.id,
+        name: group.name,
+        description: group.description || "",
+        members: [], // Will be populated from group_members
+        group_members: groupMembers,
+        expenses: group.expenseCount || 0,
+        balance: 0,
+        youOwe: false,
+        settled: false,
+      });
+    }
+
+    return (
+      rawGroups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        description: group.description || "",
+        expenseCount: group.expenseCount || 0,
+        balance: group.balance || { amount: 0, isOwed: false },
+        memberCount: group.memberCount || 0,
+        members: [],
+      })) || []
+    );
+  } catch (error) {
+    console.error("Error fetching groups from Supabase:", error);
+
+    // Fallback to IndexedDB if Supabase fails
+    const offlineGroups = (await getAllGroupsWithMembers()) as OfflineGroup[];
+    interface GroupBalance {
+      amount: number;
+      isOwed: boolean;
+    }
+
+    interface GroupSummary {
+      id: string;
+      name: string;
+      description: string;
+      expenseCount: number;
+      balance: GroupBalance;
+      memberCount: number;
+      members: GroupMember[];
+    }
+
+    interface OfflineGroup {
+      id: string;
+      name: string;
+      description: string;
+      expenses: number;
+      balance: number;
+      youOwe: boolean;
+      members: GroupMember[];
+    }
+
+        return offlineGroups.map((group: OfflineGroup): GroupSummary => ({
+          id: group.id,
+          name: group.name,
+          description: group.description,
+          expenseCount: group.expenses,
+          balance: { amount: group.balance, isOwed: group.youOwe },
+          memberCount: group.members.length,
+          members: group.members,
+        }));
+  }
 }
+
 export async function getMembersOfMyCreatedGroups(currentUserId: string) {
 	const { data, error } = await supabase
 		.from("group_members")
@@ -200,27 +297,27 @@ export async function createGroup(
 }
 
 export async function fetchBalances(userId: string) {
-	const { data, error } = await supabase.rpc("get_user_balances", {
-		current_user_id: userId,
-	});
+  const { data, error } = await supabase.rpc("get_user_balances", {
+    current_user_id: userId,
+  });
 
-	if (error) {
-		throw error;
-	}
+  if (error) {
+    throw error;
+  }
 
-	return data;
+  return data;
 }
 
 export async function fetchGroupBalances(userId: string) {
-	const { data, error } = await supabase.rpc("get_user_group_balances", {
-		p_current_user_id: userId,
-	});
+  const { data, error } = await supabase.rpc("get_user_group_balances", {
+    p_current_user_id: userId,
+  });
 
-	if (error) {
-		throw error;
-	}
+  if (error) {
+    throw error;
+  }
 
-	return data;
+  return data;
 }
 
 export async function getDashboardCardData(userId: string) {
