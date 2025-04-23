@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -20,13 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   ArrowRight,
   ArrowUpDown,
@@ -46,6 +36,7 @@ import useGetExpenses from "@/lib/services/expenses/useGetExpenses";
 import { formatNaira } from "@/lib/utils";
 import { Expense } from "@/types";
 import NoExpenseUI from "@/components/dashboard/NoExpense";
+import ExpenseModal from "@/components/dashboard/ExpenseModal";
 
 const categoryIcons = {
   "Food & Drink": Utensils,
@@ -205,7 +196,7 @@ export default function ExpensesOverview() {
   ];
 
   // Check if there are any active filters
-  const hasActiveFilters: boolean = Boolean(searchQuery) || selectedGroup !== "all" || selectedCategory !== "all";
+  const hasActiveFilters = Boolean(searchQuery) || selectedGroup !== "all" || selectedCategory !== "all";
 
   return (
     <div className="space-y-8">
@@ -239,19 +230,19 @@ export default function ExpensesOverview() {
         <TabsList className="glass">
           <TabsTrigger
             value="all"
-            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             All Expenses
           </TabsTrigger>
           <TabsTrigger
             value="you-paid"
-            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             You Paid
           </TabsTrigger>
           <TabsTrigger
             value="you-owe"
-            className="dark:data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF]  hover:text-muted-foreground  px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
+            className="dark:data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
           >
             You Owe
           </TabsTrigger>
@@ -600,73 +591,11 @@ export default function ExpensesOverview() {
         )}
       </Tabs>
 
-      {/* Expense Detail Modal */}
-      <Dialog
+      <ExpenseModal
+        expense={selectedExpense}
         open={!!selectedExpense}
         onOpenChange={(open) => !open && setSelectedExpense(null)}
-      >
-        <DialogContent className="glass sm:max-w-md">
-          {selectedExpense && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-display">
-                  {selectedExpense.description}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedExpense.formattedDate} • {selectedExpense.category}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={selectedExpense.user.avatar}
-                        alt={selectedExpense.user.name ?? 'User Avatar'}
-                      />
-                      <AvatarFallback>
-                        {selectedExpense.user.initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{selectedExpense.user.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Paid {formatNaira(selectedExpense.amount)}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-lg font-bold">
-                    {formatNaira(selectedExpense.amount)}
-                  </p>
-                </div>
-                <div className="border-t border-muted-foreground/20 pt-4">
-                  <p className="font-medium">Participants</p>
-                  <ul className="list-disc list-inside">
-                    {selectedExpense.participants?.map((participant, index) => (
-                      <li key={index} className="text-sm text-muted-foreground">
-                        {participant.name}: {formatNaira(participant.amount)}
-                      </li>
-                    )) || <li className="text-sm text-muted-foreground">No participants</li>}
-                  </ul>
-                </div>
-                <div className="border-t border-muted-foreground/20 pt-4">
-                  <p className="font-medium">Notes</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedExpense.notes || "No notes provided"}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                className="w-full mt-4"
-                onClick={() => setSelectedExpense(null)}
-              >
-                Close
-              </Button>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      />
     </div>
   );
 }
