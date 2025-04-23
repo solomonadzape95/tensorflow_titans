@@ -1,28 +1,27 @@
 // Improved IndexedDB service for offline expenses
 import { Group } from "@/types";
-import { CreateExpenseFormData } from "../schema";
 
-type ExpenseData = {
-  id: number;
-  name: string;
-  description: string;
-  amount: number;
-  group_id: string;
-  payer_id: string;
-  expense_date: string;
-  split_type: string;
-  is_recurring: boolean;
-  recurring_frequency: string | null;
-  recurring_end_date: string | null;
-  recurring_count: number | null;
-  participants: {
-    expense_id: number;
-    user_id: string;
-    share_amount: number;
-    is_settled: boolean;
-    settled_at: string | null;
-  }[];
-};
+// type ExpenseData = {
+//   id: number;
+//   name: string;
+//   description: string;
+//   amount: number;
+//   group_id: string;
+//   payer_id: string;
+//   expense_date: string;
+//   split_type: string;
+//   is_recurring: boolean;
+//   recurring_frequency: string | null;
+//   recurring_end_date: string | null;
+//   recurring_count: number | null;
+//   participants: {
+//     expense_id: number;
+//     user_id: string;
+//     share_amount: number;
+//     is_settled: boolean;
+//     settled_at: string | null;
+//   }[];
+// };
 
 export type GroupMember = {
   user_id: string;
@@ -46,7 +45,7 @@ export async function initializeDatabase(): Promise<IDBDatabase> {
       const target = event.target as IDBOpenDBRequest;
       if (target) {
         const db = target.result;
-        console.log("Database initialized:", db);
+        // console.log("Database initialized:", db);
         resolve(db);
       }
     };
@@ -55,7 +54,7 @@ export async function initializeDatabase(): Promise<IDBDatabase> {
       const target = event.target as IDBOpenDBRequest;
       if (target) {
         const db = target.result;
-        console.log("Upgrading database...");
+        // console.log("Upgrading database...");
 
         // Create object stores if they don't exist
         if (!db.objectStoreNames.contains("expenses")) {
@@ -118,8 +117,8 @@ export async function addGroupData(
     const groupStore = transaction.objectStore("groups");
     const membersStore = transaction.objectStore("group_members");
     
-    console.log("Adding group with members:", group);
-    console.log("Group members to store:", group.group_members);
+    // console.log("Adding group with members:", group);
+    // console.log("Group members to store:", group.group_members);
     
     // Add or update the group in the "groups" object store
     const groupRequest = groupStore.put({
@@ -174,12 +173,12 @@ export async function addGroupData(
       // Function to add new members
       const addNewMembers = () => {
         if (!group.group_members || group.group_members.length === 0) {
-          console.log("No members to add for group:", group.id);
+          // console.log("No members to add for group:", group.id);
           resolve(group.id);
           return;
         }
         
-        console.log(`Adding ${group.group_members.length} members for group ${group.id}`);
+        // console.log(`Adding ${group.group_members.length} members for group ${group.id}`);
         
         // Array to track completion of all member additions
         const memberPromises: Promise<void>[] = [];
@@ -198,12 +197,12 @@ export async function addGroupData(
                 avatar_url: member.avatar_url || "",
               };
               
-              console.log("Adding member record:", memberRecord);
+              // console.log("Adding member record:", memberRecord);
               
               const addRequest = membersStore.add(memberRecord);
               
               addRequest.onsuccess = () => {
-                console.log(`Successfully added member ${member.user_id} to group ${group.id}`);
+                // console.log(`Successfully added member ${member.user_id} to group ${group.id}`);
                 resolveMember();
               };
               
@@ -223,7 +222,7 @@ export async function addGroupData(
         // Wait for all member additions to complete
         Promise.all(memberPromises)
           .then(() => {
-            console.log(`Successfully added all ${group.group_members.length} members to group ${group.id}`);
+            // console.log(`Successfully added all ${group.group_members.length} members to group ${group.id}`);
             resolve(group.id);
           })
           .catch((error) => {
@@ -273,7 +272,7 @@ export async function getAllGroupMembers(): Promise<{[groupId: string]: GroupMem
         });
       });
       
-      console.log("Retrieved all group members:", membersByGroup);
+      // console.log("Retrieved all group members:", membersByGroup);
       resolve(membersByGroup);
     };
     
@@ -324,7 +323,7 @@ export async function getAllMyGroupMembers(userId: string): Promise<{[groupId: s
           
           completedGroups++;
           if (completedGroups === groupIds.length) {
-            console.log("Retrieved all members for user's groups:", membersByGroup);
+            // console.log("Retrieved all members for user's groups:", membersByGroup);
             resolve(membersByGroup);
           }
         };
@@ -362,7 +361,7 @@ export async function getGroupMembersFromIndexedDB(groupId: string): Promise<Gro
         avatar_url: member.avatar_url
       }));
       
-      console.log(`Retrieved ${members.length} members for group ${groupId}:`, members);
+      // console.log(`Retrieved ${members.length} members for group ${groupId}:`, members);
       resolve(members);
     };
     
@@ -385,12 +384,12 @@ export async function verifyGroupMembersInDB(groupId: string): Promise<GroupMemb
     
     membersRequest.onsuccess = () => {
       const members = membersRequest.result;
-      console.log(`Found ${members.length} members for group ${groupId} in IndexedDB:`, members);
+      // console.log(`Found ${members.length} members for group ${groupId} in IndexedDB:`, members);
       resolve(members);
     };
     
     membersRequest.onerror = (event) => {
-      console.error(`Failed to verify members for group ${groupId}:`, event);
+      // console.error(`Failed to verify members for group ${groupId}:`, event);
       reject(event);
     };
   });
@@ -509,356 +508,356 @@ export async function getAllGroupsWithMembers() {
           })
         );
 
-        console.log("Retrieved groups with members:", groupsWithMembers);
+        // console.log("Retrieved groups with members:", groupsWithMembers);
         resolve(groupsWithMembers);
       } catch (error) {
-        console.error("Error processing groups with members:", error);
+        // console.error("Error processing groups with members:", error);
         reject(error);
       }
     };
 
     groupRequest.onerror = (event) => {
-      console.error("Failed to retrieve groups:", event);
+      // console.error("Failed to retrieve groups:", event);
       reject(event);
     };
   });
 }
 
-export async function addExpenseToIndexedDB(
-  data: CreateExpenseFormData & {
-    splits: {
-      [userId: string]: {
-        share_amount: number;
-        percentage?: number;
-      };
-    };
-  }
-) {
-  const db = await initializeDatabase();
+// export async function addExpenseToIndexedDB(
+//   data: CreateExpenseFormData & {
+//     splits: {
+//       [userId: string]: {
+//         share_amount: number;
+//         percentage?: number;
+//       };
+//     };
+//   }
+// ) {
+//   const db = await initializeDatabase();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(
-      ["expenses", "expense_participants"],
-      "readwrite"
-    );
+//   return new Promise((resolve, reject) => {
+//     const transaction = db.transaction(
+//       ["expenses", "expense_participants"],
+//       "readwrite"
+//     );
 
-    // Add the expense to the "expenses" object store
-    const expenseStore = transaction.objectStore("expenses");
-    const expenseRequest = expenseStore.add({
-      name: data.name,
-      description: data.description || "",
-      amount: Number(data.amount),
-      group_id: data.group_id,
-      payer_id: data.payer_id,
-      expense_date: data.expense_date.toISOString(),
-      split_type: data.split_type,
-      is_recurring: data.is_recurring || false,
-      recurring_frequency: data.recurring_frequency || null,
-      recurring_end_date: data.recurring_end_date
-        ? data.recurring_end_date.toISOString()
-        : null,
-      recurring_count: data.recurring_count || null,
-      created_at: new Date().toISOString(),
-      is_synced: false, // Flag to indicate if the expense has been synced to the server
-    });
+//     // Add the expense to the "expenses" object store
+//     const expenseStore = transaction.objectStore("expenses");
+//     const expenseRequest = expenseStore.add({
+//       name: data.name,
+//       description: data.description || "",
+//       amount: Number(data.amount),
+//       group_id: data.group_id,
+//       payer_id: data.payer_id,
+//       expense_date: data.expense_date.toISOString(),
+//       split_type: data.split_type,
+//       is_recurring: data.is_recurring || false,
+//       recurring_frequency: data.recurring_frequency || null,
+//       recurring_end_date: data.recurring_end_date
+//         ? data.recurring_end_date.toISOString()
+//         : null,
+//       recurring_count: data.recurring_count || null,
+//       created_at: new Date().toISOString(),
+//       is_synced: false, // Flag to indicate if the expense has been synced to the server
+//     });
 
-    expenseRequest.onsuccess = (event) => {
-      const expenseId = (event.target as IDBRequest).result;
+//     expenseRequest.onsuccess = (event) => {
+//       const expenseId = (event.target as IDBRequest).result;
 
-      // Prepare the expense participants data
-      const participantsData = Object.entries(data.splits).map(
-        ([userId, splitData]) => ({
-          expense_id: expenseId,
-          user_id: userId,
-          share_amount: splitData.share_amount,
-          percentage: splitData.percentage || null,
-          is_settled: userId === data.payer_id,
-          settled_at:
-            userId === data.payer_id ? new Date().toISOString() : null,
-        })
-      );
+//       // Prepare the expense participants data
+//       const participantsData = Object.entries(data.splits).map(
+//         ([userId, splitData]) => ({
+//           expense_id: expenseId,
+//           user_id: userId,
+//           share_amount: splitData.share_amount,
+//           percentage: splitData.percentage || null,
+//           is_settled: userId === data.payer_id,
+//           settled_at:
+//             userId === data.payer_id ? new Date().toISOString() : null,
+//         })
+//       );
 
-      // Add participants to the "expense_participants" object store
-      const participantsStore = transaction.objectStore("expense_participants");
+//       // Add participants to the "expense_participants" object store
+//       const participantsStore = transaction.objectStore("expense_participants");
 
-      const participantPromises = participantsData.map((participant) => {
-        return new Promise<void>((resolveParticipant) => {
-          const addRequest = participantsStore.add(participant);
-          addRequest.onsuccess = () => resolveParticipant();
-        });
-      });
+//       const participantPromises = participantsData.map((participant) => {
+//         return new Promise<void>((resolveParticipant) => {
+//           const addRequest = participantsStore.add(participant);
+//           addRequest.onsuccess = () => resolveParticipant();
+//         });
+//       });
 
-      Promise.all(participantPromises).then(() => {
-        console.log("Expense and participants added successfully to IndexedDB");
+//       Promise.all(participantPromises).then(() => {
+//         console.log("Expense and participants added successfully to IndexedDB");
 
-        // Update the group's expense count
-        const groupStore = db
-          .transaction("groups", "readwrite")
-          .objectStore("groups");
-        const getGroupRequest = groupStore.get(data.group_id);
+//         // Update the group's expense count
+//         const groupStore = db
+//           .transaction("groups", "readwrite")
+//           .objectStore("groups");
+//         const getGroupRequest = groupStore.get(data.group_id);
 
-        getGroupRequest.onsuccess = () => {
-          const group = getGroupRequest.result;
+//         getGroupRequest.onsuccess = () => {
+//           const group = getGroupRequest.result;
 
-          if (group) {
-            group.expenses = (group.expenses || 0) + 1;
-            groupStore.put(group);
-          }
-        };
+//           if (group) {
+//             group.expenses = (group.expenses || 0) + 1;
+//             groupStore.put(group);
+//           }
+//         };
 
-        resolve({ expenseId, participants: participantsData });
-      });
-    };
+//         resolve({ expenseId, participants: participantsData });
+//       });
+//     };
 
-    expenseRequest.onerror = (event) => {
-      console.error("Failed to add expense:", event);
-      reject(event);
-    };
+//     expenseRequest.onerror = (event) => {
+//       console.error("Failed to add expense:", event);
+//       reject(event);
+//     };
 
-    transaction.onerror = (event) => {
-      console.error("Failed to add expense or participants:", event);
-      reject(event);
-    };
-  });
-}
+//     transaction.onerror = (event) => {
+//       console.error("Failed to add expense or participants:", event);
+//       reject(event);
+//     };
+//   });
+// }
 
-export async function getExpensesFromIndexedDB(): Promise<ExpenseData[]> {
-  const db = await initializeDatabase();
+// export async function getExpensesFromIndexedDB(): Promise<ExpenseData[]> {
+//   const db = await initializeDatabase();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(
-      ["expenses", "expense_participants"],
-      "readonly"
-    );
+//   return new Promise((resolve, reject) => {
+//     const transaction = db.transaction(
+//       ["expenses", "expense_participants"],
+//       "readonly"
+//     );
 
-    const expenseStore = transaction.objectStore("expenses");
-    const expenseRequest = expenseStore.getAll();
+//     const expenseStore = transaction.objectStore("expenses");
+//     const expenseRequest = expenseStore.getAll();
 
-    expenseRequest.onsuccess = () => {
-      const expenses = expenseRequest.result;
+//     expenseRequest.onsuccess = () => {
+//       const expenses = expenseRequest.result;
 
-      if (!expenses || expenses.length === 0) {
-        resolve([]);
-        return;
-      }
+//       if (!expenses || expenses.length === 0) {
+//         resolve([]);
+//         return;
+//       }
 
-      const participantsStore = transaction.objectStore("expense_participants");
-      const participantsRequest = participantsStore.getAll();
+//       const participantsStore = transaction.objectStore("expense_participants");
+//       const participantsRequest = participantsStore.getAll();
 
-      participantsRequest.onsuccess = () => {
-        const participants = participantsRequest.result;
+//       participantsRequest.onsuccess = () => {
+//         const participants = participantsRequest.result;
 
-        // Map participants to their respective expenses
-        const expensesWithParticipants = expenses.map(
-          (expense: ExpenseData) => ({
-            ...expense,
-            participants: participants.filter(
-              (participant: {
-                expense_id: number;
-                user_id: string;
-                share_amount: number;
-                is_settled: boolean;
-                settled_at: string | null;
-              }) => participant.expense_id === expense.id
-            ),
-          })
-        );
+//         // Map participants to their respective expenses
+//         const expensesWithParticipants = expenses.map(
+//           (expense: ExpenseData) => ({
+//             ...expense,
+//             participants: participants.filter(
+//               (participant: {
+//                 expense_id: number;
+//                 user_id: string;
+//                 share_amount: number;
+//                 is_settled: boolean;
+//                 settled_at: string | null;
+//               }) => participant.expense_id === expense.id
+//             ),
+//           })
+//         );
 
-        console.log(
-          "Retrieved expenses with participants from IndexedDB:",
-          expensesWithParticipants
-        );
-        resolve(expensesWithParticipants);
-      };
+//         console.log(
+//           "Retrieved expenses with participants from IndexedDB:",
+//           expensesWithParticipants
+//         );
+//         resolve(expensesWithParticipants);
+//       };
 
-      participantsRequest.onerror = (event) => {
-        console.error("Failed to retrieve participants:", event);
-        reject(event);
-      };
-    };
+//       participantsRequest.onerror = (event) => {
+//         console.error("Failed to retrieve participants:", event);
+//         reject(event);
+//       };
+//     };
 
-    expenseRequest.onerror = (event) => {
-      console.error("Failed to retrieve expenses:", event);
-      reject(event);
-    };
-  });
-}
+//     expenseRequest.onerror = (event) => {
+//       console.error("Failed to retrieve expenses:", event);
+//       reject(event);
+//     };
+//   });
+// }
 
-// Get group expenses by group ID
-export async function getGroupExpensesFromIndexedDB(
-  groupId: string
-): Promise<ExpenseData[]> {
-  const db = await initializeDatabase();
+// // Get group expenses by group ID
+// export async function getGroupExpensesFromIndexedDB(
+//   groupId: string
+// ): Promise<ExpenseData[]> {
+//   const db = await initializeDatabase();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(
-      ["expenses", "expense_participants"],
-      "readonly"
-    );
+//   return new Promise((resolve, reject) => {
+//     const transaction = db.transaction(
+//       ["expenses", "expense_participants"],
+//       "readonly"
+//     );
 
-    const expenseStore = transaction.objectStore("expenses");
-    const expenseRequest = expenseStore.getAll();
+//     const expenseStore = transaction.objectStore("expenses");
+//     const expenseRequest = expenseStore.getAll();
 
-    expenseRequest.onsuccess = () => {
-      const allExpenses = expenseRequest.result;
-      const groupExpenses = allExpenses.filter(
-        (expense: ExpenseData) => expense.group_id === groupId
-      );
+//     expenseRequest.onsuccess = () => {
+//       const allExpenses = expenseRequest.result;
+//       const groupExpenses = allExpenses.filter(
+//         (expense: ExpenseData) => expense.group_id === groupId
+//       );
 
-      if (groupExpenses.length === 0) {
-        resolve([]);
-        return;
-      }
+//       if (groupExpenses.length === 0) {
+//         resolve([]);
+//         return;
+//       }
 
-      const participantsStore = transaction.objectStore("expense_participants");
-      const participantsRequest = participantsStore.getAll();
+//       const participantsStore = transaction.objectStore("expense_participants");
+//       const participantsRequest = participantsStore.getAll();
 
-      participantsRequest.onsuccess = () => {
-        const participants = participantsRequest.result;
+//       participantsRequest.onsuccess = () => {
+//         const participants = participantsRequest.result;
 
-        // Map participants to their respective expenses
-        const expensesWithParticipants = groupExpenses.map(
-          (expense: ExpenseData) => ({
-            ...expense,
-            participants: participants.filter(
-              (participant: {
-                expense_id: number;
-                user_id: string;
-                share_amount: number;
-                is_settled: boolean;
-                settled_at: string | null;
-              }) => participant.expense_id === expense.id
-            ),
-          })
-        );
+//         // Map participants to their respective expenses
+//         const expensesWithParticipants = groupExpenses.map(
+//           (expense: ExpenseData) => ({
+//             ...expense,
+//             participants: participants.filter(
+//               (participant: {
+//                 expense_id: number;
+//                 user_id: string;
+//                 share_amount: number;
+//                 is_settled: boolean;
+//                 settled_at: string | null;
+//               }) => participant.expense_id === expense.id
+//             ),
+//           })
+//         );
 
-        console.log(
-          `Retrieved expenses for group ${groupId} from IndexedDB:`,
-          expensesWithParticipants
-        );
-        resolve(expensesWithParticipants);
-      };
+//         console.log(
+//           `Retrieved expenses for group ${groupId} from IndexedDB:`,
+//           expensesWithParticipants
+//         );
+//         resolve(expensesWithParticipants);
+//       };
 
-      participantsRequest.onerror = (event) => {
-        console.error("Failed to retrieve participants:", event);
-        reject(event);
-      };
-    };
+//       participantsRequest.onerror = (event) => {
+//         console.error("Failed to retrieve participants:", event);
+//         reject(event);
+//       };
+//     };
 
-    expenseRequest.onerror = (event) => {
-      console.error("Failed to retrieve expenses:", event);
-      reject(event);
-    };
-  });
-}
+//     expenseRequest.onerror = (event) => {
+//       console.error("Failed to retrieve expenses:", event);
+//       reject(event);
+//     };
+//   });
+// }
 
-// Function to get unsynchronized expenses for syncing to Supabase
-export async function getUnsyncedExpenses(): Promise<ExpenseData[]> {
-  const db = await initializeDatabase();
+// // Function to get unsynchronized expenses for syncing to Supabase
+// export async function getUnsyncedExpenses(): Promise<ExpenseData[]> {
+//   const db = await initializeDatabase();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(
-      ["expenses", "expense_participants"],
-      "readonly"
-    );
+//   return new Promise((resolve, reject) => {
+//     const transaction = db.transaction(
+//       ["expenses", "expense_participants"],
+//       "readonly"
+//     );
 
-    const expenseStore = transaction.objectStore("expenses");
-    const expenseRequest = expenseStore.getAll();
+//     const expenseStore = transaction.objectStore("expenses");
+//     const expenseRequest = expenseStore.getAll();
 
-    expenseRequest.onsuccess = () => {
-      const allExpenses = expenseRequest.result;
-      const unsyncedExpenses = allExpenses.filter(
-        (expense: ExpenseData & { is_synced: boolean }) =>
-          expense.is_synced === false
-      );
+//     expenseRequest.onsuccess = () => {
+//       const allExpenses = expenseRequest.result;
+//       const unsyncedExpenses = allExpenses.filter(
+//         (expense: ExpenseData & { is_synced: boolean }) =>
+//           expense.is_synced === false
+//       );
 
-      if (unsyncedExpenses.length === 0) {
-        resolve([]);
-        return;
-      }
+//       if (unsyncedExpenses.length === 0) {
+//         resolve([]);
+//         return;
+//       }
 
-      const participantsStore = transaction.objectStore("expense_participants");
-      const participantsRequest = participantsStore.getAll();
+//       const participantsStore = transaction.objectStore("expense_participants");
+//       const participantsRequest = participantsStore.getAll();
 
-      participantsRequest.onsuccess = () => {
-        const participants = participantsRequest.result;
+//       participantsRequest.onsuccess = () => {
+//         const participants = participantsRequest.result;
 
-        // Map participants to their respective expenses
-        const expensesWithParticipants = unsyncedExpenses.map(
-          (expense: ExpenseData) => ({
-            ...expense,
-            participants: participants.filter(
-              (participant: {
-                expense_id: number;
-                user_id: string;
-                share_amount: number;
-                is_settled: boolean;
-                settled_at: string | null;
-              }) => participant.expense_id === expense.id
-            ),
-          })
-        );
+//         // Map participants to their respective expenses
+//         const expensesWithParticipants = unsyncedExpenses.map(
+//           (expense: ExpenseData) => ({
+//             ...expense,
+//             participants: participants.filter(
+//               (participant: {
+//                 expense_id: number;
+//                 user_id: string;
+//                 share_amount: number;
+//                 is_settled: boolean;
+//                 settled_at: string | null;
+//               }) => participant.expense_id === expense.id
+//             ),
+//           })
+//         );
 
-        console.log(
-          "Retrieved unsynced expenses from IndexedDB:",
-          expensesWithParticipants
-        );
-        resolve(expensesWithParticipants);
-      };
+//         console.log(
+//           "Retrieved unsynced expenses from IndexedDB:",
+//           expensesWithParticipants
+//         );
+//         resolve(expensesWithParticipants);
+//       };
 
-      participantsRequest.onerror = (event) => {
-        console.error("Failed to retrieve participants:", event);
-        reject(event);
-      };
-    };
+//       participantsRequest.onerror = (event) => {
+//         console.error("Failed to retrieve participants:", event);
+//         reject(event);
+//       };
+//     };
 
-    expenseRequest.onerror = (event) => {
-      console.error("Failed to retrieve unsynced expenses:", event);
-      reject(event);
-    };
-  });
-}
+//     expenseRequest.onerror = (event) => {
+//       console.error("Failed to retrieve unsynced expenses:", event);
+//       reject(event);
+//     };
+//   });
+// }
 
-// Function to mark an expense as synced after uploading to Supabase
-export async function markExpenseAsSynced(expenseId: number): Promise<void> {
-  const db = await initializeDatabase();
+// // Function to mark an expense as synced after uploading to Supabase
+// export async function markExpenseAsSynced(expenseId: number): Promise<void> {
+//   const db = await initializeDatabase();
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["expenses"], "readwrite");
-    const expenseStore = transaction.objectStore("expenses");
+//   return new Promise((resolve, reject) => {
+//     const transaction = db.transaction(["expenses"], "readwrite");
+//     const expenseStore = transaction.objectStore("expenses");
 
-    const getRequest = expenseStore.get(expenseId);
+//     const getRequest = expenseStore.get(expenseId);
 
-    getRequest.onsuccess = () => {
-      const expense = getRequest.result;
+//     getRequest.onsuccess = () => {
+//       const expense = getRequest.result;
 
-      if (expense) {
-        expense.is_synced = true;
-        expense.synced_at = new Date().toISOString();
+//       if (expense) {
+//         expense.is_synced = true;
+//         expense.synced_at = new Date().toISOString();
 
-        const updateRequest = expenseStore.put(expense);
+//         const updateRequest = expenseStore.put(expense);
 
-        updateRequest.onsuccess = () => {
-          console.log(`Expense ${expenseId} marked as synced`);
-          resolve();
-        };
+//         updateRequest.onsuccess = () => {
+//           console.log(`Expense ${expenseId} marked as synced`);
+//           resolve();
+//         };
 
-        updateRequest.onerror = (event) => {
-          console.error(
-            `Failed to mark expense ${expenseId} as synced:`,
-            event
-          );
-          reject(event);
-        };
-      } else {
-        console.error(`Expense ${expenseId} not found`);
-        reject(new Error(`Expense ${expenseId} not found`));
-      }
-    };
+//         updateRequest.onerror = (event) => {
+//           console.error(
+//             `Failed to mark expense ${expenseId} as synced:`,
+//             event
+//           );
+//           reject(event);
+//         };
+//       } else {
+//         console.error(`Expense ${expenseId} not found`);
+//         reject(new Error(`Expense ${expenseId} not found`));
+//       }
+//     };
 
-    getRequest.onerror = (event) => {
-      console.error(`Failed to retrieve expense ${expenseId}:`, event);
-      reject(event);
-    };
-  });
-}
+//     getRequest.onerror = (event) => {
+//       console.error(`Failed to retrieve expense ${expenseId}:`, event);
+//       reject(event);
+//     };
+//   });
+// }

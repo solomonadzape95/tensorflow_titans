@@ -3,9 +3,52 @@ import { Outlet, useLoaderData } from "react-router";
 import { MobileNav } from "./MobileNav";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import { useEffect, useState } from "react";
+import {
+  setupSyncEventListeners,
+  syncUnsyncedExpenses,
+} from "@/lib/services/expenseService";
+import { toast } from "sonner";
 
 function DashboardLayout() {
   const data = useLoaderData() as UserData;
+  const [online, setOnline] = useState(isOnline());
+
+  // Check network status
+  function isOnline(): boolean {
+    return navigator.onLine;
+  }
+
+  useEffect(() => {
+    const handleOnlineStatus = () => {
+      setOnline(isOnline());
+    };
+
+    // Add event listeners for network status changes
+    window.addEventListener("online", handleOnlineStatus);
+    window.addEventListener("offline", handleOnlineStatus);
+
+    // Cleanup event listeners on unmount
+    return () => {
+      window.removeEventListener("online", handleOnlineStatus);
+      window.removeEventListener("offline", handleOnlineStatus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (online) {
+      setupSyncEventListeners();
+      const syncExpenses = async () => {
+        await syncUnsyncedExpenses();
+      };
+
+      toast.promise(syncExpenses(), {
+        loading: "Syncing offline expense...",
+        success: "Expenses synced successfully!",
+        error: (error) => error.message,
+      });
+    }
+  }, [online]);
 
   return (
     <div className="bg-background dark:bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)] text-foreground dark:text-foreground-dark flex overflow-hidden max-h-screen fixed w-full">

@@ -31,7 +31,7 @@ interface ExpenseData {
   synced_at?: string;
 }
 
-// New utility function to check network status
+// Check network status
 function isOnline(): boolean {
   return navigator.onLine;
 }
@@ -53,14 +53,14 @@ export async function createExpense(
       return await createExpenseOnline(data);
     } else {
       // Offline - store in IndexedDB
-      console.log("Creating expense offline in IndexedDB");
+      // console.log("Creating expense offline in IndexedDB");
       return await addExpenseToIndexedDB(data);
     }
   } catch (error) {
     console.error("Error creating expense:", error);
     // If online creation fails, fallback to IndexedDB
     if (isOnline()) {
-      console.log("Online creation failed, falling back to IndexedDB");
+      // console.log("Online creation failed, falling back to IndexedDB");
       return await addExpenseToIndexedDB(data);
     }
     throw error;
@@ -116,7 +116,6 @@ async function createExpenseOnline(
       expense_id: expenseId,
       user_id: userId,
       share_amount: splitData.share_amount,
-      percentage: splitData.percentage || null,
       is_settled: userId === data.payer_id,
       settled_at: userId === data.payer_id ? new Date().toISOString() : null,
     })
@@ -207,7 +206,7 @@ export async function addExpenseToIndexedDB(
       });
 
       Promise.all(participantPromises).then(() => {
-        console.log("Expense and participants added successfully to IndexedDB");
+        // console.log("Expense and participants added successfully to IndexedDB");
 
         // Update the group's expense count
         const groupStore = db
@@ -421,7 +420,13 @@ async function getUserExpensesOffline(userId: string) {
 
       const expenseStore = transaction.objectStore("expenses");
       const expenseIds = userParticipants.map((p) => p.expense_id);
-      const expenses: { expense: ExpenseData; share_amount: number; percentage?: number; is_settled: boolean; settled_at: string | null }[] = [];
+      const expenses: {
+        expense: ExpenseData;
+        share_amount: number;
+        percentage?: number;
+        is_settled: boolean;
+        settled_at: string | null;
+      }[] = [];
       let processed = 0;
 
       expenseIds.forEach((expenseId) => {
@@ -556,10 +561,10 @@ export async function getGroupExpensesFromIndexedDB(
           return dateB.getTime() - dateA.getTime();
         });
 
-        console.log(
-          `Retrieved expenses for group ${groupId} from IndexedDB:`,
-          expensesWithParticipants
-        );
+        // console.log(
+        //   `Retrieved expenses for group ${groupId} from IndexedDB:`,
+        //   expensesWithParticipants
+        // );
         resolve(expensesWithParticipants);
       };
 
@@ -618,10 +623,10 @@ export async function getUnsyncedExpenses(): Promise<ExpenseData[]> {
           })
         );
 
-        console.log(
-          "Retrieved unsynced expenses from IndexedDB:",
-          expensesWithParticipants
-        );
+        // console.log(
+        //   "Retrieved unsynced expenses from IndexedDB:",
+        //   expensesWithParticipants
+        // );
         resolve(expensesWithParticipants);
       };
 
@@ -692,14 +697,14 @@ export async function markExpenseAsSynced(
               });
 
               Promise.all(updatePromises).then(() => {
-                console.log(
-                  `Expense ${localExpenseId} marked as synced with server ID ${serverExpenseId}`
-                );
+                // console.log(
+                //   `Expense ${localExpenseId} marked as synced with server ID ${serverExpenseId}`
+                // );
                 resolve();
               });
             };
           } else {
-            console.log(`Expense ${localExpenseId} marked as synced`);
+            // console.log(`Expense ${localExpenseId} marked as synced`);
             resolve();
           }
         };
@@ -728,7 +733,7 @@ export async function markExpenseAsSynced(
 export async function syncUnsyncedExpenses() {
   try {
     if (!isOnline()) {
-      console.log("Cannot sync expenses while offline");
+      // console.log("Cannot sync expenses while offline");
       return { synced: 0, failed: 0 };
     }
 
@@ -788,7 +793,6 @@ export async function syncUnsyncedExpenses() {
             expense_id: serverExpenseId,
             user_id: p.user_id,
             share_amount: p.share_amount,
-            percentage: p.percentage || null,
             is_settled: p.is_settled,
             settled_at: p.settled_at,
           }));

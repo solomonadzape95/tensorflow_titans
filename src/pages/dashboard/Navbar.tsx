@@ -15,7 +15,6 @@ import { LogOut, Moon, Settings, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { useLogOutHandler } from "@/hooks/use-logout";
-import { initializeDatabase } from "@/lib/services/offlineExpenses";
 
 function Navbar({ user }: { user: UserData }) {
   const [isOpenUser, setIsOpenUser] = useState<boolean>(false);
@@ -26,14 +25,6 @@ function Navbar({ user }: { user: UserData }) {
   const slidevariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1 },
-  };
-  const handleInitializeDatabase = async () => {
-    try {
-      const db = await initializeDatabase();
-      console.log("Database initialized successfully:", db);
-    } catch (error) {
-      console.error("Error initializing database:", error);
-    }
   };
   return (
     <div className="flex items-center h-16 md:h-20 px-4 md:px-6 justify-between w-full ">
@@ -47,7 +38,6 @@ function Navbar({ user }: { user: UserData }) {
         </h2>
       </div>
       <div className="flex items-center gap-3 md:gap-5">
-        <Button onClick={handleInitializeDatabase}>Init DB</Button>
         <DropdownMenu open={isOpenTheme} onOpenChange={setIsOpenTheme}>
           <DropdownMenuTrigger asChild>
             <Button

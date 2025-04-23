@@ -53,6 +53,7 @@ import { GroupData } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 type GroupMember = {
   id: string;
   name: string;
@@ -87,7 +88,7 @@ export function AddExpenseForm() {
       group_id: id || "",
     },
   });
-
+  console.log(id);
   const groupID = form.watch("group_id");
   const expenseAmount = form.watch("amount");
 
@@ -255,8 +256,12 @@ export function AddExpenseForm() {
         recurring_count: data.recurring_count,
       }),
     };
-    createNewExpense(formData);
-    console.log("Submitting expense data:", formData);
+    toast.promise(createNewExpense(formData), {
+      loading: "Creating expense...",
+      success: "Expense created successfully!",
+      error: (error) => error.message,
+    });
+    // console.log("Submitting expense data:", formData);
   };
 
   return (
