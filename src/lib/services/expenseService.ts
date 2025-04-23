@@ -113,11 +113,14 @@ export async function getUserExpenses(userId: string) {
         *,
         expense:expense_id(*)
       `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("user_id", userId);
 
     if (error) throw error;
-    return data;
+      return data?.sort((a, b) => {
+      const dateA = new Date(a.expense.expense_date || new Date());
+      const dateB = new Date(b.expense.expense_date || new Date());
+      return dateB.getTime() - dateA.getTime(); 
+    }) || [];
   } catch (error) {
     console.error("Error fetching user expenses:", error);
     throw error;
@@ -141,42 +144,4 @@ export async function getGroupExpenses(groupId: string) {
     console.error("Error fetching group expenses:", error);
     throw error;
   }
-}
-
-export async function getAllUserExpenseData(userId: string) {
-    try {
-        const { data: participatedExpenses, error: participatedError } = await supabase
-            .from("expense_participants")
-            .select(`
-        *,
-        expense:expense_id(*),
-        expense_creator:expense(payer_id(id, full_name, avatar_url))
-      `)
-            .eq("user_id", userId);
-
-        if (participatedError) throw participatedError;
-
-        const processedExpenses = participatedExpenses.map(expense => {
-            const isOwed = expense.expense.payer_id === userId && !expense.is_settled;
-            return {
-                ...expense,
-                isOwed,
-                status: expense.is_settled ? "settled" : "pending"
-            };
-        });
-
-        const owedExpenses = processedExpenses.filter(e => e.isOwed);
-        const owingExpenses = processedExpenses.filter(e => !e.isOwed && !e.is_settled);
-        const settledExpenses = processedExpenses.filter(e => e.is_settled);
-
-        return {
-            all: processedExpenses,
-            owed: owedExpenses,
-            owing: owingExpenses,
-            settled: settledExpenses
-        };
-    } catch (error) {
-        console.error("Error fetching user expense data:", error);
-        throw error;
-    }
 }

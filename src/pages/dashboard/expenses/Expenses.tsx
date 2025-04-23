@@ -46,6 +46,7 @@ import {
 import { Link } from "react-router";
 import useGetExpenses from "@/lib/services/expenses/useGetExpenses";
 import { formatNaira } from "@/lib/utils";
+import { Expense } from "@/types";
 
 const categoryIcons = {
   "Food & Drink": Utensils,
@@ -55,10 +56,12 @@ const categoryIcons = {
   "Utilities": Wifi,
   "Entertainment": Receipt,
   "default": Receipt
-};
+} as const;
 
-const getCategoryIcon = (category) => {
-  return categoryIcons[category] || categoryIcons["default"];
+type CategoryIconsKey = keyof typeof categoryIcons;
+
+const getCategoryIcon = (category: string | number) => {
+  return categoryIcons[category as CategoryIconsKey] || categoryIcons["default"];
 };
 
 export default function ExpensesOverview() {
@@ -68,7 +71,7 @@ export default function ExpensesOverview() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [activeTab, setActiveTab] = useState("all");
 
   const transformExpenses = () => {
@@ -79,22 +82,20 @@ export default function ExpensesOverview() {
         description: expense.name,
         amount: exp.share_amount,
         date: expense.expense_date,
-        formattedDate: new Date(expense.expense_date).toLocaleDateString(),
-        category: expense.category || "Other",
-        icon: getCategoryIcon(expense.category || "default"),
-        group: expense.group_name || "Personal",
+        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
+        category: "Other", 
+        icon: getCategoryIcon("default"),
+        group: expense.group_id || "Personal",
         youPaid: true,
         youOwe: false,
+        settled: false,
         user: {
           name: "You",
           avatar: "/placeholder.svg?height=32&width=32&text=You",
           initials: "YOU",
         },
-        participants: expense.participants?.map(p => ({
-          name: p.name,
-          amount: p.amount
-        })) || [],
-        notes: expense.notes || "",
+        participants: [],
+        notes: expense.description || "",
         status: exp.status
       };
     }) || [];
@@ -106,22 +107,20 @@ export default function ExpensesOverview() {
         description: expense.name,
         amount: exp.share_amount,
         date: expense.expense_date,
-        formattedDate: new Date(expense.expense_date).toLocaleDateString(),
-        category: expense.category || "Other",
-        icon: getCategoryIcon(expense.category || "default"),
-        group: expense.group_name || "Personal",
+        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
+        category: "Other",
+        icon: getCategoryIcon("default"),
+        group: expense.group_id || "Personal",
         youPaid: false,
         youOwe: true,
+        settled: false,
         user: {
-          name: expense.payer_name || "Unknown",
-          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.payer_name || "UN").substring(0, 2).toUpperCase()}`,
-          initials: (expense.payer_name || "UN").substring(0, 2).toUpperCase(),
+          name: expense.name || "Unknown",
+          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.name || "UN").substring(0, 2).toUpperCase()}`,
+          initials: (expense.name || "UN").substring(0, 2).toUpperCase(),
         },
-        participants: expense.participants?.map(p => ({
-          name: p.name,
-          amount: p.amount
-        })) || [],
-        notes: expense.notes || "",
+        participants: [],
+        notes: expense.description || "",
         status: exp.status
       };
     }) || [];
@@ -133,23 +132,20 @@ export default function ExpensesOverview() {
         description: expense.name,
         amount: exp.share_amount,
         date: expense.expense_date,
-        formattedDate: new Date(expense.expense_date).toLocaleDateString(),
-        category: expense.category || "Other",
-        icon: getCategoryIcon(expense.category || "default"),
-        group: expense.group_name || "Personal",
-        youPaid: expense.payer_id === "your-user-id", 
-        youOwe: !expense.payer_id === "your-user-id",
+        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
+        category: "Other",
+        icon: getCategoryIcon("default"),
+        group: expense.group_id || "Personal",
+        youPaid: expense.payer_id === "", 
+        youOwe: expense.payer_id !== "",
         settled: true,
         user: {
-          name: expense.payer_name || "Unknown",
-          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.payer_name || "UN").substring(0, 2).toUpperCase()}`,
-          initials: (expense.payer_name || "UN").substring(0, 2).toUpperCase(),
+          name: expense.name || "Unknown",
+          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.name || "UN").substring(0, 2).toUpperCase()}`,
+          initials: (expense.name || "UN").substring(0, 2).toUpperCase(),
         },
-        participants: expense.participants?.map(p => ({
-          name: p.name,
-          amount: p.amount
-        })) || [],
-        notes: expense.notes || "",
+        participants: [],
+        notes: expense.description || "",
         status: exp.status
       };
     }) || [];
@@ -180,15 +176,17 @@ export default function ExpensesOverview() {
     })
     .sort((a, b) => {
       if (sortBy === "date") {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
         return sortOrder === "desc"
-          ? new Date(b.date).getTime() - new Date(a.date).getTime()
-          : new Date(a.date).getTime() - new Date(b.date).getTime();
+          ? dateB - dateA
+          : dateA - dateB;
       } else if (sortBy === "amount") {
         return sortOrder === "desc" ? b.amount - a.amount : a.amount - b.amount;
       } else {
         return sortOrder === "desc"
-          ? b.description.localeCompare(a.description)
-          : a.description.localeCompare(b.description);
+          ? (b.description || "").localeCompare(a.description || "")
+          : (a.description || "").localeCompare(b.description || "");
       }
     });
 
@@ -677,7 +675,7 @@ export default function ExpensesOverview() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage
                         src={selectedExpense.user.avatar}
-                        alt={selectedExpense.user.name}
+                        alt={selectedExpense.user.name ?? 'User Avatar'}
                       />
                       <AvatarFallback>
                         {selectedExpense.user.initials}
@@ -695,12 +693,6 @@ export default function ExpensesOverview() {
                   </p>
                 </div>
                 <div className="border-t border-muted-foreground/20 pt-4">
-                  <p className="font-medium">Notes</p>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedExpense.notes || "No notes provided"}
-                  </p>
-                </div>
-                <div className="border-t border-muted-foreground/20 pt-4">
                   <p className="font-medium">Participants</p>
                   <ul className="list-disc list-inside">
                     {selectedExpense.participants.map((participant, index) => (
@@ -711,9 +703,9 @@ export default function ExpensesOverview() {
                   </ul>
                 </div>
                 <div className="border-t border-muted-foreground/20 pt-4">
-                  <p className="font-medium">Status</p>
+                  <p className="font-medium">Notes</p>
                   <p className="text-sm text-muted-foreground">
-                    {selectedExpense.status || "No status provided"}
+                    {selectedExpense.notes || "No notes provided"}
                   </p>
                 </div>
               </div>
