@@ -51,6 +51,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
 import { Switch } from "@/components/ui/switch";
 import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { toast } from "sonner";
 
 type GroupMember = {
   id: string;
@@ -264,8 +265,13 @@ export function AddExpenseForm() {
         recurring_count: data.recurring_count,
       }),
     };
-    createNewExpense(formData);
-    console.log("Submitting expense data:", formData);
+    toast.promise(createNewExpense(formData), {
+      loading: "Creating expense...",
+      success: "Expense created successfully!",
+      error: (error) => error.message,
+    });
+
+    // console.log("Submitting expense data:", formData);
   };
 
   return (
@@ -971,7 +977,11 @@ export function AddExpenseForm() {
               )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button type="button" onClick={() => navigate(-1)}>
+              <Button
+                type="button"
+                onClick={() => navigate(-1)}
+                variant={"outline"}
+              >
                 Cancel
               </Button>
               <Button

@@ -73,6 +73,7 @@ export function MobileNav() {
                     )}
                     style={{ animationDelay: `${index * 0.05}s` }}
                     size="lg"
+                    variant={"ghost"}
                   >
                     <Icon
                       className={cn(

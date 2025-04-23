@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 import { Link, Outlet, useLocation, useParams } from "react-router";
-import { Plus, Receipt, Users } from "lucide-react";
+import { Plus, Receipt, Users, CheckCircle, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -22,37 +22,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { LoadingScreen } from "../LoadingScreen";
 
-
-// const groups: Record<string, Group> = {
-//   "1": {
-//     id: 1,
-//     name: "Roommates",
-//     description: "Rent, utilities, and household expenses",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//       { id: 4, name: "Mike Wilson", initials: "MW" },
-//     ],
-//     expenses: 12,
-//     balance: 195.0,
-//     youOwe: false,
-//   },
-//   "2": {
-//     id: 2,
-//     name: "Trip to Paris",
-//     description: "Travel expenses for our vacation",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//     ],
-//     expenses: 8,
-//     balance: 74.61,
-//     youOwe: true,
-//   },
-// };
 
 function GroupDetails() {
   const { id } = useParams<{ id: string }>();
@@ -72,257 +43,288 @@ function GroupDetails() {
   return (
     <>
       {isLoading || !group ? (
-        <div>Loading Group....</div>
+        <LoadingScreen resource="Loading group" />
       ) : creatingExpense ? (
         <Outlet />
       ) : (
         <>
-        <Breadcrumb className="px-6">
-						<BreadcrumbItem>
-							<BreadcrumbList>
-								<BreadcrumbItem>
-									<BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-								<BreadcrumbItem>
-									<BreadcrumbLink href="/dashboard/groups">
-										Groups
-									</BreadcrumbLink>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-								<BreadcrumbItem>
-									<BreadcrumbPage>
-										Group Details for {group.name.toUpperCase()}
-									</BreadcrumbPage>
-								</BreadcrumbItem>
-							</BreadcrumbList>
-						</BreadcrumbItem>
-					</Breadcrumb>
-					<div className="space-y-8 px-4 md:px-8">
-						<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-							<div className="flex items-center gap-2">
-								<div>
-									<h1 className="text-3xl font-bold tracking-tight font-display">
-										<span className="text-gradient">{group.name}</span>
-									</h1>
-									<p className="text-muted-foreground">{group.description}</p>
-								</div>
-							</div>
-							<div className="flex items-center gap-2">
-								<Button
-									asChild
-									className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
-								>
-									<Link to="/dashboard/expenses/new">
-										<Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
-										Add Expense
-									</Link>
-								</Button>
-							</div>
-						</div>
-						<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300 "
-							>
-								<CardHeader className="pb-2">
-									<CardTitle className="text-sm font-medium">
-										Group Balance
-									</CardTitle>
-								</CardHeader>
-								<CardContent className="m-0">
-									{group.settled ? (
-										<div className="text-2xl font-bold text-green-500 font-display">
-											All settled up
-										</div>
-									) : group.youOwe ? (
-										<div className="text-2xl font-bold text-red-500 font-display">
-											You owe ${group.balance.toFixed(2)}
-										</div>
-									) : (
-										<div className="text-2xl font-bold text-green-500 font-display">
-											You're owed ${group.balance.toFixed(2)}
-										</div>
-									)}
-								</CardContent>
-							</Card>
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300"
-							>
-								<CardHeader className="pb-2">
-									<CardTitle className="text-sm font-medium">
-										Expenses
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div className="flex items-center gap-2">
-										<Receipt className="h-5 w-5 text-primary" />
-										<div className="text-2xl font-bold font-display">
-											{group.expenses}
-										</div>
-									</div>
-								</CardContent>
-							</Card>
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300"
-							>
-								<CardHeader className="pb-2">
-									<CardTitle className="text-sm font-medium">Members</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div className="flex items-center gap-2">
-										<Users className="h-5 w-5 text-primary" />
-										<div className="text-2xl font-bold font-display">
-											{group.members.length}
-										</div>
-									</div>
-									<div className="mt-2 flex -space-x-2">
-										{group.members.slice(0, 5).map((member) => (
-											<Avatar
-												key={member.id}
-												className="border-2 border-background"
-											>
-												<AvatarFallback>{member.initials}</AvatarFallback>
-											</Avatar>
-										))}
-										{group.members.length > 5 && (
-											<div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
-												+{group.members.length - 5}
-											</div>
-										)}
-									</div>
-								</CardContent>
-							</Card>
-						</div>
+          <Breadcrumb className=" my-4">
+            <BreadcrumbItem>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard/groups">
+                    Groups
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>
+                    Group Details for {group.name.toUpperCase()}
+                  </BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </BreadcrumbItem>
+          </Breadcrumb>
+          <div className="space-y-8 ">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight font-display">
+                    <span className="text-gradient">{group.name}</span>
+                  </h1>
+                  <p className="text-muted-foreground">{group.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  asChild
+                  className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
+                >
+                  <Link to="/dashboard/expenses/new">
+                    <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
+                    Add Expense
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Card className="hover:shadow-glow transition-all duration-300">
+                <CardHeader className="pb-2 flex items-center gap-2">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary">
+                    <Receipt className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-sm font-medium">
+                    Group Balance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="m-0">
+                  {group.settled ? (
+                    <div className="flex items-center justify-center text-2xl font-bold text-green-500 font-display">
+                      <CheckCircle className="mr-2 h-6 w-6" />
+                      All settled up
+                    </div>
+                  ) : group.youOwe ? (
+                    <div className="flex items-center justify-center text-2xl font-bold text-red-500 font-display">
+                      <ArrowUpCircle className="mr-2 h-6 w-6" />
+                      You owe ${group.balance.toFixed(2)}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center text-2xl font-bold text-green-500 font-display">
+                      <ArrowDownCircle className="mr-2 h-6 w-6" />
+                      You're owed ${group.balance.toFixed(2)}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="hover:shadow-glow transition-all duration-300">
+                <CardHeader className="pb-2 flex items-center gap-2">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary">
+                    <Receipt className="h-5 w-5" />
+                  </div>
+                  <CardTitle className="text-sm font-medium">
+                    Expenses
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {group.expenses && group.expenses.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="text-2xl font-bold font-display">
+                        Total: $
+                        {group.expenses
+                          .reduce((sum, expense) => sum + expense.amount, 0)
+                          .toFixed(2)}
+                      </div>
+                      <ul className="space-y-1">
+                        {group.expenses.slice(0, 5).map((expense) => (
+                          <li
+                            key={expense.id}
+                            className="flex justify-between items-center text-sm"
+                          >
+                            <span className="truncate">
+                              {expense.description}
+                            </span>
+                            <span className="font-medium">
+                              ${expense.amount.toFixed(2)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {group.expenses.length > 5 && (
+                        <p className="text-xs text-muted-foreground">
+                          +{group.expenses.length - 5} more expenses
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No expenses recorded yet.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card
+                // variant="glass"
+                className="hover:shadow-glow transition-all duration-300"
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Members</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    <div className="text-2xl font-bold font-display">
+                      {group.members.length}
+                    </div>
+                  </div>
+                  <div className="mt-2 flex -space-x-2">
+                    {group.members.slice(0, 5).map((member) => (
+                      <Avatar
+                        key={member.id}
+                        className="border-2 border-background"
+                      >
+                        <AvatarFallback>{member.initials}</AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {group.members.length > 5 && (
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-xs font-medium">
+                        +{group.members.length - 5}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-						<Tabs defaultValue="activity" className="space-y-4">
-							<TabsList className="glass">
-								<TabsTrigger
-									value="activity"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Recent Activity
-								</TabsTrigger>
-								<TabsTrigger
-									value="balances"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Balances
-								</TabsTrigger>
-								<TabsTrigger
-									value="members"
-									className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
-								>
-									Members
-								</TabsTrigger>
-							</TabsList>
-							<TabsContent value="activity" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
-									<CardHeader>
-										<CardTitle>Recent Activity</CardTitle>
-										<CardDescription>
-											Recent transactions in this group
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<p className="text-center py-8 text-muted-foreground">
-											No recent activity in this group
-										</p>
-									</CardContent>
-								</Card>
-							</TabsContent>
-							<TabsContent value="balances" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
-									<CardHeader>
-										<CardTitle>Group Balances</CardTitle>
-										<CardDescription>
-											Who owes who in this group
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-4">
-											{group.members
-												.filter((m) => m.name !== "You")
-												.map((member, i) => (
-													<div
-														key={member.id}
-														className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
-													>
-														<div className="flex items-center gap-3">
-															<Avatar className="w-10 h-10">
-																<AvatarFallback>
-																	{member.initials}
-																</AvatarFallback>
-															</Avatar>
-															<span>{member.name}</span>
-														</div>
-														<div
-															className={`font-medium ${
-																i % 2 === 0 ? "text-green-500" : "text-red-500"
-															}`}
-														>
-															{i % 2 === 0
-																? `owes you $${(25 + i * 15).toFixed(2)}`
-																: `you owe $${(15 + i * 10).toFixed(2)}`}
-														</div>
-													</div>
-												))}
-										</div>
-									</CardContent>
-								</Card>
-							</TabsContent>
-							<TabsContent value="members" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
-									<CardHeader className="flex flex-row items-center justify-between">
-										<div>
-											<CardTitle>Group Members</CardTitle>
-											<CardDescription>People in this group</CardDescription>
-										</div>
-										<Button size="sm" className="group">
-											<Plus className="mr-2 h-4 w-4" />
-											Invite
-										</Button>
-									</CardHeader>
-									<CardContent>
-										<div className="space-y-4">
-											{group.members.map((member) => (
-												<div
-													key={member.id}
-													className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
-												>
-													<div className="flex items-center gap-3">
-														<Avatar className="w-10 h-10">
-															<AvatarFallback>{member.initials}</AvatarFallback>
-														</Avatar>
-														<div>
-															<div className="font-medium">{member.name}</div>
-														</div>
-													</div>
-													{member.name === "You" && (
-														<div className="text-sm font-medium text-primary">
-															You (Admin)
-														</div>
-													)}
-												</div>
-											))}
-										</div>
-									</CardContent>
-								</Card>
-							</TabsContent>
-						</Tabs>
-					</div>
-				</>
-			)}
-		</>
-	);
+            <Tabs defaultValue="activity" className="space-y-4">
+              <TabsList className="glass">
+                <TabsTrigger
+                  value="activity"
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+                >
+                  Recent Activity
+                </TabsTrigger>
+                <TabsTrigger
+                  value="balances"
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+                >
+                  Balances
+                </TabsTrigger>
+                <TabsTrigger
+                  value="members"
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary transition-all duration-300"
+                >
+                  Members
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="activity" className="space-y-4">
+                <Card
+                //   variant="glass"
+                >
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>
+                      Recent transactions in this group
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-center py-8 text-muted-foreground">
+                      No recent activity in this group
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="balances" className="space-y-4">
+                <Card
+                //   variant="glass"
+                >
+                  <CardHeader>
+                    <CardTitle>Group Balances</CardTitle>
+                    <CardDescription>
+                      Who owes who in this group
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {group.members
+                        .filter((m) => m.name !== "You")
+                        .map((member, i) => (
+                          <div
+                            key={member.id}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarFallback>
+                                  {member.initials}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>{member.name}</span>
+                            </div>
+                            <div
+                              className={`font-medium ${
+                                i % 2 === 0 ? "text-green-500" : "text-red-500"
+                              }`}
+                            >
+                              {i % 2 === 0
+                                ? `owes you $${(25 + i * 15).toFixed(2)}`
+                                : `you owe $${(15 + i * 10).toFixed(2)}`}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="members" className="space-y-4">
+                <Card
+                //   variant="glass"
+                >
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Group Members</CardTitle>
+                      <CardDescription>People in this group</CardDescription>
+                    </div>
+                    <Button size="sm" className="group">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Invite
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {group.members.map((member) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarFallback>{member.initials}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{member.name}</div>
+                            </div>
+                          </div>
+                          {member.name === "You" && (
+                            <div className="text-sm font-medium text-primary">
+                              You (Admin)
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </>
+      )}
+    </>
+  );
 }
 
 export default GroupDetails;
