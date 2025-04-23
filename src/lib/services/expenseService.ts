@@ -1,8 +1,7 @@
 import { CreateExpenseFormData } from "../schema";
 import supabase from "../supabase";
-import { initializeDatabase } from "./offlineExpenses"; // Make sure this is imported
+import { initializeDatabase } from "./offlineExpenses";
 
-// Define interfaces for better type safety
 interface ExpenseParticipant {
   expense_id: string | number;
   user_id: string;
