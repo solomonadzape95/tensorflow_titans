@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,6 +45,7 @@ import { Link } from "react-router";
 import useGetExpenses from "@/lib/services/expenses/useGetExpenses";
 import { formatNaira } from "@/lib/utils";
 import { Expense } from "@/types";
+import NoExpenseUI from "@/components/dashboard/NoExpense";
 
 const categoryIcons = {
   "Food & Drink": Utensils,
@@ -83,7 +82,7 @@ export default function ExpensesOverview() {
         amount: exp.share_amount,
         date: expense.expense_date,
         formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
-        category: "Other", 
+        category: "Other",
         icon: getCategoryIcon("default"),
         group: expense.group_id || "Personal",
         youPaid: true,
@@ -136,7 +135,7 @@ export default function ExpensesOverview() {
         category: "Other",
         icon: getCategoryIcon("default"),
         group: expense.group_id || "Personal",
-        youPaid: expense.payer_id === "", 
+        youPaid: expense.payer_id === "",
         youOwe: expense.payer_id !== "",
         settled: true,
         user: {
@@ -204,6 +203,9 @@ export default function ExpensesOverview() {
     "all",
     ...new Set(allExpenses.map((expense) => expense?.category).filter(Boolean)),
   ];
+
+  // Check if there are any active filters
+  const hasActiveFilters: boolean = Boolean(searchQuery) || selectedGroup !== "all" || selectedCategory !== "all";
 
   return (
     <div className="space-y-8">
@@ -446,31 +448,11 @@ export default function ExpensesOverview() {
                   })}
                 </div>
               ) : (
-                <Card className="p-8 text-center">
-                  <CardContent className="flex flex-col items-center justify-center space-y-4">
-                    <div className="rounded-full bg-muted p-4">
-                      <Receipt className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <CardTitle>No expenses found</CardTitle>
-                    <CardDescription>
-                      {searchQuery ||
-                        selectedGroup !== "all" ||
-                        selectedCategory !== "all"
-                        ? "Try adjusting your filters"
-                        : "Add your first expense to get started"}
-                    </CardDescription>
-                    {!searchQuery &&
-                      selectedGroup === "all" &&
-                      selectedCategory === "all" && (
-                        <Button asChild variant="gradient" className="mt-2 group">
-                          <Link to="/dashboard/expenses/new">
-                            <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
-                            Add Expense
-                          </Link>
-                        </Button>
-                      )}
-                  </CardContent>
-                </Card>
+                <NoExpenseUI
+                  hasFilters={hasActiveFilters}
+                  message="Add your first expense to get started"
+                  showAddButton={true}
+                />
               )}
             </TabsContent>
 
@@ -541,27 +523,11 @@ export default function ExpensesOverview() {
                   })}
                 </div>
               ) : (
-                <Card className="p-8 text-center">
-                  <CardContent className="flex flex-col items-center justify-center space-y-4">
-                    <div className="rounded-full bg-muted p-4">
-                      <Receipt className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <CardTitle>No expenses found</CardTitle>
-                    <CardDescription>
-                      {searchQuery ||
-                        selectedGroup !== "all" ||
-                        selectedCategory !== "all"
-                        ? "Try adjusting your filters"
-                        : "You aren't owed money for any expenses yet"}
-                    </CardDescription>
-                    <Button asChild variant="gradient" className="mt-2 group">
-                      <Link to="/dashboard/expenses/new">
-                        <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
-                        Add Expense
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                <NoExpenseUI
+                  hasFilters={hasActiveFilters}
+                  message="You aren't owed money for any expenses yet"
+                  showAddButton={true}
+                />
               )}
             </TabsContent>
 
@@ -599,15 +565,6 @@ export default function ExpensesOverview() {
                               </div>
                               <div className="flex items-center justify-between text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage
-                                      src={expense.user.avatar}
-                                      alt={expense.user.name}
-                                    />
-                                    <AvatarFallback>
-                                      {expense.user.initials}
-                                    </AvatarFallback>
-                                  </Avatar>
                                   <span>{expense.user.name}</span>
                                   <span className="text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
                                     You owe
@@ -632,21 +589,11 @@ export default function ExpensesOverview() {
                   })}
                 </div>
               ) : (
-                <Card className="p-8 text-center">
-                  <CardContent className="flex flex-col items-center justify-center space-y-4">
-                    <div className="rounded-full bg-muted p-4">
-                      <Receipt className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <CardTitle>No expenses found</CardTitle>
-                    <CardDescription>
-                      {searchQuery ||
-                        selectedGroup !== "all" ||
-                        selectedCategory !== "all"
-                        ? "Try adjusting your filters"
-                        : "You don't owe anyone money"}
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                <NoExpenseUI
+                  hasFilters={hasActiveFilters}
+                  message="You don't owe anyone money"
+                  showAddButton={false}
+                />
               )}
             </TabsContent>
           </>
@@ -695,11 +642,11 @@ export default function ExpensesOverview() {
                 <div className="border-t border-muted-foreground/20 pt-4">
                   <p className="font-medium">Participants</p>
                   <ul className="list-disc list-inside">
-                    {selectedExpense.participants.map((participant, index) => (
+                    {selectedExpense.participants?.map((participant, index) => (
                       <li key={index} className="text-sm text-muted-foreground">
                         {participant.name}: {formatNaira(participant.amount)}
                       </li>
-                    ))}
+                    )) || <li className="text-sm text-muted-foreground">No participants</li>}
                   </ul>
                 </div>
                 <div className="border-t border-muted-foreground/20 pt-4">
