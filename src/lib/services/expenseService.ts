@@ -113,11 +113,14 @@ export async function getUserExpenses(userId: string) {
         *,
         expense:expense_id(*)
       `)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("user_id", userId);
 
     if (error) throw error;
-    return data;
+      return data?.sort((a, b) => {
+      const dateA = new Date(a.expense.expense_date || new Date());
+      const dateB = new Date(b.expense.expense_date || new Date());
+      return dateB.getTime() - dateA.getTime(); 
+    }) || [];
   } catch (error) {
     console.error("Error fetching user expenses:", error);
     throw error;
