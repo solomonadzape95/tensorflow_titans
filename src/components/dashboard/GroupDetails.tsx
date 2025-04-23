@@ -1,6 +1,13 @@
 import { Button } from "../ui/button";
 import { Link, Outlet, useLocation, useParams } from "react-router";
-import { Plus, Receipt, Users, CheckCircle, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import {
+  Plus,
+  Receipt,
+  Users,
+  CheckCircle,
+  ArrowUpCircle,
+  ArrowDownCircle,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,7 +19,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import NotFound from "@/pages/not-found";
 import { useQuery } from "@tanstack/react-query";
-import { getGroupById } from "@/lib/services/groups/groupService";
+import {
+  getGroupById,
+  getGroupExpenseCount,
+} from "@/lib/services/groups/groupService";
 import { Group } from "@/types";
 import {
   Breadcrumb,
@@ -23,7 +33,6 @@ import {
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
 import { LoadingScreen } from "../LoadingScreen";
-
 
 function GroupDetails() {
   const { id } = useParams<{ id: string }>();
@@ -37,7 +46,13 @@ function GroupDetails() {
       return group;
     },
   });
-  console.log(group);
+  const { data: expenseCount } = useQuery<number>({
+    queryKey: ["expense_count", id],
+    queryFn: async () => {
+      const expense_count = await getGroupExpenseCount(id as string);
+      return expense_count || 0;
+    },
+  });
   if (!id) return <NotFound />;
 
   return (
@@ -130,32 +145,25 @@ function GroupDetails() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {group.expenses && group.expenses.length > 0 ? (
+                  {(expenseCount ?? 0) > 0 ? (
                     <div className="space-y-2">
                       <div className="text-2xl font-bold font-display">
-                        Total: $
-                        {group.expenses
-                          .reduce((sum, expense) => sum + expense.amount, 0)
-                          .toFixed(2)}
+                        Total Expenses: {expenseCount}
                       </div>
-                      <ul className="space-y-1">
-                        {group.expenses.slice(0, 5).map((expense) => (
+                      {/* <ul className="space-y-1">
+                        {group.expenses?.slice(0, 5).map((expense) => (
                           <li
                             key={expense.id}
                             className="flex justify-between items-center text-sm"
                           >
-                            <span className="truncate">
-                              {expense.description}
-                            </span>
-                            <span className="font-medium">
-                              ${expense.amount.toFixed(2)}
-                            </span>
+                            <span className="truncate">{expense.description}</span>
+                            <span className="font-medium">${expense.amount.toFixed(2)}</span>
                           </li>
                         ))}
-                      </ul>
-                      {group.expenses.length > 5 && (
+                      </ul> */}
+                      {(expenseCount ?? 0) > 5 && (
                         <p className="text-xs text-muted-foreground">
-                          +{group.expenses.length - 5} more expenses
+                          +{(expenseCount ?? 0) - 5} more expenses
                         </p>
                       )}
                     </div>
