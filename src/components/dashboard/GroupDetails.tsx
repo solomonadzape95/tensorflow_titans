@@ -1,83 +1,65 @@
-import { Button } from "../ui/button";
-import { Link, Outlet, useLocation, useParams } from "react-router";
-import { Plus, Receipt, Users } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import type { protectPage } from "@/lib/services/authService";
+import { getGroupById } from "@/lib/services/groups/groupService";
+import { formatNaira } from "@/lib/utils";
 import NotFound from "@/pages/not-found";
 import { useQuery } from "@tanstack/react-query";
-import { getGroupById } from "@/lib/services/groups/groupService";
-import { Group } from "@/types";
+import { format } from "date-fns";
+import { Plus, Receipt, Users } from "lucide-react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+	Link,
+	Outlet,
+	useLoaderData,
+	useLocation,
+	useParams,
+} from "react-router";
+import { Avatar, AvatarFallback } from "../ui/avatar";
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
 } from "../ui/breadcrumb";
-
-
-// const groups: Record<string, Group> = {
-//   "1": {
-//     id: 1,
-//     name: "Roommates",
-//     description: "Rent, utilities, and household expenses",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//       { id: 4, name: "Mike Wilson", initials: "MW" },
-//     ],
-//     expenses: 12,
-//     balance: 195.0,
-//     youOwe: false,
-//   },
-//   "2": {
-//     id: 2,
-//     name: "Trip to Paris",
-//     description: "Travel expenses for our vacation",
-//     members: [
-//       { id: 1, name: "You", initials: "You" },
-//       { id: 2, name: "Alex Johnson", initials: "AJ" },
-//       { id: 3, name: "Sarah Miller", initials: "SM" },
-//     ],
-//     expenses: 8,
-//     balance: 74.61,
-//     youOwe: true,
-//   },
-// };
+import { Button } from "../ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 function GroupDetails() {
-  const { id } = useParams<{ id: string }>();
-  const location = useLocation();
-  const pathname = location.pathname;
-  const creatingExpense = pathname.includes("expenses/new");
-  const { data: group, isLoading } = useQuery<Group>({
-    queryKey: ["group", id],
-    queryFn: async () => {
-      const group = await getGroupById(id as string);
-      return group;
-    },
-  });
-  console.log(group);
-  if (!id) return <NotFound />;
+	const { id } = useParams<{ id: string }>();
+	const loaderData = useLoaderData() as Awaited<ReturnType<typeof protectPage>>;
+	const location = useLocation();
+	const pathname = location.pathname;
+	const creatingExpense = pathname.includes("expenses/new");
+	const { data: group, isLoading } = useQuery({
+		queryKey: ["group", id],
+		queryFn: async () => {
+			if (!id) return null;
 
-  return (
-    <>
-      {isLoading || !group ? (
-        <div>Loading Group....</div>
-      ) : creatingExpense ? (
-        <Outlet />
-      ) : (
-        <>
-        <Breadcrumb className="px-6">
+			const groupData = await getGroupById(id, loaderData.user.id);
+			return groupData;
+		},
+		enabled: !!id,
+	});
+	console.log(group);
+
+	if (!id) return <NotFound />;
+
+	return (
+		<>
+			{isLoading || !group ? (
+				<div>Loading Group....</div>
+			) : creatingExpense ? (
+				<Outlet />
+			) : (
+				<>
+					<Breadcrumb className="px-6 mb-6">
 						<BreadcrumbItem>
 							<BreadcrumbList>
 								<BreadcrumbItem>
@@ -121,10 +103,7 @@ function GroupDetails() {
 							</div>
 						</div>
 						<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300 "
-							>
+							<Card className="hover:shadow-glow transition-all duration-300 ">
 								<CardHeader className="pb-2">
 									<CardTitle className="text-sm font-medium">
 										Group Balance
@@ -137,19 +116,16 @@ function GroupDetails() {
 										</div>
 									) : group.youOwe ? (
 										<div className="text-2xl font-bold text-red-500 font-display">
-											You owe ${group.balance.toFixed(2)}
+											You owe {formatNaira(group.balance)}
 										</div>
 									) : (
 										<div className="text-2xl font-bold text-green-500 font-display">
-											You're owed ${group.balance.toFixed(2)}
+											You're owed {formatNaira(group.balance)}
 										</div>
 									)}
 								</CardContent>
 							</Card>
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300"
-							>
+							<Card className="hover:shadow-glow transition-all duration-300">
 								<CardHeader className="pb-2">
 									<CardTitle className="text-sm font-medium">
 										Expenses
@@ -164,10 +140,7 @@ function GroupDetails() {
 									</div>
 								</CardContent>
 							</Card>
-							<Card
-								// variant="glass"
-								className="hover:shadow-glow transition-all duration-300"
-							>
+							<Card className="hover:shadow-glow transition-all duration-300">
 								<CardHeader className="pb-2">
 									<CardTitle className="text-sm font-medium">Members</CardTitle>
 								</CardHeader>
@@ -219,26 +192,49 @@ function GroupDetails() {
 								</TabsTrigger>
 							</TabsList>
 							<TabsContent value="activity" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
+								<Card>
 									<CardHeader>
 										<CardTitle>Recent Activity</CardTitle>
 										<CardDescription>
-											Recent transactions in this group
+											Recent transactions in this group Recent transactions in
+											this group
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<p className="text-center py-8 text-muted-foreground">
-											No recent activity in this group
-										</p>
+										{group.recentExpenses && group.recentExpenses.length > 0 ? (
+											<div className="space-y-4">
+												{group.recentExpenses.map((exp) => (
+													<div
+														key={exp.id}
+														className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+													>
+														<div className="flex flex-col">
+															<span className="font-medium">
+																{exp.description || "Expense"}
+															</span>
+															<span className="text-sm text-muted-foreground">
+																Paid by {exp.payer.name ?? "Unknown"} on{" "}
+																{exp.created_at
+																	? format(new Date(exp.created_at), "PP")
+																	: "N/A"}
+															</span>
+														</div>
+														<div className="font-medium">
+															{formatNaira(exp.amount)}
+														</div>
+													</div>
+												))}
+											</div>
+										) : (
+											<p className="text-center py-8 text-muted-foreground">
+												No recent activity in this group
+											</p>
+										)}
 									</CardContent>
 								</Card>
 							</TabsContent>
 							<TabsContent value="balances" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
+								<Card>
 									<CardHeader>
 										<CardTitle>Group Balances</CardTitle>
 										<CardDescription>
@@ -246,41 +242,42 @@ function GroupDetails() {
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div className="space-y-4">
-											{group.members
-												.filter((m) => m.name !== "You")
-												.map((member, i) => (
+										{group.detailedBalances &&
+										group.detailedBalances.length > 0 ? (
+											<div className="space-y-4">
+												{group.detailedBalances.map((balance, i) => (
 													<div
-														key={member.id}
+														key={`${balance.debtorId}-${balance.creditorId}-${i}`}
 														className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
 													>
 														<div className="flex items-center gap-3">
-															<Avatar className="w-10 h-10">
-																<AvatarFallback>
-																	{member.initials}
-																</AvatarFallback>
-															</Avatar>
-															<span>{member.name}</span>
+															{/* Consider adding avatars here if available */}
+															<span className="capitalize font-medium">
+																{balance.debtorName.toLowerCase()}
+															</span>
+															<span className="text-muted-foreground">
+																owes
+															</span>
+															<span className="capitalize font-medium">
+																{balance.creditorName.toLowerCase()}
+															</span>
 														</div>
-														<div
-															className={`font-medium ${
-																i % 2 === 0 ? "text-green-500" : "text-red-500"
-															}`}
-														>
-															{i % 2 === 0
-																? `owes you $${(25 + i * 15).toFixed(2)}`
-																: `you owe $${(15 + i * 10).toFixed(2)}`}
+														<div className="font-medium text-red-500">
+															{formatNaira(balance.amount)}
 														</div>
 													</div>
 												))}
-										</div>
+											</div>
+										) : (
+											<p className="text-center py-8 text-muted-foreground">
+												No outstanding balances in this group. All settled up!
+											</p>
+										)}
 									</CardContent>
 								</Card>
 							</TabsContent>
 							<TabsContent value="members" className="space-y-4">
-								<Card
-								//   variant="glass"
-								>
+								<Card>
 									<CardHeader className="flex flex-row items-center justify-between">
 										<div>
 											<CardTitle>Group Members</CardTitle>
@@ -303,12 +300,16 @@ function GroupDetails() {
 															<AvatarFallback>{member.initials}</AvatarFallback>
 														</Avatar>
 														<div>
-															<div className="font-medium">{member.name}</div>
+															<div className="font-medium capitalize">
+																{member.name.toLowerCase()}
+															</div>
 														</div>
 													</div>
-													{member.name === "You" && (
+													{member.id === group.creator_id && (
 														<div className="text-sm font-medium text-primary">
-															You (Admin)
+															{group.creator_id === loaderData.user.id
+																? "You (Admin)"
+																: "Admin"}
 														</div>
 													)}
 												</div>

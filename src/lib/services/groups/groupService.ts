@@ -1,80 +1,55 @@
-import { Group } from "@/types";
+import type { Group } from "@/types";
 import supabase from "../../supabase";
-export async function getGroupById(groupId: string) {
-  const { data, error: groupError } = await supabase
-    .from("groups")
-    .select(
-      `
-    id,
-    name,
-    description,
-    creator_id,
-    group_members ( user_id )
-  `
-    )
-    .eq("id", groupId)
-    .single();
-  if (groupError) {
-    throw groupError;
-  }
-  const { data: membersData, error: membersError } = await supabase
-    .from("group_members")
-    .select(
-      `
-      user_id,
-      profiles ( id, full_name )
-    `
-    )
-    .eq("group_id", groupId);
 
-  if (membersError) {
-    throw membersError;
-  }
+export async function getGroupById(
+	groupId: string,
+	userId: string,
+): Promise<Group> {
+	const { data, error } = await supabase.rpc(
+		"get_group_details_with_balances",
+		{
+			p_group_id: groupId,
+			p_user_id: userId,
+		},
+	);
 
-  const members = membersData.map((member) => ({
-    id: String(member.profiles.id),
-    name: member.profiles.full_name,
-    initials: member.profiles.full_name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase(),
-  }));
-  if (membersError) {
-    throw membersError;
-  }
-  const group: Group = {
-    ...data,
-    description: data.description ?? "",
-    members,
-    expenses: 0,
-    balance: 0,
-    youOwe: false,
-    settled: false,
-  };
-  return group;
+	if (error) {
+		console.error("Error calling get_group_details_with_balances RPC:", error);
+		throw new Error(`Failed to fetch group details for group ${groupId}`);
+	}
+
+	if (!data) {
+		throw new Error(
+			`No data returned from RPC for group ${groupId}. Group might not exist or user may not have access.`,
+		);
+	}
+
+	const groupData = data as unknown as Group;
+
+	return groupData;
 }
+
 export async function getGroupMembersByGroupId(groupId: string) {
-  const { data, error: countError } = await supabase
-    .from("group_members")
-    .select(
-      `
+	const { data, error: countError } = await supabase
+		.from("group_members")
+		.select(
+			`
         user_id,
         profiles ( full_name, email, avatar_url ),
         groups!inner ( creator_id )
-      `
-    )
-    .eq("group_id", groupId);
-  if (countError) {
-    throw countError;
-  }
-  const group_members = data.map((item) => {
-    return {
-      id: item.user_id,
-      name: item.profiles.full_name,
-      email: item.profiles.email,
-      avatar_url: item.profiles.avatar_url,
-    };
-  });
-  return group_members;
+      `,
+		)
+		.eq("group_id", groupId);
+	if (countError) {
+		throw countError;
+	}
+	const group_members = data.map((item) => {
+		return {
+			id: item.user_id,
+			name: item.profiles.full_name,
+			email: item.profiles.email,
+			avatar_url: item.profiles.avatar_url,
+		};
+	});
+	return group_members;
 }
