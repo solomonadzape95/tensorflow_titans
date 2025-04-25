@@ -247,7 +247,7 @@ function GroupDetails() {
 											<div className="space-y-4">
 												{group.detailedBalances.map((balance, i) => (
 													<div
-														key={`${balance.debtorId}-${balance.creditorId}-${i}`} // More robust key
+														key={`${balance.debtorId}-${balance.creditorId}-${i}`}
 														className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
 													>
 														<div className="flex items-center gap-3">
