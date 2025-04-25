@@ -1,5 +1,6 @@
 import type { protectPage } from "@/lib/services/authService";
 import { getGroupById } from "@/lib/services/groups/groupService";
+import { formatNaira } from "@/lib/utils";
 import NotFound from "@/pages/not-found";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -47,6 +48,7 @@ function GroupDetails() {
 		enabled: !!id,
 	});
 	console.log(group);
+
 	if (!id) return <NotFound />;
 
 	return (
@@ -114,11 +116,11 @@ function GroupDetails() {
 										</div>
 									) : group.youOwe ? (
 										<div className="text-2xl font-bold text-red-500 font-display">
-											You owe ${group.balance.toFixed(2)}
+											You owe {formatNaira(group.balance)}
 										</div>
 									) : (
 										<div className="text-2xl font-bold text-green-500 font-display">
-											You're owed ${group.balance.toFixed(2)}
+											You're owed {formatNaira(group.balance)}
 										</div>
 									)}
 								</CardContent>
@@ -218,7 +220,7 @@ function GroupDetails() {
 															</span>
 														</div>
 														<div className="font-medium">
-															${exp.amount.toFixed(2)}
+															{formatNaira(exp.amount)}
 														</div>
 													</div>
 												))}
@@ -240,36 +242,37 @@ function GroupDetails() {
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
-										<div className="space-y-4">
-											{group.members
-												.filter((m) => m.name !== "You")
-												.map((member, i) => (
+										{group.detailedBalances &&
+										group.detailedBalances.length > 0 ? (
+											<div className="space-y-4">
+												{group.detailedBalances.map((balance, i) => (
 													<div
-														key={member.id}
+														key={`${balance.debtorId}-${balance.creditorId}-${i}`} // More robust key
 														className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
 													>
 														<div className="flex items-center gap-3">
-															<Avatar className="w-10 h-10">
-																<AvatarFallback>
-																	{member.initials}
-																</AvatarFallback>
-															</Avatar>
-															<span className="capitalize">
-																{member.name.toLowerCase()}
+															{/* Consider adding avatars here if available */}
+															<span className="capitalize font-medium">
+																{balance.debtorName.toLowerCase()}
+															</span>
+															<span className="text-muted-foreground">
+																owes
+															</span>
+															<span className="capitalize font-medium">
+																{balance.creditorName.toLowerCase()}
 															</span>
 														</div>
-														<div
-															className={`font-medium ${
-																i % 2 === 0 ? "text-green-500" : "text-red-500"
-															}`}
-														>
-															{i % 2 === 0
-																? `owes you $${(25 + i * 15).toFixed(2)}`
-																: `you owe $${(15 + i * 10).toFixed(2)}`}
+														<div className="font-medium text-red-500">
+															{formatNaira(balance.amount)}
 														</div>
 													</div>
 												))}
-										</div>
+											</div>
+										) : (
+											<p className="text-center py-8 text-muted-foreground">
+												No outstanding balances in this group. All settled up!
+											</p>
+										)}
 									</CardContent>
 								</Card>
 							</TabsContent>

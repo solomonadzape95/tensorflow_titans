@@ -13,6 +13,7 @@ import CreateGroup from "./CreateGroup";
 
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import useGetGroups from "@/lib/services/groups/getGroupsForUser";
+import { formatNaira } from "@/lib/utils";
 
 const Group = () => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -51,9 +52,9 @@ const Group = () => {
 									<div className="mt-4 space-y-4">
 										{[...Array(2)].map((_, index) => (
 											<div
-												key={index}
+												key={`skeleton-group-${index}`} // Use more specific key
 												className="h-24 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
-											></div>
+											/> // Make self-closing
 										))}
 									</div>
 								) : null}
@@ -85,16 +86,25 @@ const Group = () => {
 														{group.expenseCount} expenses
 													</span>
 												</div>
-												<div
-													className={`text-sm font-medium ${
-														group.balance.isOwed
-															? "text-green-500"
-															: "text-red-400"
-													}`}
-												>
-													{group.balance.isOwed
-														? `You're owed $${group.balance.amount.toFixed(2)}`
-														: `You owe $${group.balance.amount.toFixed(2)}`}
+												<div className="text-sm font-medium">
+													{group.balance.amount > 0 ? (
+														<span
+															className={
+																group.balance.isOwed
+																	? "text-red-500 dark:text-red-400" // User owes
+																	: "text-green-600 dark:text-green-500" // User is owed
+															}
+														>
+															{group.balance.isOwed
+																? "You owe"
+																: "You are owed"}{" "}
+															{formatNaira(group.balance.amount)}
+														</span>
+													) : (
+														<span className="text-muted-foreground">
+															Settled up
+														</span>
+													)}
 												</div>
 												<div className="flex items-center justify-between">
 													<div className="flex -space-x-3 text-sidebar-foreground dark:text-sidebar-foreground-dark">
@@ -105,25 +115,28 @@ const Group = () => {
                               >
                                 <span className="flex h-full w-full items-center justify-center rounded-full bg-accent dark:bg-accent-dark text-accent-foreground dark:text-accent-foreground-dark border border-accent-foreground text-xs">
                                   {member.initial}
-                                </span>
-                              </span>
-                            ))} */}
-                          </div>
-                          <div className="flex gap-2">
-                            <button className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center">
-                              <Link2 className="h-4 w-4" />
-                            </button>
-                            <Link to={`/dashboard/groups/${group.id}`}>
-                              <Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
-                                View
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+                               </span>
+                             </span>
+                           ))} */}
+													</div>
+													<div className="flex gap-2">
+														<button
+															type="button"
+															className="h-10 w-10 border-2 border-input text-sidebar-foreground dark:text-sidebar-foreground-dark rounded-full flex justify-center items-center"
+														>
+															<Link2 className="h-4 w-4" />
+														</button>
+														<Link to={`/dashboard/groups/${group.id}`}>
+															<Button className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white cursor-pointer hover:shadow-xl shadow-md dark:text-sidebar-foreground-dark px-3 h-9 rounded-md flex justify-center items-center w-[100px]">
+																View
+															</Button>
+														</Link>
+													</div>
+												</div>
+											</CardContent>
+										</Card>
+									))
+								)}
 
 								<Card className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
 									<CardContent className="flex flex-col items-center justify-center p-0">

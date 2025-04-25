@@ -24,7 +24,13 @@ export type Group = {
 	balance: number;
 	youOwe: boolean;
 	settled?: boolean;
-
+	detailedBalances: {
+		debtorId: string;
+		debtorName: string;
+		creditorId: string;
+		creditorName: string;
+		amount: number;
+	}[];
 	recentExpenses: {
 		id: string;
 		description: string | null;
