@@ -134,3 +134,21 @@ export async function getGroupNameAndCreator(groupId: string): Promise<{
     createdAt: data.created_at || "",
   };
 }
+export async function checkMembership(
+  groupId: string,
+  userId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("group_members")
+    .select("joined_at")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Error checking membership:", error);
+    throw new Error("Failed to check group membership.");
+  }
+
+  return !!data;
+}

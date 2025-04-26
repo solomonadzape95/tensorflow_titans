@@ -1,5 +1,6 @@
 import type { protectPage } from "@/lib/services/authService";
 import {
+  checkMembership,
   deleteGroup,
   getGroupById,
   leaveGroup,
@@ -37,7 +38,7 @@ import {
 } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfirmationDialog } from "../confirmation-dialog";
 import { FaTrash } from "react-icons/fa6";
 import InviteToGroup from "@/pages/dashboard/group/InviteToGroup";
@@ -52,25 +53,7 @@ function GroupDetails() {
   const [deleteGroupDialogOpen, setDeleteGroupDialogOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
-  const { data: group, isLoading } = useQuery({
-    queryKey: ["group", id],
-    queryFn: async () => {
-      if (!id) return null;
-
-      const groupData = await getGroupById(id, loaderData.user.id);
-      return groupData;
-    },
-    enabled: !!id,
-  });
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: group?.name || "",
-    description: group?.description || "",
-  });
-  const queryClient = useQueryClient();
-  const isFormChanged =
-    formData.name !== group?.name ||
-    formData.description !== group?.description;
 
   const { mutateAsync: updateGroupFn, isPending } = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -96,6 +79,49 @@ function GroupDetails() {
       },
     });
 
+  const { mutateAsync: checkMembershipFn, isPending: isCheckingMembership } =
+    useMutation({
+      mutationFn: async () => {
+        if (!id) throw new Error("Group ID is missing.");
+        return await checkMembership(id, loaderData.user.id);
+      },
+      onSuccess: (isMember) => {
+        if (!isMember) {
+          toast.error("You are not a member of this group.");
+          navigate("/dashboard/groups"); // Redirect to groups page
+        }
+      },
+      onError: () => {
+        toast.error("Failed to verify group membership. Please try again.");
+        navigate("/dashboard/groups"); // Redirect to groups page on error
+      },
+    });
+
+  useEffect(() => {
+    if (id) {
+      checkMembershipFn();
+    }
+  }, [id, checkMembershipFn]);
+
+  const { data: group, isLoading } = useQuery({
+    queryKey: ["group", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const groupData = await getGroupById(id, loaderData.user.id);
+      return groupData;
+    },
+    enabled: !!id && !isCheckingMembership, // Only fetch group details if membership check passes
+  });
+
+  const [formData, setFormData] = useState({
+    name: group?.name || "",
+    description: group?.description || "",
+  });
+  const queryClient = useQueryClient();
+  const isFormChanged =
+    formData.name !== group?.name ||
+    formData.description !== group?.description;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     toast.promise(updateGroupFn(formData), {
@@ -104,9 +130,9 @@ function GroupDetails() {
       error: "Failed to update Group Details",
     });
   };
-
-  console.log(group);
-
+  if (isCheckingMembership || isLoading) {
+    return <div>Loading...</div>;
+  }
   if (!id) return <NotFound />;
 
   return (
@@ -399,7 +425,7 @@ function GroupDetails() {
                       isOpen={inviteDialogOpen}
                       onOpenChange={setInviteDialogOpen}
                       userId={loaderData.user.id}
-                      inviteLink={group.id} 
+                      inviteLink={group.id}
                       onUserInvited={(user) =>
                         console.log("User invited:", user)
                       }
