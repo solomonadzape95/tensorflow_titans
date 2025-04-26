@@ -442,3 +442,35 @@ export async function getRecentActivities(userId: string, limit = 5) {
 
 	return data || [];
 }
+
+export async function joinGroup(userId: string, groupId: string): Promise<void> {
+  // Check if the user is already a member of the group
+  const { data: existingMembership, error: membershipError } = await supabase
+    .from("group_members")
+    .select("joined_at")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .single();
+
+  if (membershipError && membershipError.code !== "PGRST116") {
+    console.error("Error checking group membership:", membershipError);
+    throw new Error("Failed to check group membership.");
+  }
+
+  if (existingMembership) {
+    throw new Error("You are already a member of this group.");
+  }
+
+  //Add the user to the group
+  const { error: insertError } = await supabase
+    .from("group_members")
+    .insert({
+      group_id: groupId,
+      user_id: userId,
+    });
+
+  if (insertError) {
+    console.error("Error adding user to group:", insertError);
+    throw new Error("Failed to join the group.");
+  }
+}

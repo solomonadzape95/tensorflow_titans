@@ -66,6 +66,7 @@ export function MobileNav() {
                   onClick={() => setOpen(false)}
                 >
                   <Button
+                  variant={"ghost"}
                     className={cn(
                       "w-full justify-start text-sidebar-foreground dark:text-sidebar-foreground-dark animate-pulse-glow text-sm gap-2 group transition-all duration-300 ",
                       isActive &&

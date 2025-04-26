@@ -66,7 +66,7 @@ function Sidebar({ user }: { user: UserData }) {
 				<div className="mt-4 space-y-2">
 					{navLists.map((list, index) => {
 						const Icon = list.icon;
-						const isActive = pathname.startsWith(list.path);
+						const isActive = pathname === list.path;
 						return (
 							<Link
 								key={list.name}

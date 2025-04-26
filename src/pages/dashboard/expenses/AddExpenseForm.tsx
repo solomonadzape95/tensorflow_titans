@@ -2,46 +2,42 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  CalendarDaysIcon,
-  CalendarIcon,
-  DollarSign,
-  Loader,
-  RepeatIcon,
-} from "lucide-react";
+import { CalendarIcon, DollarSign, Loader, RepeatIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,19 +50,21 @@ import { GroupData } from "@/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createExpense } from "@/lib/services/expenseService";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmationDialog } from "@/components/confirmation-dialog";
+import { toast } from "sonner";
 
 type GroupMember = {
-	id: string;
-	name: string;
-	avatar_url: string | null;
-	email: string;
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  email: string;
 };
 
 type SplitData = {
-	[userId: string]: {
-		share_amount: number;
-		percentage?: number;
-	};
+  [userId: string]: {
+    share_amount: number;
+    percentage?: number;
+  };
 };
 
 export function AddExpenseForm() {
@@ -77,6 +75,9 @@ export function AddExpenseForm() {
   const fromGroups = pathname.includes("/groups/");
   const [splitMethod, setSplitMethod] = useState("equal");
   const [splitData, setSplitData] = useState<SplitData>({});
+  const [open, setOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [isRecurring, setIsRecurring] = useState(false);
   const queryClient = useQueryClient();
   const form = useForm<CreateExpenseFormData>({
@@ -90,8 +91,8 @@ export function AddExpenseForm() {
     },
   });
 
-	const groupID = form.watch("group_id");
-	const expenseAmount = form.watch("amount");
+  const groupID = form.watch("group_id");
+  const expenseAmount = form.watch("amount");
 
   const { groupMembers, isLoading: isLoadingMembers } =
     useGetGroupMembers(groupID);
@@ -121,12 +122,12 @@ export function AddExpenseForm() {
           queryKey: ["expenses"],
         });
 
-				// If you have specific expense queries by group
-				if (form.watch("group_id")) {
-					queryClient.invalidateQueries({
-						queryKey: ["expenses", form.watch("group_id")],
-					});
-				}
+        // If you have specific expense queries by group
+        if (form.watch("group_id")) {
+          queryClient.invalidateQueries({
+            queryKey: ["expenses", form.watch("group_id")],
+          });
+        }
 
         return !fromGroups
           ? navigate("/dashboard/expenses", {
@@ -142,113 +143,113 @@ export function AddExpenseForm() {
     }
   }, [groupMembers, expenseAmount, splitMethod]);
 
-	// Calculate and update split data based on selected method
-	const updateSplitData = () => {
-		if (!groupMembers || !expenseAmount) return;
+  // Calculate and update split data based on selected method
+  const updateSplitData = () => {
+    if (!groupMembers || !expenseAmount) return;
 
-		const newSplitData: SplitData = {};
+    const newSplitData: SplitData = {};
 
-		if (splitMethod === "equal") {
-			const splitAmount =
-				Number.parseFloat(expenseAmount) / groupMembers.length;
-			const splitPercentage = 100 / groupMembers.length;
+    if (splitMethod === "equal") {
+      const splitAmount =
+        Number.parseFloat(expenseAmount) / groupMembers.length;
+      const splitPercentage = 100 / groupMembers.length;
 
-			groupMembers.forEach((member: GroupMember) => {
-				newSplitData[member.id] = {
-					share_amount: Number.parseFloat(splitAmount.toFixed(2)),
-					percentage: Number.parseFloat(splitPercentage.toFixed(2)),
-				};
-			});
-		} else if (splitMethod === "custom") {
-			// Maintain any existing custom amounts or initialize with 0
-			groupMembers.forEach((member: GroupMember) => {
-				newSplitData[member.id] = splitData[member.id] || {
-					amount: 0,
-					percentage: 0,
-				};
-			});
-		} else if (splitMethod === "percentage") {
-			// Initialize with equal percentages if not set
-			const defaultPercentage = 100 / groupMembers.length;
-			// Add validation check before updating split data for percentage method
-			let totalPercentage = 0;
-			groupMembers.forEach((member: GroupMember) => {
-				const percentage =
-					splitData[member.id]?.percentage || defaultPercentage;
-				totalPercentage += percentage;
-				if (totalPercentage > 100) return; // Skip if total exceeds 100%
-			});
-			groupMembers.forEach((member: GroupMember) => {
-				const percentage =
-					splitData[member.id]?.percentage || defaultPercentage;
-				newSplitData[member.id] = {
-					share_amount: Number.parseFloat(
-						((Number.parseFloat(expenseAmount) * percentage) / 100).toFixed(2),
-					),
-					percentage: percentage,
-				};
-			});
-		}
-		setSplitData(newSplitData);
-	};
+      groupMembers.forEach((member: GroupMember) => {
+        newSplitData[member.id] = {
+          share_amount: Number.parseFloat(splitAmount.toFixed(2)),
+          percentage: Number.parseFloat(splitPercentage.toFixed(2)),
+        };
+      });
+    } else if (splitMethod === "custom") {
+      // Maintain any existing custom amounts or initialize with 0
+      groupMembers.forEach((member: GroupMember) => {
+        newSplitData[member.id] = splitData[member.id] || {
+          amount: 0,
+          percentage: 0,
+        };
+      });
+    } else if (splitMethod === "percentage") {
+      // Initialize with equal percentages if not set
+      const defaultPercentage = 100 / groupMembers.length;
+      // Add validation check before updating split data for percentage method
+      let totalPercentage = 0;
+      groupMembers.forEach((member: GroupMember) => {
+        const percentage =
+          splitData[member.id]?.percentage || defaultPercentage;
+        totalPercentage += percentage;
+        if (totalPercentage > 100) return; // Skip if total exceeds 100%
+      });
+      groupMembers.forEach((member: GroupMember) => {
+        const percentage =
+          splitData[member.id]?.percentage || defaultPercentage;
+        newSplitData[member.id] = {
+          share_amount: Number.parseFloat(
+            ((Number.parseFloat(expenseAmount) * percentage) / 100).toFixed(2)
+          ),
+          percentage: percentage,
+        };
+      });
+    }
+    setSplitData(newSplitData);
+  };
 
-	// Handle custom amount change
-	const handleCustomAmountChange = (memberId: string, amount: string) => {
-		const numAmount = Number.parseFloat(amount) || 0;
+  // Handle custom amount change
+  const handleCustomAmountChange = (memberId: string, amount: string) => {
+    const numAmount = Number.parseFloat(amount) || 0;
 
-		setSplitData((prev) => {
-			const newData = { ...prev };
-			newData[memberId] = {
-				share_amount: numAmount,
-				percentage: expenseAmount
-					? (numAmount / Number.parseFloat(expenseAmount)) * 100
-					: 0,
-			};
-			return newData;
-		});
-	};
+    setSplitData((prev) => {
+      const newData = { ...prev };
+      newData[memberId] = {
+        share_amount: numAmount,
+        percentage: expenseAmount
+          ? (numAmount / Number.parseFloat(expenseAmount)) * 100
+          : 0,
+      };
+      return newData;
+    });
+  };
 
-	// Handle percentage slider change
-	const handlePercentageChange = (memberId: string, value: number[]) => {
-		const newPercentage = value[0];
+  // Handle percentage slider change
+  const handlePercentageChange = (memberId: string, value: number[]) => {
+    const newPercentage = value[0];
 
-		setSplitData((prev) => {
-			const newData = { ...prev };
-			const otherMembers = Object.keys(prev).filter((id) => id !== memberId);
+    setSplitData((prev) => {
+      const newData = { ...prev };
+      const otherMembers = Object.keys(prev).filter((id) => id !== memberId);
 
-			// Update the current member's percentage and amount
-			newData[memberId] = {
-				percentage: newPercentage,
-				share_amount: Number.parseFloat(
-					(
-						(Number.parseFloat(expenseAmount || "0") * newPercentage) /
-						100
-					).toFixed(2),
-				),
-			};
+      // Update the current member's percentage and amount
+      newData[memberId] = {
+        percentage: newPercentage,
+        share_amount: Number.parseFloat(
+          (
+            (Number.parseFloat(expenseAmount || "0") * newPercentage) /
+            100
+          ).toFixed(2)
+        ),
+      };
 
-			// Calculate remaining percentage
-			const remaining = Math.max(0, 100 - newPercentage);
+      // Calculate remaining percentage
+      const remaining = Math.max(0, 100 - newPercentage);
 
-			// Distribute remaining percentage equally among other members
-			if (otherMembers.length > 0) {
-				const equalShare = remaining / otherMembers.length;
-				otherMembers.forEach((id) => {
-					newData[id] = {
-						percentage: equalShare,
-						share_amount: Number.parseFloat(
-							(
-								(Number.parseFloat(expenseAmount || "0") * equalShare) /
-								100
-							).toFixed(2),
-						),
-					};
-				});
-			}
+      // Distribute remaining percentage equally among other members
+      if (otherMembers.length > 0) {
+        const equalShare = remaining / otherMembers.length;
+        otherMembers.forEach((id) => {
+          newData[id] = {
+            percentage: equalShare,
+            share_amount: Number.parseFloat(
+              (
+                (Number.parseFloat(expenseAmount || "0") * equalShare) /
+                100
+              ).toFixed(2)
+            ),
+          };
+        });
+      }
 
-			return newData;
-		});
-	};
+      return newData;
+    });
+  };
 
   const onSubmit = (data: CreateExpenseFormData) => {
     // Include the split data in your submission
@@ -264,8 +265,13 @@ export function AddExpenseForm() {
         recurring_count: data.recurring_count,
       }),
     };
-    createNewExpense(formData);
-    console.log("Submitting expense data:", formData);
+    toast.promise(createNewExpense(formData), {
+      loading: "Creating expense...",
+      success: "Expense created successfully!",
+      error: (error) => error.message,
+    });
+
+    // console.log("Submitting expense data:", formData);
   };
 
   return (
@@ -342,11 +348,11 @@ export function AddExpenseForm() {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
+                    <Dialog open={open} onOpenChange={setOpen}>
+                      <DialogTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant="outline"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
                               !field.value && "text-muted-foreground"
@@ -354,7 +360,7 @@ export function AddExpenseForm() {
                           >
                             {field.value ? (
                               <span>
-                                {field.value.toISOString().split("T")[0]}
+                                {field.value.toLocaleDateString("en-CA")}
                               </span>
                             ) : (
                               <span>Pick a date</span>
@@ -362,19 +368,36 @@ export function AddExpenseForm() {
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                      </DialogTrigger>
+                      <DialogContent
+                        className="p-4 rounded-xl w-auto bg-white dark:bg-neutral-900 shadow-lg"
+                        style={{
+                          minWidth: "fit-content",
+                          maxWidth: "fit-content",
+                          margin: "auto",
+                        }}
+                      >
+                        <DialogHeader>
+                          <DialogTitle className="text-lg font-semibold text-center w-full">
+                            Pick a date
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="pt-2 flex justify-center">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(date) => {
+                              field.onChange(date);
+                              setOpen(false);
+                            }}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            className="rounded-md border p-4 bg-white dark:bg-neutral-800"
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     <FormDescription>
                       This is the date the expense was made
                     </FormDescription>
@@ -383,7 +406,7 @@ export function AddExpenseForm() {
                 )}
               />
               {/* Recurring Expense Toggle */}
-              <div className="flex items-center justify-between space-x-2 rounded-lg glass p-4">
+              <div className="flex items-center justify-between space-x-2">
                 <div className="flex flex-col space-y-1">
                   <div className="flex items-center space-x-2">
                     <RepeatIcon className="h-4 w-4 text-primary" />
@@ -416,7 +439,7 @@ export function AddExpenseForm() {
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select frequency" />
                             </SelectTrigger>
                           </FormControl>
@@ -493,11 +516,11 @@ export function AddExpenseForm() {
                           name="recurring_end_date"
                           render={({ field }) => (
                             <FormItem>
-                              <Popover>
-                                <PopoverTrigger asChild>
+                              <Dialog open={endOpen} onOpenChange={setEndOpen}>
+                                <DialogTrigger asChild>
                                   <FormControl>
                                     <Button
-                                      variant={"outline"}
+                                      variant="outline"
                                       className={cn(
                                         "w-full pl-3 text-left font-normal",
                                         !field.value && "text-muted-foreground"
@@ -505,37 +528,47 @@ export function AddExpenseForm() {
                                     >
                                       {field.value ? (
                                         <span>
-                                          {
-                                            field.value
-                                              .toISOString()
-                                              .split("T")[0]
-                                          }
+                                          {field.value.toLocaleDateString(
+                                            "en-CA"
+                                          )}
                                         </span>
                                       ) : (
                                         <span>Select end date</span>
                                       )}
-                                      <CalendarDaysIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                     </Button>
                                   </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent
-                                  className="w-auto p-0"
-                                  align="start"
+                                </DialogTrigger>
+                                <DialogContent
+                                  className="p-4 rounded-xl w-auto bg-white dark:bg-neutral-900 shadow-lg"
+                                  style={{
+                                    minWidth: "fit-content",
+                                    maxWidth: "fit-content",
+                                    margin: "auto",
+                                  }}
                                 >
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) =>
-                                      date < new Date() ||
-                                      form.watch("recurring_frequency")
-                                        ? true
-                                        : false
-                                    }
-                                    initialFocus
-                                  />
-                                </PopoverContent>
-                              </Popover>
+                                  <DialogHeader>
+                                    <DialogTitle className="text-lg font-semibold text-center w-full">
+                                      Select end date
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="pt-2 flex justify-center">
+                                    <Calendar
+                                      mode="single"
+                                      selected={field.value}
+                                      onSelect={(date) => {
+                                        field.onChange(date);
+                                        setEndOpen(false);
+                                      }}
+                                      disabled={(date) =>
+                                        date < new Date() ||
+                                        date < new Date("1900-01-01")
+                                      }
+                                      className="rounded-md border p-4 bg-white dark:bg-neutral-800"
+                                    />
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                               <FormDescription>
                                 The expense will repeat until this date
                               </FormDescription>
@@ -590,6 +623,12 @@ export function AddExpenseForm() {
                       Group where this expense will be shared
                     </FormDescription>
                     <FormMessage />
+                    {groupMembers && groupMembers.length < 2 && (
+                      <p className="text-sm text-red-500">
+                        The selected group must contain at least 2 members to
+                        create an expense.
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -603,7 +642,11 @@ export function AddExpenseForm() {
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
-                      disabled={!groupMembers || isLoadingMembers}
+                      disabled={
+                        !groupMembers ||
+                        isLoadingMembers ||
+                        (groupMembers && groupMembers.length < 2)
+                      }
                     >
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -811,16 +854,30 @@ export function AddExpenseForm() {
                           </p>
                         )}
                       </div>
-                      {expenseAmount && (
-                        <div className="flex justify-between items-center p-3 rounded-lg bg-primary/10">
-                          <span>Total:</span>
-                          <span className="font-bold">
-                            $
-                            {Object.values(splitData)
-                              .reduce((sum, data) => sum + data.share_amount, 0)
-                              .toFixed(2)}
-                            /{expenseAmount}
-                          </span>
+                      {splitMethod === "custom" && expenseAmount && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center p-3 rounded-lg bg-primary/10">
+                            <span>Total:</span>
+                            <span className="font-bold">
+                              $
+                              {Object.values(splitData)
+                                .reduce(
+                                  (sum, data) => sum + (data.share_amount || 0),
+                                  0
+                                )
+                                .toFixed(2)}
+                              /{expenseAmount}
+                            </span>
+                          </div>
+                          {Object.values(splitData).reduce(
+                            (sum, data) => sum + (data.share_amount || 0),
+                            0
+                          ) !== parseFloat(expenseAmount) && (
+                            <p className="text-sm text-red-500">
+                              The total of custom splits must equal the expense
+                              amount.
+                            </p>
+                          )}
                         </div>
                       )}
                     </TabsContent>
@@ -920,17 +977,28 @@ export function AddExpenseForm() {
               )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button type="button" onClick={() => navigate(-1)}>
+              <Button
+                type="button"
+                onClick={() => navigate(-1)}
+                variant={"outline"}
+              >
                 Cancel
               </Button>
               <Button
-                type="submit"
+                type="button"
+                onClick={() => setConfirmOpen(true)}
                 disabled={
                   form.formState.isSubmitting ||
                   isCreatingExpense ||
-                  !form.formState.isValid
+                  !form.formState.isValid ||
+                  (groupMembers && groupMembers.length < 2) ||
+                  (splitMethod === "custom" &&
+                    Object.values(splitData).reduce(
+                      (sum, data) => sum + (data.share_amount || 0),
+                      0
+                    ) !== parseFloat(expenseAmount))
                 }
-                className="min-w-[120px] "
+                className="min-w-[120px] bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
               >
                 {form.formState.isSubmitting || isCreatingExpense ? (
                   <div className="flex items-center gap-2">
@@ -957,9 +1025,30 @@ export function AddExpenseForm() {
                     <span>Processing...</span>
                   </div>
                 ) : (
-                  "Create Expense"
+                  <span>Create Expense</span>
                 )}
               </Button>
+              <ConfirmationDialog
+                open={confirmOpen}
+                onOpenChange={setConfirmOpen}
+                title="Confirm Expense Creation"
+                description={
+                  <span>
+                    Please go through the details again because this expense{" "}
+                    <strong className="text-red-500">CANNOT</strong> be edited.
+                    <br />
+                    Are you sure you want to create this expense?
+                  </span>
+                }
+                confirmText="Yes, Create Expense"
+                cancelText="No, Go back"
+                destructive={false}
+                onConfirm={async () => {
+                  setConfirmOpen(false); // Close the dialog
+                  await form.handleSubmit(onSubmit)(); // Submit the form
+                }}
+                loading={form.formState.isSubmitting || isCreatingExpense}
+              />
             </CardFooter>
           </Card>
         </form>
