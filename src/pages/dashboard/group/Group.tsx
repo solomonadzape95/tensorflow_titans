@@ -1,21 +1,29 @@
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Link2, Plus, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import CreateGroup from "./CreateGroup";
-
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import ArchivedGroup from "@/components/dashboard/ArchivedGroup";
 import useGetGroups from "@/lib/services/groups/getGroupsForUser";
 import { formatNaira } from "@/lib/utils";
 
 const Group = () => {
+
 	const [isOpen, setIsOpen] = useState(false);
 	const { groups: filteredGroups, isLoading: isLoadingGroups } = useGetGroups();
 	console.log(isLoadingGroups);
@@ -138,34 +146,34 @@ const Group = () => {
 									))
 								)}
 
-								<Card className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
-									<CardContent className="flex flex-col items-center justify-center p-0">
-										<div className="rounded-full bg-[#4F32FF]/10 p-4 mb-4">
-											<Users className="h-8 w-8 text-[#4F32FF]" />
-										</div>
-										<h3 className="mb-2 text-lg font-medium text-sidebar-foreground dark:text-sidebar-foreground-dark">
-											Create a new group
-										</h3>
-										<p className="mb-4 text-center text-sm text-muted-foreground">
-											Start splitting expenses with friends, roommates, or
-											travel buddies
-										</p>
-										<Button
-											className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
-											onClick={() => setIsOpen(true)}
-										>
-											<Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
-											New Group
-										</Button>
-									</CardContent>
-								</Card>
-							</div>
-						</div>
-					</div>
-				</>
-			)}
-		</div>
-	);
+                <Card className="rounded-xl bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md border dark:border-border-dark text-sidebar-foreground dark:text-sidebar-foreground-dark flex h-full flex-col items-center justify-center p-6">
+                  <CardContent className="flex flex-col items-center justify-center p-0">
+                    <div className="rounded-full bg-[#4F32FF]/10 p-4 mb-4">
+                      <Users className="h-8 w-8 text-[#4F32FF]" />
+                    </div>
+                    <h3 className="mb-2 text-lg font-medium text-sidebar-foreground dark:text-sidebar-foreground-dark">
+                      Create a new group
+                    </h3>
+                    <p className="mb-4 text-center text-sm text-muted-foreground">
+                      Start splitting expenses with friends, roommates, or
+                      travel buddies
+                    </p>
+                    <Button
+                      className="inline-flex items-center justify-center rounded-lg text-sm font-medium relative bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white h-10 px-4 py-2 group"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
+                      New Group
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default Group;

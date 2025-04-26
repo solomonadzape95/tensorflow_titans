@@ -53,3 +53,16 @@ export async function getGroupMembersByGroupId(groupId: string) {
 	});
 	return group_members;
 }
+
+export async function getGroupExpenseCount(groupId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("expenses")
+    .select("*", { count: "exact" }) // Use count: "exact" to get the total count
+    .eq("group_id", groupId);
+
+  if (error) {
+    throw error;
+  }
+
+  return count || 0; // Return 0 if no expenses are found
+}
