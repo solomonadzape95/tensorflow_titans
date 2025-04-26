@@ -13,7 +13,7 @@ function Activities() {
 	});
 
 	return (
-		<div>
+		<div className="flex flex-col gap-4">
 			{data.map((activity) => (
 				<Activity key={activity.id} activity={activity} /> // Add key prop
 			))}

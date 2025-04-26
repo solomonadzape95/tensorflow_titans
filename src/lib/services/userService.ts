@@ -1,58 +1,122 @@
-import type { GroupData } from "@/types";
 import type { CreateGroupFormData } from "../schema";
 import supabase from "../supabase";
-export async function getGroupsForUser(userId: string) {
-	const { data, error } = await supabase
-		.from("group_members")
-		.select(
-			`
-    group_id,
-    groups ( id, name, description, creator_id )
-    `,
-		)
-		.eq("user_id", userId);
-	const rawGroups =
-		(data
-			?.map((item) => item.groups)
-			.filter((group) => group !== null) as unknown as GroupData[]) || [];
-	for (const group of rawGroups) {
-		const { count, error: countError } = await supabase
-			.from("group_members")
-			.select("*", { count: "exact", head: true })
-			.eq("group_id", group.id);
 
-		const { count: expenseCount, error: expenseError } = await supabase
-			.from("expenses")
-			.select("*", { count: "exact", head: true })
-			.eq("group_id", group.id);
-		console.log("count", expenseCount);
-		if (countError || expenseError) {
-			console.error(
-				`Error fetching member count for group ${group.id}:`,
-				countError || expenseError,
-			);
-			group.expenseCount = 0;
-			group.memberCount = 0;
-		} else {
-			group.expenseCount = expenseCount || 0;
-			group.memberCount = count || 0;
+export async function getGroupsForUser(userId: string) {
+	// 1. Fetch groups with member and expense counts using the efficient RPC
+	const { data: groupsData, error: groupsError } = await supabase.rpc(
+		"get_user_groups_with_counts",
+		{
+			p_user_id: userId,
+		},
+	);
+
+	if (groupsError) {
+		console.error("Error fetching groups with counts:", groupsError);
+		throw groupsError;
+	}
+
+	if (!groupsData || groupsData.length === 0) {
+		return [];
+	}
+
+	const groupIds = groupsData.map((g) => g.id);
+
+	// 2. Fetch all expenses where the user is the payer in these groups
+	const { data: paidExpenses, error: paidError } = await supabase
+		.from("expenses")
+		.select("group_id, amount")
+		.in("group_id", groupIds)
+		.eq("payer_id", userId);
+
+	if (paidError) {
+		console.error("Error fetching paid expenses:", paidError);
+		// Continue, balances will be inaccurate
+	}
+
+	// 3. Fetch all expenses the user participated in within these groups, including expense details
+	//    and the count of participants for each expense to calculate the share.
+	const { data: participatedExpensesData, error: participatedError } =
+		await supabase
+			.from("expense_participants")
+			.select(
+				`
+        user_id,
+        expense:expenses!inner (
+          id,
+          group_id,
+          amount,
+          participant_count:expense_participants!inner(count)
+        )
+      `,
+			)
+			.eq("user_id", userId)
+			.in("expense.group_id", groupIds); // Filter expenses by the user's groups
+
+	if (participatedError) {
+		console.error("Error fetching participated expenses:", participatedError);
+		// Continue, balances will be inaccurate
+	}
+
+	// 4. Calculate balances in memory
+	const groupBalances = new Map<string, { paid: number; share: number }>();
+
+	// Initialize balances for all groups
+	for (const groupId of groupIds) {
+		groupBalances.set(groupId, { paid: 0, share: 0 });
+	}
+
+	// Aggregate amounts paid by the user
+	if (paidExpenses) {
+		for (const expense of paidExpenses) {
+			const balance = groupBalances.get(expense.group_id);
+			if (balance) {
+				balance.paid += expense.amount;
+			}
 		}
 	}
 
-	if (error) {
-		throw error;
+	// Aggregate user's share of participated expenses
+	if (participatedExpensesData) {
+		for (const participation of participatedExpensesData) {
+			// Ensure expense and participant_count are valid
+			const expense = participation.expense;
+			if (!expense || !expense.group_id || typeof expense.amount !== "number") {
+				continue; // Skip if data is incomplete
+			}
+
+			// Access the count correctly - it's an array with one object { count: number }
+			const participantCount =
+				Array.isArray(expense.participant_count) &&
+				expense.participant_count.length > 0
+					? (expense.participant_count[0]?.count ?? 1) // Default to 1 if count is missing/invalid
+					: 1; // Default to 1 if structure is unexpected
+
+			const userShare = expense.amount / Math.max(1, participantCount); // Avoid division by zero
+
+			const balance = groupBalances.get(expense.group_id);
+			if (balance) {
+				balance.share += userShare;
+			}
+		}
 	}
-	return (
-		rawGroups.map((group) => ({
+
+	// 5. Merge group data with calculated balances
+	return groupsData.map((group) => {
+		const balances = groupBalances.get(group.id) || { paid: 0, share: 0 };
+		const netAmount = balances.paid - balances.share;
+		return {
 			id: group.id,
 			name: group.name,
 			description: group.description || "",
-			expenseCount: group.expenseCount || 0,
-			balance: group.balance || { amount: 0, isOwed: false },
-			memberCount: group.memberCount || 0,
-			members: [],
-		})) || []
-	);
+			expenseCount: group.expense_count || 0,
+			balance: {
+				amount: Math.abs(netAmount),
+				isOwed: netAmount < 0, // True if user owes (share > paid)
+			},
+			memberCount: group.member_count || 0,
+			members: [], // Member details are not fetched here
+		};
+	});
 }
 export async function getMembersOfMyCreatedGroups(currentUserId: string) {
 	const { data, error } = await supabase

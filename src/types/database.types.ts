@@ -89,8 +89,12 @@ export type Database = {
           expense_date: string | null
           group_id: string
           id: string
+          is_recurring: boolean | null
           name: string | null
           payer_id: string | null
+          recurring_count: number | null
+          recurring_end_date: string | null
+          recurring_frequency: string | null
           split_type: string
           updated_at: string | null
         }
@@ -101,8 +105,12 @@ export type Database = {
           expense_date?: string | null
           group_id: string
           id?: string
+          is_recurring?: boolean | null
           name?: string | null
           payer_id?: string | null
+          recurring_count?: number | null
+          recurring_end_date?: string | null
+          recurring_frequency?: string | null
           split_type?: string
           updated_at?: string | null
         }
@@ -113,8 +121,12 @@ export type Database = {
           expense_date?: string | null
           group_id?: string
           id?: string
+          is_recurring?: boolean | null
           name?: string | null
           payer_id?: string | null
+          recurring_count?: number | null
+          recurring_end_date?: string | null
+          recurring_frequency?: string | null
           split_type?: string
           updated_at?: string | null
         }
@@ -171,7 +183,7 @@ export type Database = {
       groups: {
         Row: {
           created_at: string | null
-          creator_id: string | null
+          creator_id: string
           description: string | null
           id: string
           name: string
@@ -179,7 +191,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          creator_id?: string | null
+          creator_id: string
           description?: string | null
           id?: string
           name: string
@@ -187,7 +199,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          creator_id?: string | null
+          creator_id?: string
           description?: string | null
           id?: string
           name?: string
@@ -274,6 +286,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_group_balances: {
+        Args: { p_user_id: string; p_group_id: string }
+        Returns: {
+          user_id: string
+          full_name: string
+          avatar_url: string
+          amount: number
+        }[]
+      }
+      get_group_details_with_balances: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: Json
+      }
+      get_recent_group_transactions: {
+        Args: { p_group_id: string; p_limit: number }
+        Returns: {
+          id: string
+          type: string
+          description: string
+          amount: number
+          created_at: string
+          user_id: string
+          full_name: string
+          avatar_url: string
+        }[]
+      }
       get_suggested_invitees: {
         Args: { p_user_id: string }
         Returns: {
@@ -297,6 +335,17 @@ export type Database = {
           members: Json
         }[]
       }
+      get_user_groups_with_counts: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          creator_id: string
+          member_count: number
+          expense_count: number
+        }[]
+      }
       is_group_member: {
         Args: { p_group_id: string; p_user_id: string }
         Returns: boolean
@@ -311,6 +360,10 @@ export type Database = {
         group_name: string | null
         net_group_balance: number | null
         member_avatars: string[] | null
+      }
+      member_balance_record: {
+        member_id: string | null
+        balance: number | null
       }
       user_balance_entry: {
         other_user_id: string | null
