@@ -1,3 +1,4 @@
+import { updateProfile } from "@/lib/services/userService";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,36 +29,93 @@ import { useDarkMode } from "@/hooks/use-darkmode";
 import { FaFloppyDisk } from "react-icons/fa6";
 import { useLoaderData } from "react-router";
 import type { UserData } from "@/types";
+import { uploadAvatar } from "@/lib/services/userService";
 
 export default function Settings() {
   const [darkMode, toggleDarkMode] = useDarkMode();
   const [isLoading, setIsLoading] = useState(false);
-  // const [ newProfile, setNewProfile] = useState({
+  const { profile } = useLoaderData() as UserData;
 
-  // })
+  // Add form state
+  const [formData, setFormData] = useState({
+    firstName: profile?.full_name.split(" ")[0] || "",
+    lastName: profile?.full_name.split(" ")[1] || "",
+    email: profile?.email || "",
+  });
 
-  const {profile } = useLoaderData() as UserData;
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id.replace("-", "")]: value,
+    }));
+  };
 
- console.log(profile)
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+
+      // Prepare the update data
+      const updates = {
+        full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+      };
+
+      // Update the profile
+      await updateProfile(profile.id, updates);
+
+      toast.success("Settings saved", {
+        description: "Your profile has been updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      toast.error("Error saving settings", {
+        description: "There was a problem updating your profile.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.target.files || e.target.files.length === 0) {
+        return;
+      }
+
+      const file = e.target.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        // 2MB
+        toast.error("File too large", {
+          description: "Please select an image under 2MB.",
+        });
+        return;
+      }
+
+      setIsLoading(true);
+      const newAvatarUrl = await uploadAvatar(profile.id, file);
+
+      toast.success("Avatar updated", {
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error) {
+      console.error("Error updating avatar:", error);
+      toast.error("Error updating avatar", {
+        description: "There was a problem updating your profile picture.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   function initialName(fullName: string) {
     const name = fullName.trim().split(" ").filter(Boolean);
-    console.log(name)
+    console.log(name);
     if (name.length === 0) return "";
     if (name.length === 1) return name[0].substring(0, 2).toUpperCase();
     return (name[0][0] + name[name.length - 1][0]).toUpperCase();
   }
-
-  const handleSave = () => {
-    setIsLoading(true);
- 
-    
-    setTimeout(() => {
-      setIsLoading(false);
-      toast("Settings saved", {
-        description: "Your settings have been updated successfully.",
-      });
-    }, 1000);
-  };
 
   return (
     <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -115,7 +173,10 @@ export default function Settings() {
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                   <Avatar className="h-24 w-24 animate-pulse-glow">
                     <AvatarImage
-                       src={profile?.avatar_url || '/placeholder.svg?height=96&width=96'}
+                      src={
+                        profile?.avatar_url ||
+                        "/placeholder.svg?height=96&width=96"
+                      }
                       alt="User"
                     />
                     <AvatarFallback className="text-2xl">
@@ -123,7 +184,13 @@ export default function Settings() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
-                    <Button className="w-full sm:w-auto bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white ">
+                    <Button
+                      className="w-full sm:w-auto bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
+                      onClick={() =>
+                        document.getElementById("avatar-upload")?.click()
+                      }
+                      disabled={isLoading}
+                    >
                       <Upload className="mr-2 h-4 w-4" />
                       Change Avatar
                     </Button>
@@ -136,11 +203,19 @@ export default function Settings() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
-                    <Input id="first-name" defaultValue={profile?.full_name.split(' ')[0]} />
+                    <Input
+                      id="first-name"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="last-name">Last Name</Label>
-                    <Input id="last-name" defaultValue={profile?.full_name.split(' ')[1]}  />
+                    <Input
+                      id="last-name"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
 
@@ -149,7 +224,8 @@ export default function Settings() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue={profile?.email}
+                    value={formData.email}
+                    onChange={handleInputChange}
                   />
                 </div>
 
@@ -313,6 +389,13 @@ export default function Settings() {
           </TabsContent>
         </Tabs>
       </div>
+      <input
+        id="avatar-upload"
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleAvatarChange}
+      />
     </main>
   );
 }

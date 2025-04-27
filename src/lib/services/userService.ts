@@ -474,3 +474,66 @@ export async function joinGroup(userId: string, groupId: string): Promise<void> 
     throw new Error("Failed to join the group.");
   }
 }
+import supabase from "../supabase";
+
+export interface UpdateProfileData {
+  full_name?: string;
+  email?: string;
+  avatar_url?: string;
+}
+
+export async function updateProfile(
+  userId: string,
+  updates: UpdateProfileData
+) {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", userId)
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+}
+export async function uploadAvatar(
+  userId: string,
+  file: File
+): Promise<string> {
+  try {
+    // Create a unique file name
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${userId}-${Math.random()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+
+    // Upload the file to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    // Get the public URL
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+    // Update the user's avatar_url
+    await updateProfile(userId, {
+      avatar_url: data.publicUrl,
+    });
+
+    return data.publicUrl;
+  } catch (error) {
+    console.error("Error uploading avatar:", error);
+    throw error;
+  }
+}
