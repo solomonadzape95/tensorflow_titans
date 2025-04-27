@@ -1,82 +1,85 @@
-# Tensorflow_titans
+# TensorFlow Titans - Split Wise
 
-## Team Members 
+The easiest way to share expenses with friends and family, and stop stressing about "who owes who."
 
-- **[Olamide](https://github.com/danieljs-codes)**
-- **[Solomon](https://github.com/solomonadzape95)**
-- **[Venny](https://github.com/Venny-Dev)**
-- **[Stephen](https://github.com/Praizee)**
-- **[Obed](https://github.com/obed-smart)**
-- **[Diamond](https://github.com/raveroses)**
-- **[Bridget](https://github.com/Bridgetamana)**
-- **[Basilver](https://github.com/Bazilver)**
+## Table of Contents
+- [About the Project](#about-the-project)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [UI Design](#ui-design)
+- [Contributing](#contributing)
+- [Team Members](#team-members)
 
-# React + TypeScript + Vite
+## About the Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a modern and simple expense-splitting application that makes it easy to track and manage shared costs among friends, family, and groups. Users can add expenses, split bills, and see who owes what, helping to remove the stress and confusion around shared payments.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend:** React, TypeScript, Vite
+- **Backend Services:** Supabase (Database, Authentication, Storage)
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+To run the project locally:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+1. Clone the repository:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+   ```bash
+   git clone https://github.com/solomonadzape95/tensorflow_titans.git
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2. Navigate to the project directory:
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+   ```bash
+   cd tensorflow_titans
+   ```
 
-## UI Design Concept
-Our interface design was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered interface generator. You can view our initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-nS46Gidhapg) and view the live demo version [here](https://v0-modern-bill-split-design.vercel.app/).
+3. Install dependencies:
 
-## Supabase Setup
+   ```bash
+   npm install
+   ```
 
-This project uses [Supabase](https://supabase.com) for backend services (database, auth, storage, etc).
+4. Create a `.env.local` file and configure your environment variables (see below).
 
-### Environment Variables
+## Environment Variables
 
-Make sure you create a `.env.local` file in the root with the following:
+Create a `.env.local` file in the root of the project and add the following:
 
 ```bash
 VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-anon-public-key
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+Replace `your-supabase-url` and `your-supabase-anon-key` with your Supabase project credentials.
+
+
+5. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+## UI Design
+
+Our user interface was prototyped using [v0.dev](https://v0.dev), Vercel's AI-powered UI generator.
+
+- View the initial design concept [here](https://v0.dev/chat/fork-of-modern-bill-split-design-nS46Gidhapg).
+- View the live demo version [here](https://v0-modern-bill-split-design.vercel.app/).
+
+## Contributing
+
+Please read the [Code of Conduct](./CODE_OF_CONDUCT.md), [Contributing Guidelines](./CONTRIBUTING.md), and use the provided [Pull Request Template](./PULL_REQUEST_TEMPLATE.md) when making a contribution.
+
+## Team Members
+
+- [Olamide](https://github.com/danieljs-codes)
+- [Solomon](https://github.com/solomonadzape95)
+- [Venny](https://github.com/Venny-Dev)
+- [Stephen](https://github.com/Praizee)
+- [Obed](https://github.com/obed-smart)
+- [Diamond](https://github.com/raveroses)
+- [Bridget](https://github.com/Bridgetamana)
+- [Basilver](https://github.com/Bazilver)
