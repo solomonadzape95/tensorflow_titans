@@ -19,6 +19,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Card, CardContent } from "../ui/card";
 import { getGroupNameAndCreator } from "@/lib/services/groups/groupService";
+import { signInWithGoogle } from "@/lib/services/authService";
 
 const SignUpForm = () => {
   const navigate = useNavigate();
@@ -97,9 +98,7 @@ const SignUpForm = () => {
   };
 
   const handleSignUpWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    await signInWithGoogle();
   };
 
   return (

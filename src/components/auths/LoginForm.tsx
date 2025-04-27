@@ -19,6 +19,7 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Card, CardContent } from "../ui/card";
 import { getGroupNameAndCreator } from "@/lib/services/groups/groupService";
+import { signInWithGoogle } from "@/lib/services/authService";
 
 const LoginForm = () => {
   const [search] = useSearchParams();
@@ -35,7 +36,7 @@ const LoginForm = () => {
   const link = search.get("redirectTo") as string;
   const isOpen = !!link;
   const id = isOpen ? link.split("=")[1] : "";
-  console.log(link, isOpen);
+  // console.log(link, isOpen);
   const { mutateAsync: login, isPending } = useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: LoginFormData) => {
@@ -70,9 +71,7 @@ const LoginForm = () => {
   };
 
   const handleSignInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    await signInWithGoogle();
   };
   const {
     mutate: fetchGroupDetails,
@@ -96,26 +95,28 @@ const LoginForm = () => {
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)]">
       {isOpen && (
-      <Card className="mb-4 rounded-xl bg-white/40 mx-auto dark:bg-[#11131E] w-11/12 md:w-full md:max-w-md shadow-lg backdrop-blur-2xl h-min">
-        <CardContent className="p-4"></CardContent>
-        {isPendingDetails ? (
-          <div className="text-center text-gray-500">Loading...</div>
-        ) : groupDetails ? (
-          <div className="text-center space-y-2">
-          <h3 className="font-semibold">You've been invited to join</h3>
-          <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-bold text-primary">{groupDetails.groupName}</span>
-            <span className="block text-sm">
-            by {groupDetails.creatorName}
-            </span>
-          </p>
-          </div>
-        ) : (
-          <div className="text-center text-red-500">
-          Couldn't load group details
-          </div>
-        )}
-      </Card>
+        <Card className="mb-4 rounded-xl bg-white/40 mx-auto dark:bg-[#11131E] w-11/12 md:w-full md:max-w-md shadow-lg backdrop-blur-2xl h-min">
+          <CardContent className="p-4"></CardContent>
+          {isPendingDetails ? (
+            <div className="text-center text-gray-500">Loading...</div>
+          ) : groupDetails ? (
+            <div className="text-center space-y-2">
+              <h3 className="font-semibold">You've been invited to join</h3>
+              <p className="text-gray-700 dark:text-gray-300">
+                <span className="font-bold text-primary">
+                  {groupDetails.groupName}
+                </span>
+                <span className="block text-sm">
+                  by {groupDetails.creatorName}
+                </span>
+              </p>
+            </div>
+          ) : (
+            <div className="text-center text-red-500">
+              Couldn't load group details
+            </div>
+          )}
+        </Card>
       )}
       <Card className="rounded-xl bg-white/40 mx-auto dark:bg-[#11131E] w-11/12 md:w-full md:max-w-md shadow-lg backdrop-blur-2xl">
         <div className="flex flex-col p-6 space-y-1">

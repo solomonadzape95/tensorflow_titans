@@ -286,6 +286,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_expense_display_data: {
+        Args: { expense_id_param: string }
+        Returns: {
+          expense_name: string
+          group_name: string
+          category_name: string
+          expense_amount: number
+          payer_name: string
+          owe_status: string
+          expense_date: string
+        }[]
+      }
       get_group_balances: {
         Args: { p_user_id: string; p_group_id: string }
         Returns: {
@@ -298,6 +310,20 @@ export type Database = {
       get_group_details_with_balances: {
         Args: { p_group_id: string; p_user_id: string }
         Returns: Json
+      }
+      get_group_expenses_display_data: {
+        Args: { group_id_param?: string }
+        Returns: {
+          expense_id: string
+          expense_name: string
+          group_name: string
+          category_name: string
+          total_expense_amount: number
+          user_share_amount: number
+          payer_name: string
+          display_status: string
+          expense_date: string
+        }[]
       }
       get_recent_group_transactions: {
         Args: { p_group_id: string; p_limit: number }

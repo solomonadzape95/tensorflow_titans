@@ -22,9 +22,18 @@ export const signInWithEmail = async (email: string, password: string) => {
 
 // Sign in with Google
 export const signInWithGoogle = async () => {
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get("redirectTo");
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
+    options: {
+      redirectTo: redirectTo
+        ? `${window.location.origin}${redirectTo}`
+        : `${window.location.origin}/dashboard`,
+    },
   });
+
   return { data, error };
 };
 
