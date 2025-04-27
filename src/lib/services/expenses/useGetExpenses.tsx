@@ -10,7 +10,6 @@ import { useLoaderData } from "react-router";
 
 export async function getAllUserExpenseData(userId: string) {
   try {
-    // Get all expenses where the user is a participant
     const participatedExpenses = await getUserExpenses(userId);
 
     if (!participatedExpenses) {
@@ -22,53 +21,58 @@ export async function getAllUserExpenseData(userId: string) {
       };
     }
 
-    // Fetch group, payer, and participant details for each expense
     const processedExpenses = await Promise.all(
       participatedExpenses.map(async (expenseParticipation) => {
         const expense = expenseParticipation.expense;
 
-        // Fetch group details
+        // Fetch additional details
         const groupDetails = expense.group_id
           ? await getGroupDetails(expense.group_id)
           : null;
-
-        // Fetch payer details
         const payerDetails = expense.payer_id
           ? await getUserDetails(expense.payer_id)
           : null;
-
-        // Fetch participants
         const participants = await getExpenseParticipants(expense.id);
 
-        // Determine if the user owes or is owed
+        // Determine the expense status
+        const isPayer = expense.payer_id === userId;
+        const isSettled = expenseParticipation.is_settled;
+
+        // Updated logic for expense status:
+        // - You are owed: You are the payer and others haven't settled
+        // - You owe: Someone else paid and you haven't settled
+        // - Settled: Your participation is marked as settled
         const isOwed =
-          expense.payer_id === userId && !expenseParticipation.is_settled;
-        const youOwe =
-          expense.payer_id !== userId && !expenseParticipation.is_settled;
+          isPayer && participants.some((p) => p.id !== userId && !p.is_settled);
+        const youOwe = !isPayer && !isSettled;
 
         return {
           ...expenseParticipation,
+          expense,
           isOwed,
           youOwe,
-          status: expenseParticipation.is_settled ? "settled" : "pending",
-          group: groupDetails, // Include group details
-          payer: payerDetails, // Include payer details
-          participants, // Include participants
+          status: isSettled ? "settled" : "pending",
+          group: groupDetails,
+          payer: payerDetails,
+          participants,
         };
       })
     );
 
-    const owedExpenses = processedExpenses.filter((e) => e.isOwed);
-    const owingExpenses = processedExpenses.filter((e) => e.youOwe);
-    const settledExpenses = processedExpenses.filter(
-      (e) => e.status === "settled"
+    // Updated categorization logic
+    const settledExpenses = processedExpenses.filter((e) => e.is_settled);
+    const owedExpenses = processedExpenses.filter(
+      (e) => !e.is_settled && e.isOwed
+    );
+    const owingExpenses = processedExpenses.filter(
+      (e) => !e.is_settled && e.youOwe
     );
 
     return {
       all: processedExpenses,
-      owed: owedExpenses,
+      owed: settledExpenses,
       owing: owingExpenses,
-      settled: settledExpenses,
+      settled: owedExpenses,
     };
   } catch (error) {
     console.error("Error fetching user expense data:", error);

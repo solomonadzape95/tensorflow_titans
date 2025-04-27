@@ -1,18 +1,16 @@
+import { useMutation } from "@tanstack/react-query";
+import { settleExpense } from "@/lib/services/expenseService"; // Import the settleExpense function
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { protectPage } from "@/lib/services/authService";
 import { fetchBalances, fetchGroupBalances } from "@/lib/services/userService";
 import { useSuspenseQueries } from "@tanstack/react-query";
-import { ArrowRight, Check } from "lucide-react";
-import { Link, useLoaderData } from "react-router";
+import { Check } from "lucide-react";
+import { useLoaderData } from "react-router";
+import { toast } from "sonner";
+import { queryClient } from "@/lib/queryClient";
 
 const getInitials = (name: string) => {
   if (!name) return "?";
@@ -44,7 +42,7 @@ interface GroupBalanceWithDetailedMembers {
 const Balances = () => {
   const loaderData = useLoaderData() as Awaited<ReturnType<typeof protectPage>>;
 
-  const [{ data: userBalances }, { data: groupBalances }] = useSuspenseQueries({
+  const [{ data: userBalances }] = useSuspenseQueries({
     queries: [
       {
         queryKey: ["user", "balances", loaderData.user.id],
@@ -68,6 +66,23 @@ const Balances = () => {
     .reduce((sum, b) => sum + Math.abs(b.net_amount ?? 0), 0);
   const totalBalance = totalOwedToYou - totalYouOwe;
 
+  // Mutation for settling expenses
+  const { mutateAsync: settleExpenseMutation } = useMutation({
+    mutationFn: async (expenseId: string) => {
+      return await settleExpense(expenseId, loaderData.user.id);
+    },
+    onSuccess: () => {
+      toast.success("Expense settled successfully!");
+      // Optionally refetch balances after settling
+      queryClient.invalidateQueries({ queryKey: ["user", "balances"] });
+    },
+    onError: (error: Error) => {
+      toast.error(
+        error.message || "Failed to settle the expense. Please try again."
+      );
+    },
+  });
+  console.log(userBalances);
   return (
     <div className="space-y-8">
       <div className="animate-in">
@@ -113,18 +128,6 @@ const Balances = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* <Card className="gap-3 py-4 bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md">
-				<CardHeader>
-					<CardTitle className="font-display text-2xl">
-						Balance Overview
-					</CardTitle>
-					<CardDescription>Your current balances with friends</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<div className="h-80" />
-				</CardContent>
-			</Card> */}
 
       <Tabs defaultValue="friends" className="space-y-4">
         <TabsList className="glass">
@@ -189,14 +192,20 @@ const Balances = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {netAmount !== 0 && (
+                        {netAmount > 0 && (
                           <Button
                             size="sm"
                             className="group bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
-                            asChild
+                            onClick={() =>
+                              toast.promise(settleExpenseMutation("gsfsfsf"), {
+                                loading: "Settling expense...",
+                                success: "Expense settled successfully!",
+                                error: "Failed to settle the expense.",
+                              })
+                            }
+                            disabled={true}
                           >
-                            {/* TODO: Update link to actual settle up page */}
-                            <Link to="/">Settle Up</Link>
+                            Settle Up
                           </Button>
                         )}
                         {netAmount === 0 && (
@@ -215,81 +224,6 @@ const Balances = () => {
                 </Card>
               );
             })}
-          </div>
-        </TabsContent>
-        <TabsContent value="groups" className="space-y-4 animate-in">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {groupBalances.length === 0 && (
-              <p className="text-muted-foreground col-span-full text-center">
-                You are not part of any groups yet.
-              </p>
-            )}
-            {groupBalances.map(
-              (groupBalance: GroupBalanceWithDetailedMembers) => {
-                const netBalance = groupBalance.net_group_balance ?? 0;
-                const groupName = groupBalance.group_name ?? "Unnamed Group";
-                const members = groupBalance.members || [];
-
-                return (
-                  <Card
-                    key={groupBalance.group_id}
-                    className="overflow-hidden bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
-                  >
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-lg font-display">
-                        {groupName}
-                      </CardTitle>
-                      <CardDescription>
-                        {netBalance > 0 ? (
-                          <span className="text-green-500">
-                            You're owed {formatNaira(netBalance)}
-                          </span>
-                        ) : netBalance < 0 ? (
-                          <span className="text-red-500">
-                            You owe {formatNaira(Math.abs(netBalance))}
-                          </span>
-                        ) : (
-                          "All settled up"
-                        )}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex -space-x-2 overflow-hidden">
-                          {members.map((member) => (
-                            <Avatar
-                              key={member.id}
-                              className="border-2 border-background size-8"
-                            >
-                              <AvatarImage
-                                src={member.avatar_url ?? undefined}
-                                alt={member.full_name ?? "Member"}
-                              />
-
-                              <AvatarFallback>
-                                {getInitials(member.full_name ?? "")}
-                              </AvatarFallback>
-                            </Avatar>
-                          ))}
-                        </div>
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
-                          asChild
-                        >
-                          <Link
-                            to={`/dashboard/groups/${groupBalance.group_id}`}
-                          >
-                            View
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              }
-            )}
           </div>
         </TabsContent>
       </Tabs>

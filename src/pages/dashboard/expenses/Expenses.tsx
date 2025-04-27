@@ -226,7 +226,7 @@ function ExpenseCard({
   expense: Expense;
   onClick: () => void;
 }) {
-  const Icon = expense.icon; // Use the component reference
+  const Icon = expense.icon;
 
   return (
     <Card
@@ -237,7 +237,7 @@ function ExpenseCard({
       <CardContent className="px-4 py-4">
         <div className="flex items-start gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-            <Icon className="h-5 w-5 text-primary" /> {/* Render the icon */}
+            <Icon className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1 space-y-1 gap-3">
             <div className="flex items-center justify-between text-sm gap-2">
@@ -249,27 +249,24 @@ function ExpenseCard({
                   <span>Payer: {expense?.payer?.name}</span>
                 </div>
               </div>
-              <p className="font-medium">{formatNaira(expense.amount)}</p>{" "}
-              {/* Total expense amount */}
+              <p className="font-medium">{formatNaira(expense.amount)}</p>
             </div>
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                {expense.youOwe && (
-                  <span className="text-xs font-medium text-red-500 bg-red-100 px-2 py-0.5 rounded-full">
-                    You owe {formatNaira(expense?.userOwedAmount || 0)}{" "}
-                    {/* Amount the user owes */}
-                  </span>
-                )}
-                {expense.youPaid && (
-                  <span className="text-xs font-medium text-green-500 bg-green-100 px-2 py-0.5 rounded-full">
-                    You are owed
-                  </span>
-                )}
-                {expense.settled && (
+                {/* Show status badges */}
+                {expense?.is_settled ? (
                   <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
                     Settled
                   </span>
-                )}
+                ) : expense.youOwe ? (
+                  <span className="text-xs font-medium text-red-500 bg-red-100 px-2 py-0.5 rounded-full">
+                    You owe {formatNaira(expense?.userOwedAmount || 0)}
+                  </span>
+                ) : expense.youPaid ? (
+                  <span className="text-xs font-medium text-green-500 bg-green-100 px-2 py-0.5 rounded-full">
+                    Others owe you
+                  </span>
+                ) : null}
               </div>
               <span>{expense.formattedDate}</span>
             </div>

@@ -81,7 +81,7 @@ export default function ExpenseModal({
 
           {/* Notes */}
           <div className="border-t border-muted-foreground/20 pt-4">
-            <p className="font-medium">Descript</p>
+            <p className="font-medium">Description</p>
             <p className="text-sm text-muted-foreground">
               {expense.notes || "No notes provided"}
             </p>
@@ -92,14 +92,14 @@ export default function ExpenseModal({
             <p className="font-medium">Status</p>
             <p
               className={`text-sm font-medium ${
-                expense.settled
+                expense.is_settled
                   ? "text-gray-500"
                   : expense.youOwe
                   ? "text-red-500"
                   : "text-green-500"
               }`}
             >
-              {expense.settled
+              {expense.is_settled
                 ? "Settled"
                 : expense.youOwe
                 ? "You owe"

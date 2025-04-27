@@ -55,7 +55,8 @@ export type Expense = {
   group: string;
   youPaid: boolean;
   youOwe: boolean;
-  settled?: boolean;
+  isOwed?: boolean;
+  is_settled?: boolean;
   user?: {
     name: string | null;
     avatar_url: string | null;

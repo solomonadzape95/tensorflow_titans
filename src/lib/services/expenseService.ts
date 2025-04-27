@@ -118,6 +118,7 @@ export async function getUserExpenses(userId: string) {
       .eq("user_id", userId);
 
     if (error) throw error;
+    console.log(data);
     return (
       data?.sort((a, b) => {
         const dateA = new Date(a.expense.expense_date || new Date());
@@ -238,7 +239,7 @@ export async function getExpenseParticipants(expenseId: string) {
   try {
     const { data, error } = await supabase
       .from("expense_participants")
-      .select("user_id, share_amount, profiles(full_name, avatar_url)")
+      .select("user_id, share_amount,is_settled, profiles(full_name, avatar_url)")
       .eq("expense_id", expenseId);
 
     if (error) {
@@ -252,6 +253,7 @@ export async function getExpenseParticipants(expenseId: string) {
       name: participant.profiles?.full_name || "Unknown",
       avatar: participant.profiles?.avatar_url || "/placeholder.svg",
       amount: participant.share_amount,
+      is_settled: participant.is_settled || false,
     }));
   } catch (error) {
     console.error("Error in getExpenseParticipants function:", error);
