@@ -20,20 +20,37 @@ import {
   Save,
   Sun,
   Upload,
-  User,
+  UserIcon,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useDarkMode } from "@/hooks/use-darkmode";
 import { FaFloppyDisk } from "react-icons/fa6";
+import { useLoaderData } from "react-router";
+import type { UserData } from "@/types";
 
 export default function Settings() {
   const [darkMode, toggleDarkMode] = useDarkMode();
   const [isLoading, setIsLoading] = useState(false);
+  // const [ newProfile, setNewProfile] = useState({
+
+  // })
+
+  const {profile } = useLoaderData() as UserData;
+
+ console.log(profile)
+  function initialName(fullName: string) {
+    const name = fullName.trim().split(" ").filter(Boolean);
+    console.log(name)
+    if (name.length === 0) return "";
+    if (name.length === 1) return name[0].substring(0, 2).toUpperCase();
+    return (name[0][0] + name[name.length - 1][0]).toUpperCase();
+  }
 
   const handleSave = () => {
     setIsLoading(true);
-    // Simulate API call
+ 
+    
     setTimeout(() => {
       setIsLoading(false);
       toast("Settings saved", {
@@ -60,7 +77,7 @@ export default function Settings() {
               value="profile"
               className="data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] transition-all duration-300"
             >
-              <User className="mr-2 h-4 w-4" />
+              <UserIcon className="mr-2 h-4 w-4" />
               Profile
             </TabsTrigger>
             <TabsTrigger
@@ -98,10 +115,12 @@ export default function Settings() {
                 <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
                   <Avatar className="h-24 w-24 animate-pulse-glow">
                     <AvatarImage
-                      src="/placeholder.svg?height=96&width=96"
+                       src={profile?.avatar_url || '/placeholder.svg?height=96&width=96'}
                       alt="User"
                     />
-                    <AvatarFallback className="text-2xl">JD</AvatarFallback>
+                    <AvatarFallback className="text-2xl">
+                      {initialName(profile?.full_name)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="space-y-2">
                     <Button className="w-full sm:w-auto bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white ">
@@ -117,11 +136,11 @@ export default function Settings() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
-                    <Input id="first-name" defaultValue="John" />
+                    <Input id="first-name" defaultValue={profile?.full_name.split(' ')[0]} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="last-name">Last Name</Label>
-                    <Input id="last-name" defaultValue="Doe" />
+                    <Input id="last-name" defaultValue={profile?.full_name.split(' ')[1]}  />
                   </div>
                 </div>
 
@@ -130,11 +149,11 @@ export default function Settings() {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue="demo@splitwise.com"
+                    defaultValue={profile?.email}
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
                   <Input
                     id="phone"
@@ -146,14 +165,14 @@ export default function Settings() {
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Input id="bio" placeholder="Tell us about yourself" />
-                </div>
+                </div> */}
               </CardContent>
               <CardFooter className="flex justify-end">
                 <Button
                   variant="gradient"
                   onClick={handleSave}
                   disabled={isLoading}
-                  className="bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
+                  className="bg-gradient-to-r cursor-pointer from-[#4F32FF] to-[#ff4ecd] text-white"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
