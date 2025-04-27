@@ -94,7 +94,7 @@ export default function Settings() {
       }
 
       setIsLoading(true);
-      const newAvatarUrl = await uploadAvatar(profile.id, file);
+      await uploadAvatar(profile.id, file);
 
       toast.success("Avatar updated", {
         description: "Your profile picture has been updated successfully.",
