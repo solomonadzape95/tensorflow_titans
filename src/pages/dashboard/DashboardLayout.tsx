@@ -8,17 +8,19 @@ function DashboardLayout() {
 	const data = useLoaderData() as UserData;
 
 	return (
-		<div className="bg-background dark:bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)] text-foreground dark:text-foreground-dark flex overflow-hidden h-fit md:max-h-screen fixed w-full">
-			<Sidebar user={data} />
-			<div className="no-scrollbar flex-1 overflow-scroll  relative">
+		<div className="bg-background dark:bg-[radial-gradient(circle_at_top_right,#4f32ff26,transparent_90%),radial-gradient(circle_at_bottom_left,#f51d7826,transparent_50%)] text-foreground dark:text-foreground-dark flex overflow-hidden min-h-screen w-full">
+			<Sidebar user={data} className="hidden md:block fixed top-0 left-0 h-full z-40" />
+			<div className="flex-1 overflow-y-auto relative">
 				<header className="sticky top-0 z-50 w-full border-b left-0 backdrop-blur-lg flex h-16 md:h-20 items-center px-4 md:px-6 bg-background/60 shadow-md">
 					<MobileNav />
-					<Navbar user={data} />
+					<Navbar user={data} className="md:ml-64 w-full" /> {/* Adjust width for sidebar */}
 				</header>
 				<main className="bg-transparent flex-1 overflow-y-auto p-4 md:p-8 min-h-screen">
 					<Outlet />
 				</main>
 			</div>
+			{/* Mobile Nav remains outside the scrolling container */}
+			<MobileNav className="md:hidden fixed bottom-0 left-0 w-full z-50 bg-background/60 border-t shadow-md" />
 		</div>
 	);
 }
