@@ -1,202 +1,113 @@
-import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  ArrowRight,
-  ArrowUpDown,
-  Calendar,
-  Car,
-  Filter,
-  Home,
-  Plus,
-  Receipt,
-  Search,
-  ShoppingBag,
-  Utensils,
-  Wifi,
-} from "lucide-react";
+import { DollarSign, Plus } from "lucide-react";
 import { Link } from "react-router";
 import useGetExpenses from "@/lib/services/expenses/useGetExpenses";
 import { formatNaira } from "@/lib/utils";
-import { Expense } from "@/types";
 import NoExpenseUI from "@/components/dashboard/NoExpense";
 import ExpenseModal from "@/components/dashboard/ExpenseModal";
-
-const categoryIcons = {
-  "Food & Drink": Utensils,
-  "Housing": Home,
-  "Groceries": ShoppingBag,
-  "Transportation": Car,
-  "Utilities": Wifi,
-  "Entertainment": Receipt,
-  "default": Receipt
-} as const;
-
-type CategoryIconsKey = keyof typeof categoryIcons;
-
-const getCategoryIcon = (category: string | number) => {
-  return categoryIcons[category as CategoryIconsKey] || categoryIcons["default"];
-};
+import { useState } from "react";
+import { Expense } from "@/types";
 
 export default function ExpensesOverview() {
   const { expenses, isLoading } = useGetExpenses();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGroup, setSelectedGroup] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("date");
-  const [sortOrder, setSortOrder] = useState("desc");
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
+  console.log(expenses);
+  interface RawExpensePayer {
+    id?: string;
+    full_name: string;
+    name?: string | null;
+    avatar_url: string | null;
+    initials?: string;
+    email: string;
+  }
 
-  const transformExpenses = () => {
-    const owedExpenses = expenses?.owed?.map(exp => {
-      const expense = exp.expense;
-      return {
-        id: exp.id,
-        description: expense.name,
-        amount: exp.share_amount,
-        date: expense.expense_date,
-        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
-        category: "Other",
-        icon: getCategoryIcon("default"),
-        group: expense.group_id || "Personal",
-        youPaid: true,
-        youOwe: false,
-        settled: false,
-        user: {
-          name: "You",
-          avatar: "/placeholder.svg?height=32&width=32&text=You",
-          initials: "YOU",
-        },
-        participants: [],
-        notes: expense.description || "",
-        status: exp.status
-      };
-    }) || [];
+  interface RawExpenseGroup {
+    name: string;
+  }
 
-    const owingExpenses = expenses?.owing?.map(exp => {
-      const expense = exp.expense;
-      return {
-        id: exp.id,
-        description: expense.name,
-        amount: exp.share_amount,
-        date: expense.expense_date,
-        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
-        category: "Other",
-        icon: getCategoryIcon("default"),
-        group: expense.group_id || "Personal",
-        youPaid: false,
-        youOwe: true,
-        settled: false,
-        user: {
-          name: expense.name || "Unknown",
-          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.name || "UN").substring(0, 2).toUpperCase()}`,
-          initials: (expense.name || "UN").substring(0, 2).toUpperCase(),
-        },
-        participants: [],
-        notes: expense.description || "",
-        status: exp.status
-      };
-    }) || [];
+  interface RawExpenseDetails {
+    name: string | null;
+    expense_date: string | null;
+    description?: string | null;
+    amount: number;
+  }
 
-    const settledExpenses = expenses?.settled?.map(exp => {
-      const expense = exp.expense;
-      return {
-        id: exp.id,
-        description: expense.name,
-        amount: exp.share_amount,
-        date: expense.expense_date,
-        formattedDate: expense.expense_date ? new Date(expense.expense_date).toLocaleDateString() : 'No date',
-        category: "Other",
-        icon: getCategoryIcon("default"),
-        group: expense.group_id || "Personal",
-        youPaid: expense.payer_id === "",
-        youOwe: expense.payer_id !== "",
-        settled: true,
-        user: {
-          name: expense.name || "Unknown",
-          avatar: `/placeholder.svg?height=32&width=32&text=${(expense.name || "UN").substring(0, 2).toUpperCase()}`,
-          initials: (expense.name || "UN").substring(0, 2).toUpperCase(),
-        },
-        participants: [],
-        notes: expense.description || "",
-        status: exp.status
-      };
-    }) || [];
+  interface ExpenseParticipant {
+    id: string;
+    name?: string;
+    full_name?: string;
+    avatar_url?: string;
+    avatar?: string;
+    // email: string;
+    amount: number;
+  }
 
-    // Combine all expenses
-    return [...owedExpenses, ...owingExpenses, ...settledExpenses];
-  };
+  interface RawExpenseData {
+    id: string;
+    expense: RawExpenseDetails;
+    share_amount: number;
+    payer?: RawExpensePayer | null;
+    group?: RawExpenseGroup | null;
+    isOwed: boolean;
+    youOwe: boolean;
+    status: string;
+    participants?: ExpenseParticipant[];
+  }
 
-  const allExpenses = transformExpenses();
+  function transformExpenses(
+    expenseList: RawExpenseData[] | undefined
+  ): Expense[] {
+    return (
+      expenseList?.map((exp) => {
+        const expense = exp.expense;
+        const payer = exp.payer || {
+          full_name: "Unknown",
+          avatar_url: "",
+          email: "",
+        };
 
-  // Filter and sort expenses
-  const filteredExpenses = allExpenses
-    .filter((expense) => {
-      const matchesSearch =
-        expense?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        expense?.user?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesGroup =
-        selectedGroup === "all" || expense?.group === selectedGroup;
-      const matchesCategory =
-        selectedCategory === "all" || expense?.category === selectedCategory;
+        return {
+          id: exp.id,
+          description: expense.name,
+          amount: expense.amount, // Use the total expense amount
+          date: expense.expense_date,
+          formattedDate: expense.expense_date
+            ? new Date(expense.expense_date).toLocaleDateString()
+            : "No date",
+          category: "Other",
+          icon: DollarSign,
+          group: exp?.group?.name || "Personal",
+          youPaid: exp.isOwed,
+          youOwe: exp.youOwe,
+          settled: exp.status === "settled",
+          user: {
+            name: payer.name ?? payer.full_name ?? null,
+            avatar_url: payer.avatar_url,
+            initials: payer.initials ?? undefined,
+          },
+          payer: {
+            name: payer.full_name ?? null,
+            avatar_url: payer.avatar_url || "/placeholder.svg",
+            initials: payer.initials || payer.full_name?.charAt(0) || "?",
+          },
+          participants: (exp.participants || []).map((p) => ({
+            name: p.name || p.full_name || "Unknown",
+            amount: p.amount,
+          })),
+          notes: expense.description || "",
+          status: exp.status,
+          userOwedAmount: exp.youOwe ? exp.share_amount : 0, // Add the amount the user owes
+        };
+      }) || []
+    );
+  }
 
-      const matchesTab =
-        activeTab === "all" ||
-        (activeTab === "you-paid" && expense?.youPaid) ||
-        (activeTab === "you-owe" && expense?.youOwe);
-
-      return matchesSearch && matchesGroup && matchesCategory && matchesTab;
-    })
-    .sort((a, b) => {
-      if (sortBy === "date") {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return sortOrder === "desc"
-          ? dateB - dateA
-          : dateA - dateB;
-      } else if (sortBy === "amount") {
-        return sortOrder === "desc" ? b.amount - a.amount : a.amount - b.amount;
-      } else {
-        return sortOrder === "desc"
-          ? (b.description || "").localeCompare(a.description || "")
-          : (a.description || "").localeCompare(b.description || "");
-      }
-    });
-
-  // Filter expenses for "You Paid" and "You Owe" tabs
-  const youPaidExpenses = filteredExpenses.filter((expense) => expense?.youPaid);
-  const youOweExpenses = filteredExpenses.filter((expense) => expense?.youOwe);
-
-  const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "desc" ? "asc" : "desc");
-  };
-
-  // Get unique groups and categories for filters
-  const groups = ["all", ...new Set(allExpenses.map((expense) => expense?.group).filter(Boolean))];
-  const categories = [
-    "all",
-    ...new Set(allExpenses.map((expense) => expense?.category).filter(Boolean)),
-  ];
-
-  // Check if there are any active filters
-  const hasActiveFilters = Boolean(searchQuery) || selectedGroup !== "all" || selectedCategory !== "all";
+  const allExpenses = transformExpenses(expenses?.all);
+  const youreOwedExpenses = transformExpenses(expenses?.owed);
+  const youOweExpenses = transformExpenses(expenses?.owing);
+  const settledExpenses = transformExpenses(expenses?.settled);
 
   return (
     <div className="space-y-8">
@@ -221,136 +132,13 @@ export default function ExpensesOverview() {
         </Button>
       </div>
 
-      <Tabs
-        defaultValue="all"
-        className="space-y-4"
-        value={activeTab}
-        onValueChange={setActiveTab}
-      >
+      <Tabs defaultValue="all" className="space-y-4">
         <TabsList className="glass">
-          <TabsTrigger
-            value="all"
-            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
-          >
-            All Expenses
-          </TabsTrigger>
-          <TabsTrigger
-            value="you-paid"
-            className="data-[state=on]:bg-[#4F32FF]/20 data-[state=on]:text-[#4F32FF] hover:bg-transparent hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
-          >
-            You Paid
-          </TabsTrigger>
-          <TabsTrigger
-            value="you-owe"
-            className="dark:data-[state=on]:bg-[#4F32FF] data-[state=on]:text-[#4F32FF] hover:text-muted-foreground px-4 py-1 text-sm font-medium cursor-pointer rounded-sm transition-colors"
-          >
-            You Owe
-          </TabsTrigger>
+          <TabsTrigger value="all">All Expenses</TabsTrigger>
+          <TabsTrigger value="youre-owed">You're Owed</TabsTrigger>
+          <TabsTrigger value="you-owe">You Owe</TabsTrigger>
+          <TabsTrigger value="settled">Settled</TabsTrigger>
         </TabsList>
-
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search expenses..."
-              className="pl-10 glass"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-              <SelectTrigger className="w-[150px] glass">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="Group" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="glass">
-                {groups.map((group) => (
-                  <SelectItem key={group} value={group} className="capitalize">
-                    {group === "all" ? "All Groups" : group}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-fit glass">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="Category" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="glass">
-                {categories.map((category) => (
-                  <SelectItem
-                    key={category}
-                    value={category}
-                    className="capitalize"
-                  >
-                    {category === "all" ? "All Categories" : category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  className="h-10 w-10 bg-gradient-to-r from-[#4F32FF] to-[#ff4ecd] text-white"
-                >
-                  <ArrowUpDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="glass">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortBy("date");
-                    toggleSortOrder();
-                  }}
-                  className={
-                    sortBy === "date" ? "bg-primary/10 text-primary" : ""
-                  }
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Date {sortBy === "date" && (sortOrder === "desc" ? "↓" : "↑")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortBy("amount");
-                    toggleSortOrder();
-                  }}
-                  className={
-                    sortBy === "amount" ? "bg-primary/10 text-primary" : ""
-                  }
-                >
-                  <Receipt className="mr-2 h-4 w-4" />
-                  Amount{" "}
-                  {sortBy === "amount" && (sortOrder === "desc" ? "↓" : "↑")}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSortBy("description");
-                    toggleSortOrder();
-                  }}
-                  className={
-                    sortBy === "description" ? "bg-primary/10 text-primary" : ""
-                  }
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Description{" "}
-                  {sortBy === "description" &&
-                    (sortOrder === "desc" ? "↓" : "↑")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -358,244 +146,133 @@ export default function ExpensesOverview() {
           </div>
         ) : (
           <>
+            {/* All Expenses Tab */}
             <TabsContent value="all" className="space-y-4 animate-in">
-              {filteredExpenses.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredExpenses.map((expense) => {
-                    const Icon = expense.icon;
-                    return (
-                      <Card
-                        key={expense.id}
-                        className="py-1 hover:shadow-glow transition-all duration-300 cursor-pointer bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
-                        onClick={() => setSelectedExpense(expense)}
-                      >
-                        <CardContent className="px-4 py-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                              <Icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1 space-y-1 gap-3">
-                              <div className="flex items-center justify-between text-sm gap-2">
-                                <div>
-                                  <p className="font-medium text-xl">
-                                    {expense.description}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-muted-foreground">
-                                    <span>Group: {expense.group}</span>
-                                    <span>•</span>
-                                    <span>Category: {expense.category}</span>
-                                  </div>
-                                </div>
-                                <p className="font-medium">
-                                  {formatNaira(expense.amount)}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                <div className="flex items-start md:items-center gap-2 flex-col md:flex-row">
-                                  <span className="flex items-center gap-3">
-                                    <Avatar className="h-6 w-6 text-xs">
-                                      <AvatarImage
-                                        src={expense.user.avatar}
-                                        alt={expense.user.name}
-                                      />
-                                      <AvatarFallback>
-                                        {expense.user.initials}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span>{expense.user.name}</span>
-                                  </span>
-                                  {expense.youOwe && (
-                                    <span className="text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
-                                      You owe
-                                    </span>
-                                  )}
-                                  {expense.youPaid && (
-                                    <span className="text-xs font-medium text-green-500 bg-green-100 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
-                                      You are owed
-                                    </span>
-                                  )}
-                                  {expense.settled && (
-                                    <span className="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-800/50 px-2 py-0.5 rounded-full">
-                                      Settled
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span>{expense.formattedDate}</span>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 group"
-                                  >
-                                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+              {allExpenses.length > 0 ? (
+                allExpenses.map((expense) => (
+                  <ExpenseCard
+                    key={expense.id}
+                    expense={expense}
+                    onClick={() => setSelectedExpense(expense)}
+                  />
+                ))
               ) : (
-                <NoExpenseUI
-                  hasFilters={hasActiveFilters}
-                  message="Add your first expense to get started"
-                  showAddButton={true}
-                />
+                <NoExpenseUI message="No expenses to display." />
               )}
             </TabsContent>
 
-            <TabsContent value="you-paid" className="space-y-4 animate-in">
-              {youPaidExpenses.length > 0 ? (
-                <div className="space-y-4">
-                  {youPaidExpenses.map((expense) => {
-                    const Icon = expense.icon;
-                    return (
-                      <Card
-                        key={expense.id}
-                        className="hover:shadow-glow transition-all duration-300 cursor-pointer bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
-                        onClick={() => setSelectedExpense(expense)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                              <Icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1 space-y-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium">
-                                    {expense.description}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>Group: {expense.group}</span>
-                                    <span>•</span>
-                                    <span>Category: {expense.category}</span>
-                                  </div>
-                                </div>
-                                <p className="font-medium">
-                                  {formatNaira(expense.amount)}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage
-                                      src={expense.user.avatar}
-                                      alt={expense.user.name}
-                                    />
-                                    <AvatarFallback>
-                                      {expense.user.initials}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span>{expense.user.name}</span>
-                                  <span className="text-xs font-medium text-green-500 bg-green-100 dark:bg-green-900/20 px-2 py-0.5 rounded-full">
-                                    You are owed
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span>{expense.formattedDate}</span>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 group"
-                                  >
-                                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+            {/* You're Owed Tab */}
+            <TabsContent value="youre-owed" className="space-y-4 animate-in">
+              {youreOwedExpenses.length > 0 ? (
+                youreOwedExpenses.map((expense) => (
+                  <ExpenseCard
+                    key={expense.id}
+                    expense={expense}
+                    onClick={() => setSelectedExpense(expense)}
+                  />
+                ))
               ) : (
-                <NoExpenseUI
-                  hasFilters={hasActiveFilters}
-                  message="You aren't owed money for any expenses yet"
-                  showAddButton={true}
-                />
+                <NoExpenseUI message="No one owes you any expenses." />
               )}
             </TabsContent>
 
+            {/* You Owe Tab */}
             <TabsContent value="you-owe" className="space-y-4 animate-in">
               {youOweExpenses.length > 0 ? (
-                <div className="space-y-4">
-                  {youOweExpenses.map((expense) => {
-                    const Icon = expense.icon;
-                    return (
-                      <Card
-                        key={expense.id}
-                        className="hover:shadow-glow transition-all duration-300 cursor-pointer bg-[#F9FAFB]/80 dark:bg-[#141727]/90 backdrop-blur-md"
-                        onClick={() => setSelectedExpense(expense)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                              <Icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1 space-y-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium">
-                                    {expense.description}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>Group: {expense.group}</span>
-                                    <span>•</span>
-                                    <span>Category: {expense.category}</span>
-                                  </div>
-                                </div>
-                                <p className="font-medium">
-                                  {formatNaira(expense.amount)}
-                                </p>
-                              </div>
-                              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                  <span>{expense.user.name}</span>
-                                  <span className="text-xs font-medium text-red-500 bg-red-100 dark:bg-red-900/20 px-2 py-0.5 rounded-full">
-                                    You owe
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span>{expense.formattedDate}</span>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 group"
-                                  >
-                                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                youOweExpenses.map((expense) => (
+                  <ExpenseCard
+                    key={expense.id}
+                    expense={expense}
+                    onClick={() => setSelectedExpense(expense)}
+                  />
+                ))
               ) : (
-                <NoExpenseUI
-                  hasFilters={hasActiveFilters}
-                  message="You don't owe anyone money"
-                  showAddButton={false}
-                />
+                <NoExpenseUI message="You don't owe anyone any expenses." />
+              )}
+            </TabsContent>
+
+            {/* Settled Tab */}
+            <TabsContent value="settled" className="space-y-4 animate-in">
+              {settledExpenses.length > 0 ? (
+                settledExpenses.map((expense) => (
+                  <ExpenseCard
+                    key={expense.id}
+                    expense={expense}
+                    onClick={() => setSelectedExpense(expense)}
+                  />
+                ))
+              ) : (
+                <NoExpenseUI message="No settled expenses to display." />
               )}
             </TabsContent>
           </>
         )}
       </Tabs>
 
+      {/* Expense Modal */}
       <ExpenseModal
         expense={selectedExpense}
         open={!!selectedExpense}
         onOpenChange={(open) => !open && setSelectedExpense(null)}
       />
     </div>
+  );
+}
+
+function ExpenseCard({
+  expense,
+  onClick,
+}: {
+  expense: Expense;
+  onClick: () => void;
+}) {
+  const Icon = expense.icon;
+
+  return (
+    <Card
+      key={expense.id}
+      className="py-1 hover:shadow-glow cursor-pointer"
+      onClick={onClick}
+    >
+      <CardContent className="px-4 py-4">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <Icon className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 space-y-1 gap-3">
+            <div className="flex items-center justify-between text-sm gap-2">
+              <div>
+                <p className="font-medium text-xl">{expense.description}</p>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span>Group: {expense.group}</span>
+                  <span>•</span>
+                  <span>Payer: {expense?.payer?.name}</span>
+                </div>
+              </div>
+              <p className="font-medium">{formatNaira(expense.amount)}</p>
+            </div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                {/* Show status badges */}
+                {expense?.is_settled ? (
+                  <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                    Settled
+                  </span>
+                ) : expense.youOwe ? (
+                  <span className="text-xs font-medium text-red-500 bg-red-100 px-2 py-0.5 rounded-full">
+                    You owe {formatNaira(expense?.userOwedAmount || 0)}
+                  </span>
+                ) : expense.youPaid ? (
+                  <span className="text-xs font-medium text-green-500 bg-green-100 px-2 py-0.5 rounded-full">
+                    Others owe you
+                  </span>
+                ) : null}
+              </div>
+              <span>{expense.formattedDate}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

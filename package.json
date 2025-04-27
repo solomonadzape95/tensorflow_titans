@@ -9,7 +9,7 @@
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"typecheck": "tsc --noEmit",
-		"gen-types": "bun x supabase gen types typescript --project-id hovnflqbpueeigwoonrv --schema public > src/types/database.types.ts"
+		"gen-types": "supabase gen types typescript --project-id hovnflqbpueeigwoonrv --schema public > src/types/database.types.ts"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "^6.3.1",

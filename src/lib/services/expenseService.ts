@@ -51,7 +51,7 @@ export async function createExpense(
         user_id: userId,
         share_amount: splitData.share_amount,
         is_settled: userId === data.payer_id,
-        settled_at: userId === data.payer_id ? new Date().toISOString() : null, 
+        settled_at: userId === data.payer_id ? new Date().toISOString() : null,
       })
     );
 
@@ -109,18 +109,23 @@ export async function getUserExpenses(userId: string) {
   try {
     const { data, error } = await supabase
       .from("expense_participants")
-      .select(`
+      .select(
+        `
         *,
         expense:expense_id(*)
-      `)
+      `
+      )
       .eq("user_id", userId);
 
     if (error) throw error;
-      return data?.sort((a, b) => {
-      const dateA = new Date(a.expense.expense_date || new Date());
-      const dateB = new Date(b.expense.expense_date || new Date());
-      return dateB.getTime() - dateA.getTime(); 
-    }) || [];
+    console.log(data);
+    return (
+      data?.sort((a, b) => {
+        const dateA = new Date(a.expense.expense_date || new Date());
+        const dateB = new Date(b.expense.expense_date || new Date());
+        return dateB.getTime() - dateA.getTime();
+      }) || []
+    );
   } catch (error) {
     console.error("Error fetching user expenses:", error);
     throw error;
@@ -131,10 +136,12 @@ export async function getGroupExpenses(groupId: string) {
   try {
     const { data, error } = await supabase
       .from("expenses")
-      .select(`
+      .select(
+        `
         *,
         participants:expense_participants(*, user:user_id(*))
-      `)
+      `
+      )
       .eq("group_id", groupId)
       .order("expense_date", { ascending: false });
 
@@ -142,6 +149,114 @@ export async function getGroupExpenses(groupId: string) {
     return data;
   } catch (error) {
     console.error("Error fetching group expenses:", error);
+    throw error;
+  }
+}
+export async function settleExpense(
+  expenseId: string,
+  userId: string
+): Promise<void> {
+  try {
+    // Update the expense participants to mark them as settled
+    const { error } = await supabase
+      .from("expense_participants")
+      .update({
+        is_settled: true,
+        settled_at: new Date().toISOString(),
+      })
+      .eq("expense_id", expenseId)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error settling expense:", error);
+      throw new Error("Failed to settle the expense. Please try again.");
+    }
+
+    console.log(
+      `Expense ${expenseId} settled successfully for user ${userId}.`
+    );
+  } catch (error) {
+    console.error("Error in settleExpense function:", error);
+    throw error;
+  }
+}
+export async function getExpenseDetails(expenseId: string) {
+  try {
+    const { data, error } = await supabase.rpc("get_expense_display_data", {
+      expense_id_param: expenseId,
+    });
+
+    if (error) {
+      console.error("Error fetching expense details:", error);
+      throw new Error("Failed to fetch expense details. Please try again.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getExpenseDetails function:", error);
+    throw error;
+  }
+}
+export async function getGroupDetails(groupId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("groups")
+      .select("*")
+      .eq("id", groupId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching group details:", error);
+      throw new Error("Failed to fetch group details.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getGroupDetails function:", error);
+    throw error;
+  }
+}
+export async function getUserDetails(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, avatar_url")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user details:", error);
+      throw new Error("Failed to fetch user details.");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getUserDetails function:", error);
+    throw error;
+  }
+}
+export async function getExpenseParticipants(expenseId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("expense_participants")
+      .select("user_id, share_amount,is_settled, profiles(full_name, avatar_url)")
+      .eq("expense_id", expenseId);
+
+    if (error) {
+      console.error("Error fetching expense participants:", error);
+      throw new Error("Failed to fetch expense participants.");
+    }
+
+    // Map participants to include user details
+    return data.map((participant) => ({
+      id: participant.user_id,
+      name: participant.profiles?.full_name || "Unknown",
+      avatar: participant.profiles?.avatar_url || "/placeholder.svg",
+      amount: participant.share_amount,
+      is_settled: participant.is_settled || false,
+    }));
+  } catch (error) {
+    console.error("Error in getExpenseParticipants function:", error);
     throw error;
   }
 }
