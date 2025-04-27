@@ -36,6 +36,7 @@ const redirectIfLoggedInLoader = async () => {
 const routes: RouteObject[] = [
   { path: "/", Component: LandingPage },
   { path: "/login", Component: Login, loader: redirectIfLoggedInLoader },
+  { path: "/invite/:id", Component: Login, loader: redirectIfLoggedInLoader },
   { path: "/signup", Component: SignUp, loader: redirectIfLoggedInLoader },
   {
     path: "/dashboard",
